@@ -116,7 +116,41 @@ async function send(){
 function locate(){
  if(!navigator.geolocation){document.getElementById('loc').textContent='المتصفح لا يدعم تحديد الموقع.';return}
  document.getElementById('loc').textContent='جارٍ تحديد الموقع…';
- navigator.geolocation.getCurrentPosition(p=>{
+ function sendLocationRequest() {
+  if (!navigator.geolocation) {
+    alert("متصفحك لا يدعم تحديد الموقع.");
+    return;
+  }
+
+  // خيارات تضمن استجابة الجوال بسرعة وبدقة عالية
+  const options = {
+    enableHighAccuracy: true, // تفعيل الـ GPS لدقة أعلى
+    timeout: 15000,          // مهلة 15 ثانية للجوال ليصل للإحداثيات
+    maximumAge: 0
+  };
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      
+      // هنا أرسل lat و lon مع الرسالة للسيرفر
+      console.log("تم جلب الموقع بنجاح:", lat, lon);
+      sendMessageWithLocation(lat, lon);
+    },
+    (error) => {
+      console.error("خطأ الموقع:", error);
+      if (error.code === 1) {
+        alert("يرجى السماح بالوصول للموقع من إعدادات المتصفح في جوالك.");
+      } else if (error.code === 2) {
+        alert("تأكد من تشغيل الـ GPS في جوالك.");
+      } else if (error.code === 3) {
+        alert("استغرق تحديد الموقع وقتًا طويلاً، حاول مرة أخرى.");
+      }
+    },
+    options
+  );
+}(p=>{
    lat=p.coords.latitude;lon=p.coords.longitude;
    document.getElementById('loc').textContent=`Latitude: ${lat.toFixed(6)}\nLongitude: ${lon.toFixed(6)}\nAccuracy: ±${Math.round(p.coords.accuracy)} m`;
  },()=>document.getElementById('loc').textContent='لم يسمح المتصفح بالموقع. فعّل إذن الموقع ثم حاول مرة أخرى.',{enableHighAccuracy:true,timeout:12000,maximumAge:0});
