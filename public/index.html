@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <title>سند</title>
+<link rel="icon" href="/logo.png">
 <style>
 :root{--bg:#000;--s1:#0c0c0e;--s2:#1c1c1e;--line:#2c2c2e;--tx:#f5f5f7;--mu:#86868b;--g:#39ff14;--red:#ff453a}
 *{box-sizing:border-box;margin:0}
@@ -15,13 +16,14 @@ button,input{font:inherit;color:inherit}button{cursor:pointer;border:0;backgroun
 .app{max-width:760px;margin:auto;min-height:100dvh;display:flex;flex-direction:column;padding:0 20px env(safe-area-inset-bottom)}
 header{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 16px) 0 8px}
 .logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700}
-.logo i{width:12px;height:12px;border-radius:50%;background:var(--g);box-shadow:0 0 14px var(--g)}
+.logo img{width:36px;height:36px}
 .bar{display:flex;gap:8px}
-.pill{display:flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:99px;background:var(--s2);font-size:14px;color:var(--tx)}
-.pill svg{width:16px;height:16px}.pill.on{color:var(--g)}.sos{color:var(--red)}
+.pill{display:flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:99px;background:var(--s2);font-size:14px}
+.pill svg{width:16px;height:16px}.pill.on{color:var(--g)}.sos{color:var(--red)}.sq{width:36px;padding:0;justify-content:center}
 #loc{min-height:20px;font-size:13px;color:var(--mu);padding:4px 2px}
-#loc.err{color:var(--red)}#loc.ok{color:var(--g)}
-.hero{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:20px 0 40px}
+#loc.err{color:var(--red)}#loc.ok{color:var(--g)}#loc.warn{color:#ffd60a}
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;gap:26px;padding:20px 0 40px}
+.mark{width:72px;height:72px}
 h1{font-size:clamp(34px,7vw,52px);line-height:1.25;font-weight:700;letter-spacing:-.5px;max-width:560px}
 .chips{display:flex;flex-wrap:wrap;gap:10px}
 .chip{padding:12px 18px;border-radius:99px;background:var(--s2);font-size:15px;transition:background .2s}
@@ -35,104 +37,171 @@ h1{font-size:clamp(34px,7vw,52px);line-height:1.25;font-weight:700;letter-spacin
 .spk{display:inline-flex;margin-top:8px;color:var(--mu);padding:4px}.spk:hover,.spk.on{color:var(--g)}.spk svg{width:18px;height:18px}
 .svc{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;background:var(--s1);border:1px solid var(--line);border-radius:14px;white-space:normal}
 .svc small{display:block;color:var(--mu)}.svc a{color:var(--g);text-decoration:none;font-size:14px;margin-inline-start:10px}
-form{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;margin:8px 0 16px;padding:8px;border-radius:99px;background:var(--s2);border:1px solid var(--line)}
-form:focus-within{border-color:var(--g)}
+form.c{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;margin:8px 0 16px;padding:8px;border-radius:99px;background:var(--s2);border:1px solid var(--line)}
+form.c:focus-within{border-color:var(--g)}
 #inp{flex:1;min-width:0;background:none;border:0;outline:0;padding:10px 14px;font-size:16px}
 #inp::placeholder{color:var(--mu)}
 .ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none}
 .ic svg{width:22px;height:22px}
-#mic{background:var(--s1);color:var(--tx)}
+#mic{background:var(--s1)}#mic:disabled{opacity:.5}
 #mic.on{background:var(--red);animation:pulse 1.2s infinite}
-#send{background:var(--g);color:#000;box-shadow:0 0 18px #39ff1455}
+#send{background:var(--g);color:#000;box-shadow:0 0 18px color-mix(in srgb,var(--g) 35%,transparent)}
 @keyframes pulse{50%{box-shadow:0 0 0 10px #ff453a22}}
-#toast{position:fixed;inset-inline:20px;bottom:96px;margin:auto;max-width:420px;padding:12px 16px;border-radius:14px;background:#2c2c2e;text-align:center;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s}
+#toast{position:fixed;inset-inline:20px;bottom:96px;margin:auto;max-width:420px;padding:12px 16px;border-radius:14px;background:#2c2c2e;text-align:center;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:9}
 #toast.show{opacity:1}
 dialog{margin:auto;width:min(92vw,420px);padding:24px;border:1px solid var(--line);border-radius:24px;background:var(--s1);color:var(--tx)}
 dialog::backdrop{background:#000a;backdrop-filter:blur(8px)}
 dialog h2{font-size:20px;margin-bottom:16px}
+dialog h3{font-size:14px;color:var(--mu);font-weight:500;margin:18px 0 8px}
 .nums{display:grid;gap:10px}
 .num{display:flex;justify-content:space-between;align-items:center;padding:16px;border-radius:16px;background:var(--s2);color:var(--tx);text-decoration:none}
 .num b{font-size:24px;color:var(--g);direction:ltr}
 .note{margin-top:14px;font-size:13px;color:var(--mu);line-height:1.7}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.opt{padding:10px 18px;border-radius:99px;background:var(--s2);border:1px solid transparent}
+.opt[aria-pressed=true]{border-color:var(--g);color:var(--g)}
+.sw{width:34px;height:34px;border-radius:50%;border:2px solid transparent}
+.sw[aria-pressed=true]{border-color:#fff;box-shadow:0 0 0 2px #000 inset}
+.fld{display:flex;gap:8px}.fld input{flex:1;min-width:0;background:var(--s2);border:1px solid var(--line);border-radius:14px;padding:12px;outline:0}
+.fld input:focus{border-color:var(--g)}
+.go{background:var(--g);color:#000;font-weight:700;border-radius:14px;padding:0 16px}
+.full{width:100%;margin-top:6px}
+.lnk{display:none;margin-top:12px;color:var(--g);font-size:14px}
+.cls{width:100%;margin-top:20px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="app" id="app">
   <header>
-    <div class="logo"><i></i>سند</div>
+    <div class="logo"><img src="/logo.png" alt=""><span data-i="name"></span></div>
     <div class="bar">
-      <button class="pill" id="locBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/></svg>موقعي</button>
-      <button class="pill" id="ttsBtn" aria-pressed="false" title="قراءة الردود تلقائيًا"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.500 8.500a5 5 0 0 1 0 7M18.500 5.500a9 9 0 0 1 0 13"/></svg>قراءة</button>
-      <button class="pill sos" id="sosBtn">طوارئ</button>
+      <button class="pill" id="locBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s7-6.200 7-11.500A7 7 0 0 0 5 9.500C5 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/></svg><span data-i="loc"></span></button>
+      <button class="pill sq" id="setBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
+      <button class="pill sos" id="sosBtn" data-i="sos"></button>
     </div>
   </header>
   <div id="loc"></div>
 
   <section class="hero">
+    <img class="mark" src="/logo.png" alt="">
     <h1 id="hi"></h1>
-    <div class="chips">
-      <button class="chip" data-q="أحتاج مساعدة طبية عاجلة">طوارئ طبية</button>
-      <button class="chip" data-q="سيارتي معطلة على الطريق، أحتاج ميكانيكي أو سحب">عطل في السيارة</button>
-      <button class="chip" data-q="أبحث عن أقرب مستشفى">أقرب مستشفى</button>
-      <button class="chip" data-q="كيف أتصرف عند حدوث حريق؟">حريق</button>
-      <button class="chip" data-q="ما خطوات الإسعاف الأولي للحروق؟">حروق</button>
-    </div>
+    <div class="chips" id="chips"></div>
   </section>
 
   <div id="chat" aria-live="polite"></div>
 
-  <form id="f" autocomplete="off">
-    <button type="button" class="ic" id="mic" aria-label="تحدث بدل الكتابة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
-    <input id="inp" placeholder="اكتب أو اضغط الميكروفون وتحدث" aria-label="رسالتك">
-    <button class="ic" id="send" aria-label="إرسال"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.500" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+  <form class="c" id="f" autocomplete="off">
+    <button type="button" class="ic" id="mic" aria-label="Mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+    <input id="inp" aria-label="Message">
+    <button class="ic" id="send" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.500" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
   </form>
 </div>
 
 <div id="toast"></div>
+
 <dialog id="dlg">
-  <h2>أرقام الطوارئ في الإمارات</h2>
+  <h2 data-i="sosT"></h2>
   <div class="nums">
-    <a class="num" href="tel:999">الشرطة <b>999</b></a>
-    <a class="num" href="tel:998">الإسعاف <b>998</b></a>
-    <a class="num" href="tel:997">الدفاع المدني <b>997</b></a>
+    <a class="num" href="tel:999"><span data-i="police"></span><b>999</b></a>
+    <a class="num" href="tel:998"><span data-i="amb"></span><b>998</b></a>
+    <a class="num" href="tel:997"><span data-i="civil"></span><b>997</b></a>
   </div>
-  <p class="note">في الحالات الخطرة اتصل مباشرة. سند مساعد إرشادي ولا يتصل بالجهات نيابة عنك.</p>
-  <form method="dialog" style="all:unset"><button class="chip" style="margin-top:16px;width:100%">إغلاق</button></form>
+  <p class="note" data-i="sosN"></p>
+  <form method="dialog"><button class="chip cls" data-i="close"></button></form>
+</dialog>
+
+<dialog id="locDlg">
+  <h2 data-i="locT"></h2>
+  <button class="go pill full" id="auto" style="height:44px;justify-content:center" data-i="auto"></button>
+  <h3 data-i="manual"></h3>
+  <div class="fld"><input id="geoQ" data-p="geoPh"><button class="go" id="geoGo" data-i="search"></button></div>
+  <a class="lnk" id="verify" target="_blank" rel="noopener" data-i="verify"></a>
+  <form method="dialog"><button class="chip cls" data-i="close"></button></form>
+</dialog>
+
+<dialog id="setDlg">
+  <h2 data-i="setT"></h2>
+  <h3 data-i="langL"></h3>
+  <div class="row"><button class="opt" data-l="ar">العربية</button><button class="opt" data-l="en">English</button></div>
+  <h3 data-i="colorL"></h3>
+  <div class="row" id="sws"></div>
+  <h3 data-i="readL"></h3>
+  <div class="row"><button class="opt" id="readOpt" aria-pressed="false"></button></div>
+  <form method="dialog"><button class="chip cls" data-i="close"></button></form>
 </dialog>
 
 <script>
 const $ = s => document.querySelector(s);
 const app = $('#app'), chat = $('#chat'), inp = $('#inp'), locEl = $('#loc');
-let coords = null, autoRead = false;
+const COLORS = ['#39ff14', '#00e5ff', '#ffd60a', '#ff9f0a', '#ff6bd6', '#e8d3b0'];
 
-// عبارة ترحيب عشوائية
-const hi = ['أهلًا بك، بماذا أساعدك؟','سند معك. ما الذي تحتاجه؟','أخبرني ما الذي يحدث.','أنا هنا. من أين نبدأ؟','ما الأمر؟ أنا أسمعك.','في أي شيء تحتاج سندًا؟','قل لي ما تحتاجه الآن.','خذ نفسًا، ثم أخبرني.'];
-$('#hi').textContent = hi[Math.floor(Math.random() * hi.length)];
+const T = {
+  ar: {
+    name:'سند', loc:'موقعي', sos:'طوارئ', ph:'اكتب أو اضغط الميكروفون وتحدث', listening:'أنا أسمعك… اضغط للإيقاف', trans:'جارٍ تحويل الصوت إلى نص…',
+    greet:['أهلًا بك، بماذا أساعدك؟','سند معك. ما الذي تحتاجه؟','أخبرني ما الذي يحدث.','أنا هنا. من أين نبدأ؟','ما الأمر؟ أنا أسمعك.','في أي شيء تحتاج سندًا؟','قل لي ما تحتاجه الآن.','خذ نفسًا، ثم أخبرني.'],
+    chips:[['طوارئ طبية','أحتاج مساعدة طبية عاجلة'],['عطل في السيارة','سيارتي معطلة على الطريق، أحتاج ميكانيكي أو سحب'],['أقرب مستشفى','أبحث عن أقرب مستشفى'],['حريق','كيف أتصرف عند حدوث حريق؟'],['حروق','ما خطوات الإسعاف الأولي للحروق؟']],
+    sosT:'أرقام الطوارئ في الإمارات', police:'الشرطة', amb:'الإسعاف', civil:'الدفاع المدني', sosN:'في الحالات الخطرة اتصل مباشرة. سند مساعد إرشادي ولا يتصل بالجهات نيابة عنك.', close:'إغلاق',
+    locT:'موقعك', auto:'تحديد تلقائي', manual:'أو اكتب منطقتك يدويًا', geoPh:'مثال: مدينة خليفة، أبوظبي', search:'بحث', verify:'تحقق من موقعك على الخريطة',
+    setT:'الإعدادات', langL:'اللغة', colorL:'اللون', readL:'قراءة الردود بصوت عالٍ', on:'مفعّلة', off:'متوقفة',
+    locating:'جارٍ تحديد موقعك…', insecure:'المتصفح يمنع GPS هنا. افتح الموقع عبر HTTPS.', nogeo:'المتصفح لا يدعم تحديد الموقع.',
+    ok:'تم تحديد موقعك (دقة {n} م)', lowacc:'الدقة منخفضة (نحو {n} كم). للنتائج الأدق اكتب منطقتك يدويًا.', approx:'موقع تقريبي حسب الشبكة وقد يكون بعيدًا. اكتب منطقتك يدويًا من زر «موقعي».',
+    denied:'تم رفض إذن الموقع. اضغط أيقونة القفل بجانب العنوان واسمح بالموقع، أو اكتب منطقتك يدويًا.', failed:'تعذّر تحديد الموقع. اكتب منطقتك يدويًا من زر «موقعي».', notfound:'لم أجد هذا المكان. جرّب اسمًا آخر.', manualOk:'الموقع: ',
+    nomic:'المتصفح لا يدعم تسجيل الصوت.', micDenied:'اسمح للمتصفح باستخدام الميكروفون.', nospeech:'لم أسمع كلامًا واضحًا. حاول مرة أخرى.', micFail:'تعذّر تحويل الصوت. تحقق من الاتصال وحاول مرة أخرى.',
+    nots:'المتصفح لا يدعم قراءة النص.', call:'اتصال', dir:'الاتجاهات', down:'تعذّر الاتصال بالخادم. في الطوارئ اتصل بـ 999.', speak:'قراءة الرد'
+  },
+  en: {
+    name:'Sanad', loc:'My location', sos:'Emergency', ph:'Type, or tap the mic and speak', listening:'Listening… tap to stop', trans:'Converting speech to text…',
+    greet:['Hello, how can I help?','Sanad is with you. What do you need?','Tell me what is happening.','I am here. Where do we start?','What is going on? I am listening.','What do you need help with?','Tell me what you need now.','Take a breath, then tell me.'],
+    chips:[['Medical emergency','I need urgent medical help'],['Car breakdown','My car broke down on the road, I need a mechanic or towing'],['Nearest hospital','Find the nearest hospital'],['Fire','What should I do in a fire?'],['Burns','What is the first aid for burns?']],
+    sosT:'UAE emergency numbers', police:'Police', amb:'Ambulance', civil:'Civil Defense', sosN:'In danger, call directly. Sanad is a guide and does not call anyone for you.', close:'Close',
+    locT:'Your location', auto:'Detect automatically', manual:'Or enter your area manually', geoPh:'e.g. Khalifa City, Abu Dhabi', search:'Search', verify:'Check your location on the map',
+    setT:'Settings', langL:'Language', colorL:'Color', readL:'Read replies aloud', on:'On', off:'Off',
+    locating:'Finding your location…', insecure:'The browser blocks GPS here. Open the site over HTTPS.', nogeo:'This browser does not support location.',
+    ok:'Location found (accuracy {n} m)', lowacc:'Low accuracy (about {n} km). Enter your area manually for better results.', approx:'Approximate location from your network, it may be far off. Enter your area manually from "My location".',
+    denied:'Location permission was denied. Click the lock icon next to the address, allow location, or enter your area manually.', failed:'Could not find your location. Enter your area manually from "My location".', notfound:'Place not found. Try another name.', manualOk:'Location: ',
+    nomic:'This browser cannot record audio.', micDenied:'Allow the browser to use the microphone.', nospeech:'I did not hear clear speech. Try again.', micFail:'Could not convert the audio. Check your connection and try again.',
+    nots:'This browser does not support reading text aloud.', call:'Call', dir:'Directions', down:'Cannot reach the server. In an emergency call 999.', speak:'Read reply'
+  }
+};
+let cfg = { lang: 'ar', color: COLORS[0], read: false }, gi = Math.floor(Math.random() * 8), coords = null;
+try { Object.assign(cfg, JSON.parse(localStorage.getItem('sanad') || '{}')); } catch {}
+const save = () => { try { localStorage.setItem('sanad', JSON.stringify(cfg)); } catch {} };
+const t = k => T[cfg.lang][k];
 
-function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 3500); }
+function applyCfg() {
+  document.documentElement.lang = cfg.lang; document.documentElement.dir = cfg.lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.style.setProperty('--g', cfg.color);
+  document.querySelectorAll('[data-i]').forEach(e => e.textContent = t(e.dataset.i));
+  document.querySelectorAll('[data-p]').forEach(e => e.placeholder = t(e.dataset.p));
+  inp.placeholder = t('ph'); $('#hi').textContent = t('greet')[gi];
+  $('#chips').replaceChildren(...t('chips').map(([l, q]) => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = l; b.onclick = () => send(q); return b; }));
+  document.querySelectorAll('[data-l]').forEach(b => b.setAttribute('aria-pressed', b.dataset.l === cfg.lang));
+  document.querySelectorAll('.sw').forEach(b => b.setAttribute('aria-pressed', b.dataset.c === cfg.color));
+  $('#readOpt').textContent = cfg.read ? t('on') : t('off'); $('#readOpt').setAttribute('aria-pressed', cfg.read);
+}
+$('#sws').replaceChildren(...COLORS.map(c => { const b = document.createElement('button'); b.className = 'sw'; b.dataset.c = c; b.style.background = c; b.setAttribute('aria-label', c); b.onclick = () => { cfg.color = c; save(); applyCfg(); }; return b; }));
+document.querySelectorAll('[data-l]').forEach(b => b.onclick = () => { cfg.lang = b.dataset.l; save(); applyCfg(); });
+$('#readOpt').onclick = () => { cfg.read = !cfg.read; if (!cfg.read) speechSynthesis.cancel(); save(); applyCfg(); };
+$('#setBtn').onclick = () => $('#setDlg').showModal();
+$('#sosBtn').onclick = () => $('#dlg').showModal();
+$('#locBtn').onclick = () => $('#locDlg').showModal();
+
+function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 3500); }
 
 // ---- قراءة النص ----
 const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.500 8.500a5 5 0 0 1 0 7"/></svg>';
 function speak(text, btn) {
-  if (!('speechSynthesis' in window)) return toast('المتصفح لا يدعم قراءة النص.');
+  if (!('speechSynthesis' in window)) return toast(t('nots'));
   const was = btn && btn.classList.contains('on');
-  speechSynthesis.cancel();
-  document.querySelectorAll('.spk.on').forEach(b => b.classList.remove('on'));
+  speechSynthesis.cancel(); document.querySelectorAll('.spk.on').forEach(b => b.classList.remove('on'));
   if (was) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ar-SA';
-  const v = speechSynthesis.getVoices().find(v => v.lang.toLowerCase().startsWith('ar'));
+  const u = new SpeechSynthesisUtterance(text); u.lang = cfg.lang === 'ar' ? 'ar-SA' : 'en-US';
+  const v = speechSynthesis.getVoices().find(v => v.lang.toLowerCase().startsWith(cfg.lang));
   if (v) u.voice = v;
   if (btn) { btn.classList.add('on'); u.onend = u.onerror = () => btn.classList.remove('on'); }
   speechSynthesis.speak(u);
 }
-$('#ttsBtn').onclick = e => {
-  autoRead = !autoRead; e.currentTarget.classList.toggle('on', autoRead);
-  e.currentTarget.setAttribute('aria-pressed', autoRead);
-  if (!autoRead) speechSynthesis.cancel();
-  toast(autoRead ? 'ستُقرأ الردود بصوت عالٍ.' : 'تم إيقاف القراءة التلقائية.');
-};
 
 // ---- المحادثة ----
 function add(text, cls) { const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; chat.appendChild(d); chat.scrollTop = chat.scrollHeight; window.scrollTo(0, document.body.scrollHeight); return d; }
@@ -143,76 +212,107 @@ function fillBot(el, reply, services = []) {
     const info = document.createElement('div'); info.textContent = s.name;
     const sm = document.createElement('small'); sm.textContent = s.distance; info.appendChild(sm);
     const acts = document.createElement('div');
-    if (s.phone) { const a = document.createElement('a'); a.href = 'tel:' + s.phone.replace(/[^\d+]/g, ''); a.textContent = 'اتصال'; acts.appendChild(a); }
-    const m = document.createElement('a'); m.target = '_blank'; m.rel = 'noopener'; m.textContent = 'الاتجاهات';
+    if (s.phone) { const a = document.createElement('a'); a.href = 'tel:' + s.phone.replace(/[^\d+]/g, ''); a.textContent = t('call'); acts.appendChild(a); }
+    const m = document.createElement('a'); m.target = '_blank'; m.rel = 'noopener'; m.textContent = t('dir');
     m.href = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`; acts.appendChild(m);
     d.append(info, acts); el.appendChild(d);
   }
-  const b = document.createElement('button'); b.className = 'spk'; b.type = 'button'; b.setAttribute('aria-label', 'قراءة الرد'); b.innerHTML = ICON;
+  const b = document.createElement('button'); b.className = 'spk'; b.type = 'button'; b.setAttribute('aria-label', t('speak')); b.innerHTML = ICON;
   b.onclick = () => speak(reply, b); el.appendChild(b);
-  if (autoRead) speak(reply, b);
+  if (cfg.read) speak(reply, b);
   chat.scrollTop = chat.scrollHeight;
 }
 async function send(text) {
   text = (text ?? inp.value).trim(); if (!text) return;
   inp.value = ''; app.classList.add('started'); add(text, 'user');
-  if (!coords && /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|سحب|ونش/.test(text)) await locate();
+  if (!coords && /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|سحب|ونش|nearest|nearby|hospital|clinic|mechanic|garage|tow/i.test(text)) await locate();
   const el = add('…', 'bot');
   try {
-    const r = await fetch('/api/assist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, latitude: coords?.lat, longitude: coords?.lon }) });
+    const r = await fetch('/api/assist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, latitude: coords?.lat, longitude: coords?.lon, lang: cfg.lang }) });
     const d = await r.json();
-    fillBot(el, d.reply || 'لم أحصل على رد.', d.services);
-  } catch { fillBot(el, 'تعذّر الاتصال بالخادم. شغّل الخادم بالأمر npm start وافتح الموقع من http://localhost:3000. في الطوارئ اتصل بـ 999.'); }
+    fillBot(el, d.reply || '…', d.services);
+  } catch { fillBot(el, t('down')); }
 }
 $('#f').onsubmit = e => { e.preventDefault(); send(); };
-document.querySelectorAll('.chip[data-q]').forEach(b => b.onclick = () => send(b.dataset.q));
-$('#sosBtn').onclick = () => $('#dlg').showModal();
 
 // ---- تحديد الموقع ----
-function setLoc(cls, t) { locEl.className = cls; locEl.textContent = t; }
-const getPos = o => new Promise((ok, no) => navigator.geolocation.getCurrentPosition(ok, no, o));
-async function locate() {
-  setLoc('', 'جارٍ تحديد موقعك…');
-  let denied = false;
-  if (!window.isSecureContext) {
-    setLoc('err', 'المتصفح يمنع GPS هنا. افتح الموقع من http://localhost:3000 أو عبر HTTPS، وليس من ملف مباشر أو عنوان IP.');
-  } else if (!navigator.geolocation) {
-    setLoc('err', 'المتصفح لا يدعم تحديد الموقع.');
-  } else {
-    // محاولتان: دقة عالية ثم دقة عادية (أجهزة الكمبيوتر غالبًا بلا GPS فتنتهي الأولى بمهلة)
-    for (const o of [{ enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }]) {
-      try {
-        const p = await getPos(o);
-        coords = { lat: +p.coords.latitude.toFixed(6), lon: +p.coords.longitude.toFixed(6) };
-        setLoc('ok', `تم تحديد موقعك (دقة ${Math.round(p.coords.accuracy)} م)`); return coords;
-      } catch (e) { if (e.code === 1) { denied = true; break; } }
-    }
-  }
-  // احتياطي: موقع تقريبي من عنوان الشبكة
-  try {
-    const j = await (await fetch('https://ipwho.is/')).json();
-    if (j.success) { coords = { lat: j.latitude, lon: j.longitude }; setLoc('ok', 'موقع تقريبي حسب الشبكة. فعّل GPS لنتائج أدق.'); return coords; }
-  } catch {}
-  setLoc('err', denied ? 'تم رفض إذن الموقع. اضغط أيقونة القفل بجانب العنوان، اسمح بالموقع، ثم أعد المحاولة.' : 'تعذّر تحديد الموقع. فعّل خدمة الموقع في جهازك ثم أعد المحاولة.');
-  return null;
+function setLoc(cls, m) { locEl.className = cls; locEl.textContent = m; $('#locBtn').classList.toggle('on', cls === 'ok'); }
+function got(lat, lon, acc, approx) {
+  coords = { lat: +lat.toFixed(6), lon: +lon.toFixed(6) };
+  const far = approx || acc > 3000;
+  setLoc(approx ? 'warn' : far ? 'warn' : 'ok', approx ? t('approx') : far ? t('lowacc').replace('{n}', Math.round(acc / 1000)) : t('ok').replace('{n}', Math.round(acc)));
+  const v = $('#verify'); v.href = `https://www.google.com/maps?q=${coords.lat},${coords.lon}`; v.style.display = 'inline-block';
+  return coords;
 }
-$('#locBtn').onclick = locate;
-
-// ---- الإدخال الصوتي ----
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let rec = null, listening = false;
-$('#mic').onclick = () => {
-  if (!SR) return toast('المتصفح لا يدعم الإدخال الصوتي. استخدم Chrome أو Safari.');
-  if (!window.isSecureContext) return toast('الميكروفون يحتاج localhost أو HTTPS.');
-  if (listening) return rec.stop();
-  rec = new SR(); rec.lang = 'ar-AE'; rec.interimResults = true; rec.continuous = false;
-  const base = inp.value.trim();
-  rec.onstart = () => { listening = true; $('#mic').classList.add('on'); inp.placeholder = 'أنا أسمعك…'; };
-  rec.onresult = e => { inp.value = (base + ' ' + [...e.results].map(r => r[0].transcript).join(' ')).trim(); };
-  rec.onerror = e => toast(e.error === 'not-allowed' ? 'اسمح للمتصفح باستخدام الميكروفون.' : e.error === 'no-speech' ? 'لم أسمع شيئًا. حاول مرة أخرى.' : 'تعذّر الإدخال الصوتي (' + e.error + ').');
-  rec.onend = () => { listening = false; $('#mic').classList.remove('on'); inp.placeholder = 'اكتب أو اضغط الميكروفون وتحدث'; inp.focus(); };
-  try { rec.start(); } catch {}
+// watchPosition ينتظر قراءة أدق حتى 12 ثانية ثم يقبل أفضل ما وصل
+const gps = () => new Promise((ok, no) => {
+  let best = null, last = null;
+  const fin = () => { navigator.geolocation.clearWatch(id); clearTimeout(tm); best ? ok(best) : no(last || { code: 3 }); };
+  const id = navigator.geolocation.watchPosition(p => { if (!best || p.coords.accuracy < best.coords.accuracy) best = p; if (p.coords.accuracy <= 100) fin(); }, e => { last = e; if (e.code === 1) fin(); }, { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 });
+  const tm = setTimeout(fin, 12000);
+});
+const once = o => new Promise((ok, no) => navigator.geolocation.getCurrentPosition(ok, no, o));
+async function locate() {
+  setLoc('', t('locating')); let denied = false;
+  if (!window.isSecureContext) setLoc('err', t('insecure'));
+  else if (!navigator.geolocation) setLoc('err', t('nogeo'));
+  else {
+    try { const p = await gps(); return got(p.coords.latitude, p.coords.longitude, p.coords.accuracy); } catch (e) { denied = e.code === 1; }
+    if (!denied) try { const p = await once({ enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }); return got(p.coords.latitude, p.coords.longitude, p.coords.accuracy); } catch (e) { denied = e.code === 1; }
+  }
+  try { const j = await (await fetch('https://ipwho.is/')).json(); if (j.success) return got(j.latitude, j.longitude, null, true); } catch {}
+  setLoc('err', denied ? t('denied') : t('failed')); return null;
+}
+$('#auto').onclick = async () => { $('#locDlg').close(); await locate(); };
+$('#geoGo').onclick = async () => {
+  const q = $('#geoQ').value.trim(); if (!q) return;
+  try {
+    const r = await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=' + cfg.lang + '&q=' + encodeURIComponent(q))).json();
+    if (!r[0]) return toast(t('notfound'));
+    got(+r[0].lat, +r[0].lon, 50); setLoc('ok', t('manualOk') + r[0].display_name.slice(0, 70)); $('#locDlg').close();
+  } catch { toast(t('failed')); }
 };
+$('#geoQ').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); $('#geoGo').click(); } };
+
+// ---- الميكروفون: تسجيل ثم تحويل إلى نص عبر الخادم (لا يعتمد على خدمة المتصفح) ----
+async function toWav(blob) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const buf = await ctx.decodeAudioData(await blob.arrayBuffer()); ctx.close();
+  const rate = 16000, n = Math.max(1, Math.round(buf.duration * rate));
+  const off = new OfflineAudioContext(1, n, rate), s = off.createBufferSource();
+  s.buffer = buf; s.connect(off.destination); s.start();
+  const pcm = (await off.startRendering()).getChannelData(0);
+  const v = new DataView(new ArrayBuffer(44 + n * 2)), w = (o, str) => [...str].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVEfmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) { const x = Math.max(-1, Math.min(1, pcm[i])); v.setInt16(44 + i * 2, x < 0 ? x * 0x8000 : x * 0x7fff, true); }
+  const u = new Uint8Array(v.buffer); let bin = '';
+  for (let i = 0; i < u.length; i += 0x8000) bin += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+let mr = null, chunks = [], stream = null, tmo;
+$('#mic').onclick = async () => {
+  if (mr && mr.state === 'recording') return mr.stop();
+  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) return toast(t('nomic'));
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { return toast(t('micDenied')); }
+  chunks = []; mr = new MediaRecorder(stream);
+  mr.ondataavailable = e => e.data.size && chunks.push(e.data);
+  mr.onstop = async () => {
+    clearTimeout(tmo); stream.getTracks().forEach(x => x.stop()); $('#mic').classList.remove('on');
+    if (!chunks.length) { inp.placeholder = t('ph'); return; }
+    inp.placeholder = t('trans'); $('#mic').disabled = true;
+    try {
+      const audio = await toWav(new Blob(chunks, { type: mr.mimeType }));
+      const d = await (await fetch('/api/transcribe', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio, lang: cfg.lang }) })).json();
+      d.text ? inp.value = (inp.value + ' ' + d.text).trim() : toast(t('nospeech'));
+    } catch { toast(t('micFail')); }
+    $('#mic').disabled = false; inp.placeholder = t('ph'); inp.focus();
+  };
+  mr.start(); $('#mic').classList.add('on'); inp.placeholder = t('listening');
+  tmo = setTimeout(() => mr.state === 'recording' && mr.stop(), 30000);
+};
+
+applyCfg();
 </script>
 </body>
 </html>
