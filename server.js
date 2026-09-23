@@ -8,59 +8,68 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
+const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const ai = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
 
-async function nearbyMechanics(lat, lon) {
-  if (lat == null || lon == null) return [];
-  const q = `[out:json][timeout:8];(nwr(around:7000,${lat},${lon})["shop"="car_repair"];nwr(around:7000,${lat},${lon})["craft"="car_repair"];nwr(around:7000,${lat},${lon})["amenity"="car_repair"];);out center tags;`;
+const KINDS = [
+  { test: /ميكانيك|ورشة|تصليح السيارة|سحب|ونش|قطع غيار|خدمة سيارات/, tags: ['["shop"="car_repair"]', '["craft"="car_repair"]', '["amenity"="car_repair"]'], fallback: "ورشة سيارات" },
+  { test: /مستشفى|عيادة|مركز صحي/, tags: ['["amenity"="hospital"]', '["amenity"="clinic"]'], fallback: "منشأة صحية" },
+];
+
+function meters(a, b, c, d) {
+  const R = 6371000, r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r;
+  const h = Math.sin(x / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+}
+
+async function nearby(kind, lat, lon) {
+  const around = kind.tags.map(t => `nwr(around:7000,${lat},${lon})${t};`).join("");
+  const q = `[out:json][timeout:10];(${around});out center tags;`;
   try {
-    const r = await fetch("https://overpass-api.de/api/interpreter", { method: "POST", body: q });
+    const r = await fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "data=" + encodeURIComponent(q),
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!r.ok) return [];
     const data = await r.json();
-    const arr = (data.elements || []).map(x => {
-      const la = x.lat ?? x.center?.lat, lo = x.lon ?? x.center?.lon, t = x.tags || {};
-      return { name: t.name || t["name:ar"] || "ورشة سيارات", phone: t.phone || t["contact:phone"] || "", lat: la, lon: lo, distance: distance(lat, lon, la, lo) };
-    }).filter(x => x.lat && x.lon).sort((a, b) => meters(a.distance) - meters(b.distance)).slice(0, 5);
-    return arr;
+    return (data.elements || [])
+      .map(x => {
+        const la = x.lat ?? x.center?.lat, lo = x.lon ?? x.center?.lon, t = x.tags || {};
+        return { name: t["name:ar"] || t.name || kind.fallback, phone: t.phone || t["contact:phone"] || "", lat: la, lon: lo, m: la && lo ? meters(lat, lon, la, lo) : Infinity };
+      })
+      .filter(x => Number.isFinite(x.m))
+      .sort((a, b) => a.m - b.m)
+      .slice(0, 5)
+      .map(({ m, ...s }) => ({ ...s, distance: (m / 1000).toFixed(1) + " كم" }));
   } catch { return []; }
 }
 
-function distance(a, b, c, d) { const R = 6371, rad = Math.PI / 180; const x = (c - a) * rad, y = (d - b) * rad; const h = Math.sin(x / 2) ** 2 + Math.cos(a * rad) * Math.cos(c * rad) * Math.sin(y / 2) ** 2; return (R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h))).toFixed(1) + " كم"; }
-function meters(s) { return parseFloat(s) * 1000; }
-
 app.post("/api/assist", async (req, res) => {
   const { message, latitude, longitude } = req.body || {};
-  let services = [];
-  const asksMechanic = /ميكانيك|ميكانيكي|ورشة|تصليح السيارة|سحب|ونش|قطعة غيار|خدمة سيارات/i.test(message || "");
-  if (asksMechanic) services = await nearbyMechanics(latitude, longitude);
+  const text = String(message || "").trim().slice(0, 2000);
+  if (!text) return res.status(400).json({ reply: "اكتب رسالتك أولًا." });
+
+  const la = Number(latitude), lo = Number(longitude);
+  const hasLoc = latitude != null && longitude != null && Number.isFinite(la) && Number.isFinite(lo);
+  const kind = KINDS.find(k => k.test.test(text));
+  const services = kind && hasLoc ? await nearby(kind, la, lo) : [];
 
   if (!ai) {
-    return res.json({ reply: "واجهة سند جاهزة، لكن الذكاء الاصطناعي غير مفعّل. أضف GEMINI_API_KEY في ملف .env ثم أعد التشغيل.", safety: "إذا كانت الحالة طارئة، اتصل مباشرة بالطوارئ.", services });
+    return res.json({ reply: "الذكاء الاصطناعي غير مفعّل. أضف GEMINI_API_KEY في ملف .env ثم أعد تشغيل الخادم. للطوارئ اتصل بـ 999.", services });
   }
 
-  const location = latitude && longitude ? `موقع المستخدم التقريبي من GPS: ${latitude}, ${longitude}` : "لا يوجد موقع GPS متاح.";
-  const serviceText = services.length ? JSON.stringify(services) : "لا توجد نتائج خدمات قريبة متاحة.";
-  const systemInstruction = `أنت "سند"، مساعد سلامة وخدمات في الإمارات. هدفك مساعدة المستخدم بأقل عدد ممكن من الأسئلة. ابدأ دائمًا بالسلامة إذا كانت هناك خطورة. لا تدّعي أنك اتصلت بجهة حكومية أو أرسلت موقعًا ما لم يحدث ذلك فعليًا. إذا طلب المستخدم ميكانيكيًا أو خدمة قريبة، استخدم النتائج المرفقة ولا تخترع أسماء أو أرقامًا. إذا لم يوجد GPS، اطلب تفعيل الموقع فقط عندما يكون البحث القريب ضروريًا. كن مختصرًا وواضحًا بالعربية. عند الطوارئ اذكر أن الشرطة 999، الإسعاف 998، الدفاع المدني 997.\n${location}\nنتائج الخدمات القريبة: ${serviceText}`;
+  const location = hasLoc ? `موقع المستخدم من GPS: ${la}, ${lo}` : "لا يوجد موقع GPS متاح.";
+  const serviceText = services.length ? JSON.stringify(services) : "لا توجد نتائج خدمات قريبة.";
+  const systemInstruction = `أنت "سند"، مساعد سلامة وخدمات في الإمارات. ساعد المستخدم بأقل عدد ممكن من الأسئلة. ابدأ بالسلامة إذا كانت هناك خطورة. لا تدّعي أنك اتصلت بجهة أو أرسلت موقعًا. إذا طلب خدمة قريبة فاستخدم النتائج المرفقة فقط ولا تخترع أسماء أو أرقامًا. إذا لم يوجد GPS فاطلب منه الضغط على زر "موقعي" عندما يكون البحث القريب ضروريًا. أجب بالعربية باختصار ووضوح. أرقام الطوارئ: الشرطة 999، الإسعاف 998، الدفاع المدني 997.\n${location}\nنتائج الخدمات القريبة: ${serviceText}`;
 
   try {
-   const response = await ai.models.generateContent({
-  model: "gemini-3.6-flash",
-  contents: message,
-  config: {
-    systemInstruction: systemInstruction,
-  }
-});
-
-    res.json({
-      reply: response.text || "لم أحصل على رد.",
-      services,
-      safety: "المعلومات إرشادية وليست بديلًا عن خدمات الطوارئ أو فني مختص."
-    });
+    const response = await ai.models.generateContent({ model: MODEL, contents: text, config: { systemInstruction } });
+    res.json({ reply: response.text || "لم أحصل على رد.", services });
   } catch (e) {
-    console.error("Gemini Error:", e);
-    res.status(500).json({
-      reply: "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي. تحقق من GEMINI_API_KEY.",
-      services
-    });
+    console.error("Gemini error:", e);
+    res.status(500).json({ reply: "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي. تحقق من GEMINI_API_KEY واسم النموذج.", services });
   }
 });
 

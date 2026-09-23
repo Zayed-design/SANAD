@@ -2,233 +2,217 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>سند | مساعدك وقت الحاجة</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>سند</title>
 <style>
-:root{--bg:#070707;--panel:#111;--panel2:#171717;--line:#292929;--text:#f7f2e9;--muted:#a7a198;--gold:#e8d3b0;--danger:#d95353;--ok:#8fbf9a}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -20%,#29241d 0,#0b0b0b 36%,#070707 70%);color:var(--text);font-family:Tahoma,Arial,sans-serif}
-button,input,textarea{font:inherit}.app{max-width:1180px;margin:auto;padding:22px}
-header{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:18px}.brand{display:flex;align-items:center;gap:13px}.brand img{width:60px;height:60px;border-radius:16px}.brand h1{font-size:30px;margin:0}.brand p{margin:3px 0;color:var(--muted)}
-.badge{border:1px solid var(--line);background:#101010;padding:9px 13px;border-radius:999px;font-size:12px;color:#cfc7bb}
-.hero{padding:30px;border:1px solid #2a2927;border-radius:28px;background:linear-gradient(145deg,#171513,#0d0d0d);box-shadow:0 25px 70px #0008}
-.hero h2{font-size:38px;margin:0 0 8px}.hero p{max-width:720px;color:#b9b2a8;line-height:1.9;margin:0}
-.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:23px}.quick button{min-height:92px;border:1px solid #2d2b28;background:#141311;color:#eee;border-radius:18px;padding:14px;text-align:right;cursor:pointer}.quick button:hover{border-color:#736653;transform:translateY(-2px)}.quick b{display:block;margin-top:8px}.quick small{color:#999}
-.main{display:grid;grid-template-columns:1.35fr .65fr;gap:15px;margin-top:15px}.panel{background:#101010;border:1px solid #252525;border-radius:22px;padding:19px}
-.panel h3{margin:0 0 14px}
-.chat{height:450px;overflow:auto;display:flex;flex-direction:column;gap:11px;padding:5px}.msg{max-width:88%;padding:13px 15px;border-radius:18px;line-height:1.85;white-space:pre-wrap}.bot{align-self:flex-start;background:#1a1917;border:1px solid #292824}.user{align-self:flex-end;background:#2b251d}.system{align-self:center;color:#aaa;font-size:12px}
-.composer{display:flex;gap:8px;margin-top:10px}.composer input{flex:1;background:#090909;border:1px solid #303030;border-radius:14px;color:#fff;padding:14px;outline:none}.send,.mic{border:0;border-radius:14px;padding:0 17px;cursor:pointer}.send{background:var(--gold);color:#18130d;font-weight:700}.mic{background:#24221f;color:#fff}.mic.recording{background:#8d3030}
-.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.tool{background:#1c1c1c;color:#ddd;border:1px solid #303030;border-radius:12px;padding:9px 11px;cursor:pointer}
-.locbox{background:#090909;border:1px solid #2a2a2a;border-radius:14px;padding:13px;direction:ltr;text-align:left;font:13px Consolas,monospace;min-height:75px;white-space:pre-wrap}
-.primary{background:var(--gold);color:#17120d;border:0;border-radius:13px;padding:12px 15px;cursor:pointer;font-weight:700;width:100%}
-.emergency{margin-top:15px}.numbers{display:grid;grid-template-columns:1fr 1fr;gap:8px}.num{border:1px solid #302525;background:#171010;border-radius:13px;padding:11px;color:#fff;text-decoration:none}.num b{display:block}.num small{color:#f2aaaa}
-.safe{margin-top:15px;border:1px solid #30302c;background:#12130f;border-radius:16px;padding:14px;color:#d8d6ce;line-height:1.8}.safe strong{color:#c9e0c7}
-footer{text-align:center;color:#777;font-size:12px;padding:22px 0}
-@media(max-width:900px){.quick{grid-template-columns:repeat(2,1fr)}.main{grid-template-columns:1fr}}@media(max-width:550px){.app{padding:12px}.hero{padding:20px}.hero h2{font-size:29px}.quick{grid-template-columns:1fr 1fr}.chat{height:390px}.badge{display:none}}
+:root{--bg:#000;--s1:#0c0c0e;--s2:#1c1c1e;--line:#2c2c2e;--tx:#f5f5f7;--mu:#86868b;--g:#39ff14;--red:#ff453a}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,"SF Pro Arabic","SF Pro Text","Segoe UI",Tahoma,sans-serif;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--g);outline-offset:2px}
+.app{max-width:760px;margin:auto;min-height:100dvh;display:flex;flex-direction:column;padding:0 20px env(safe-area-inset-bottom)}
+header{display:flex;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 16px) 0 8px}
+.logo{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700}
+.logo i{width:12px;height:12px;border-radius:50%;background:var(--g);box-shadow:0 0 14px var(--g)}
+.bar{display:flex;gap:8px}
+.pill{display:flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:99px;background:var(--s2);font-size:14px;color:var(--tx)}
+.pill svg{width:16px;height:16px}.pill.on{color:var(--g)}.sos{color:var(--red)}
+#loc{min-height:20px;font-size:13px;color:var(--mu);padding:4px 2px}
+#loc.err{color:var(--red)}#loc.ok{color:var(--g)}
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:20px 0 40px}
+h1{font-size:clamp(34px,7vw,52px);line-height:1.25;font-weight:700;letter-spacing:-.5px;max-width:560px}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{padding:12px 18px;border-radius:99px;background:var(--s2);font-size:15px;transition:background .2s}
+.chip:hover{background:#2c2c2e}
+.started .hero{display:none}
+#chat{flex:1;display:none;flex-direction:column;gap:12px;padding:14px 0;overflow-y:auto}
+.started #chat{display:flex}
+.msg{max-width:86%;padding:12px 16px;border-radius:20px;line-height:1.8;white-space:pre-wrap;font-size:16px}
+.user{align-self:flex-start;background:var(--g);color:#000;border-end-start-radius:6px}
+.bot{align-self:flex-end;background:var(--s2);border-end-end-radius:6px}
+.spk{display:inline-flex;margin-top:8px;color:var(--mu);padding:4px}.spk:hover,.spk.on{color:var(--g)}.spk svg{width:18px;height:18px}
+.svc{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;background:var(--s1);border:1px solid var(--line);border-radius:14px;white-space:normal}
+.svc small{display:block;color:var(--mu)}.svc a{color:var(--g);text-decoration:none;font-size:14px;margin-inline-start:10px}
+form{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;margin:8px 0 16px;padding:8px;border-radius:99px;background:var(--s2);border:1px solid var(--line)}
+form:focus-within{border-color:var(--g)}
+#inp{flex:1;min-width:0;background:none;border:0;outline:0;padding:10px 14px;font-size:16px}
+#inp::placeholder{color:var(--mu)}
+.ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ic svg{width:22px;height:22px}
+#mic{background:var(--s1);color:var(--tx)}
+#mic.on{background:var(--red);animation:pulse 1.2s infinite}
+#send{background:var(--g);color:#000;box-shadow:0 0 18px #39ff1455}
+@keyframes pulse{50%{box-shadow:0 0 0 10px #ff453a22}}
+#toast{position:fixed;inset-inline:20px;bottom:96px;margin:auto;max-width:420px;padding:12px 16px;border-radius:14px;background:#2c2c2e;text-align:center;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s}
+#toast.show{opacity:1}
+dialog{margin:auto;width:min(92vw,420px);padding:24px;border:1px solid var(--line);border-radius:24px;background:var(--s1);color:var(--tx)}
+dialog::backdrop{background:#000a;backdrop-filter:blur(8px)}
+dialog h2{font-size:20px;margin-bottom:16px}
+.nums{display:grid;gap:10px}
+.num{display:flex;justify-content:space-between;align-items:center;padding:16px;border-radius:16px;background:var(--s2);color:var(--tx);text-decoration:none}
+.num b{font-size:24px;color:var(--g);direction:ltr}
+.note{margin-top:14px;font-size:13px;color:var(--mu);line-height:1.7}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<div class="app">
-<header>
-  <div class="brand">
-    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABEQAAARECAIAAADz51N0AAAQAElEQVR4AeydB4BdRfn235lzbt2STmhSFSliAVRUBAQL0kVB6SC9B9JIb5BKElIIvTdREBQL6if2/rdjQQWlQ/q22845M98z5+zebCppu3s3eYbnzp0zZ8o7vzl3933vJEELEwmQAAmQAAmQAAmQAAmQAAn0QgIMZnrhptHkniTAuUmABEiABEiABEiABGqFAIOZWtkJ2kECJEAC2yIBrokESIAESIAEupQAg5kuxcvBSYAESIAESIAESGBjCbAdCZDAphBgMLNpvNiaBEiABEiABEiABEiABEigNggIg5ka2QiaQQIkQAIkQAIkQAIkQAIksGkEGMxsGi+23t4JcP0kQAIkQAIkQAIkQAI1Q4DBTM1sBQ0hARIggW2PAFdEAiRAAiRAAl1JgMFMV9Ll2CRAAiRAAiRAAiSw8QTYkgRIYBMJMJjZRGBsTgIkQAIkQAIkQAIkQAIstAhAM5ghp3sAnkI788AAAAAElFTkSuQmCC" alt="سند">
-    <div>
-      <h1>سند</h1>
-      <p>مساعدك الذكي وقت الحاجة والطوارئ</p>
+<div class="app" id="app">
+  <header>
+    <div class="logo"><i></i>سند</div>
+    <div class="bar">
+      <button class="pill" id="locBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/></svg>موقعي</button>
+      <button class="pill" id="ttsBtn" aria-pressed="false" title="قراءة الردود تلقائيًا"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.500 8.500a5 5 0 0 1 0 7M18.500 5.500a9 9 0 0 1 0 13"/></svg>قراءة</button>
+      <button class="pill sos" id="sosBtn">طوارئ</button>
     </div>
-  </div>
-  <div class="badge">متصل وحاضر للمساعدة</div>
-</header>
+  </header>
+  <div id="loc"></div>
 
-<section class="hero">
-  <h2>أهلاً بك، كيف يمكنني مساعدتك اليوم؟</h2>
-  <p>أنا هنا لإرشادك في حالات الطوارئ، تقديم الإرشادات الطبية الأولية، وتحديد موقعك لمشاركته مع الجهات المختصة.</p>
-  <div class="quick">
-    <button onclick="quickSend('أنا بحاجة لمساعدة طبية عاجلة')"><b>طوارئ طبية</b><small>إرشادات وإسعاف</small></button>
-    <button onclick="quickSend('لدي عطل في السيارة على الطريق')"><b>عطل طريق</b><small>سحب وصيانة</small></button>
-    <button onclick="quickSend('كيف أتصرف أثناء حريق؟')"><b>إرشادات السلامة</b><small>حرائق وكوارث</small></button>
-    <button onclick="quickSend('أبحث عن أقرب مستشفى')"><b>أقرب مستشفى</b><small>تحديد الموقع</small></button>
-    <button onclick="quickSend('أريد رقم الإسعاف أو الشرطة')"><b>أرقام الطوارئ</b><small>اتصال مباشر</small></button>
-  </div>
-</section>
-
-<div class="main">
-  <section class="panel">
-    <h3>المحادثة الفورية</h3>
-    <div class="chat" id="chatBox">
-      <div class="msg system">بدأت المحادثة - سند جاهز لمساعدتك</div>
-      <div class="msg bot">مرحباً بك! أنا "سند". كيف أستطيع المساعدة الآن؟</div>
-    </div>
-    <div class="composer">
-      <input type="text" id="userInput" placeholder="اكتب رسالتك هنا..." onkeydown="if(event.key==='Enter') sendMessage()">
-      <button class="mic" id="micBtn" onclick="toggleMic()">🎤</button>
-      <button class="send" onclick="sendMessage()">إرسال</button>
-    </div>
-    <div class="tools">
-      <button class="tool" onclick="quickSend('كيف أقدم إسعافات أولية لحالة إغماء؟')">🏥 إغماء</button>
-      <button class="tool" onclick="quickSend('ما هي خطوات التعامل مع الحروق؟')">🔥 حروق</button>
-      <button class="tool" onclick="quickSend('كيف أتعامل مع حوادث السير؟')">🚗 حادث</button>
+  <section class="hero">
+    <h1 id="hi"></h1>
+    <div class="chips">
+      <button class="chip" data-q="أحتاج مساعدة طبية عاجلة">طوارئ طبية</button>
+      <button class="chip" data-q="سيارتي معطلة على الطريق، أحتاج ميكانيكي أو سحب">عطل في السيارة</button>
+      <button class="chip" data-q="أبحث عن أقرب مستشفى">أقرب مستشفى</button>
+      <button class="chip" data-q="كيف أتصرف عند حدوث حريق؟">حريق</button>
+      <button class="chip" data-q="ما خطوات الإسعاف الأولي للحروق؟">حروق</button>
     </div>
   </section>
 
-  <aside class="panel">
-    <h3>موقعك والخدمات القريبة</h3>
-    <div class="location-actions">
-      <button class="primary" onclick="getLocation()">تحديد موقعي الحالي</button>
-      <div class="locbox" id="locBox">اضغط على الزر أعلاه لتحديد إحداثياتك...</div>
-    </div>
+  <div id="chat" aria-live="polite"></div>
 
-    <div class="emergency">
-      <h3>أرقام الطوارئ السريعة</h3>
-      <div class="numbers">
-        <a href="tel:997" class="num"><b>الإسعاف</b><small>997</small></a>
-        <a href="tel:998" class="num"><b>الدفاع المدني</b><small>998</small></a>
-        <a href="tel:999" class="num"><b>الشرطة</b><small>999</small></a>
-        <a href="tel:993" class="num"><b>المرور</b><small>993</small></a>
-      </div>
-    </div>
-
-    <div class="safe">
-      <strong>تنويه هام:</strong>
-      <br>في الحالات الحتمية والطوارئ الحرجة، يرجى الاتصال فوراً بأرقام الطوارئ الموضحة أعلاه.
-    </div>
-  </aside>
+  <form id="f" autocomplete="off">
+    <button type="button" class="ic" id="mic" aria-label="تحدث بدل الكتابة"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+    <input id="inp" placeholder="اكتب أو اضغط الميكروفون وتحدث" aria-label="رسالتك">
+    <button class="ic" id="send" aria-label="إرسال"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.500" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+  </form>
 </div>
 
-<footer>جميع الحقوق محفوظة © منصة سند</footer>
-</div>
+<div id="toast"></div>
+<dialog id="dlg">
+  <h2>أرقام الطوارئ في الإمارات</h2>
+  <div class="nums">
+    <a class="num" href="tel:999">الشرطة <b>999</b></a>
+    <a class="num" href="tel:998">الإسعاف <b>998</b></a>
+    <a class="num" href="tel:997">الدفاع المدني <b>997</b></a>
+  </div>
+  <p class="note">في الحالات الخطرة اتصل مباشرة. سند مساعد إرشادي ولا يتصل بالجهات نيابة عنك.</p>
+  <form method="dialog" style="all:unset"><button class="chip" style="margin-top:16px;width:100%">إغلاق</button></form>
+</dialog>
 
 <script>
-// ضع مفتاح API الخاص بك من Google Gemini هنا لتفعيل الذكاء الاصطناعي الحقيقي
-const API_KEY = "ضع_مفتاح_API_خاصتك_هنا"; 
+const $ = s => document.querySelector(s);
+const app = $('#app'), chat = $('#chat'), inp = $('#inp'), locEl = $('#loc');
+let coords = null, autoRead = false;
 
-const chatBox = document.getElementById('chatBox');
-const userInput = document.getElementById('userInput');
+// عبارة ترحيب عشوائية
+const hi = ['أهلًا بك، بماذا أساعدك؟','سند معك. ما الذي تحتاجه؟','أخبرني ما الذي يحدث.','أنا هنا. من أين نبدأ؟','ما الأمر؟ أنا أسمعك.','في أي شيء تحتاج سندًا؟','قل لي ما تحتاجه الآن.','خذ نفسًا، ثم أخبرني.'];
+$('#hi').textContent = hi[Math.floor(Math.random() * hi.length)];
 
-async function sendMessage() {
-  const text = userInput.value.trim();
-  if (!text) return;
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 3500); }
 
-  appendMessage(text, 'user');
-  userInput.value = '';
+// ---- قراءة النص ----
+const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.500 8.500a5 5 0 0 1 0 7"/></svg>';
+function speak(text, btn) {
+  if (!('speechSynthesis' in window)) return toast('المتصفح لا يدعم قراءة النص.');
+  const was = btn && btn.classList.contains('on');
+  speechSynthesis.cancel();
+  document.querySelectorAll('.spk.on').forEach(b => b.classList.remove('on'));
+  if (was) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ar-SA';
+  const v = speechSynthesis.getVoices().find(v => v.lang.toLowerCase().startsWith('ar'));
+  if (v) u.voice = v;
+  if (btn) { btn.classList.add('on'); u.onend = u.onerror = () => btn.classList.remove('on'); }
+  speechSynthesis.speak(u);
+}
+$('#ttsBtn').onclick = e => {
+  autoRead = !autoRead; e.currentTarget.classList.toggle('on', autoRead);
+  e.currentTarget.setAttribute('aria-pressed', autoRead);
+  if (!autoRead) speechSynthesis.cancel();
+  toast(autoRead ? 'ستُقرأ الردود بصوت عالٍ.' : 'تم إيقاف القراءة التلقائية.');
+};
 
-  const loadingMsg = appendMessage("جاري التفكير...", 'bot');
-
+// ---- المحادثة ----
+function add(text, cls) { const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; chat.appendChild(d); chat.scrollTop = chat.scrollHeight; window.scrollTo(0, document.body.scrollHeight); return d; }
+function fillBot(el, reply, services = []) {
+  el.textContent = reply;
+  for (const s of services) {
+    const d = document.createElement('div'); d.className = 'svc';
+    const info = document.createElement('div'); info.textContent = s.name;
+    const sm = document.createElement('small'); sm.textContent = s.distance; info.appendChild(sm);
+    const acts = document.createElement('div');
+    if (s.phone) { const a = document.createElement('a'); a.href = 'tel:' + s.phone.replace(/[^\d+]/g, ''); a.textContent = 'اتصال'; acts.appendChild(a); }
+    const m = document.createElement('a'); m.target = '_blank'; m.rel = 'noopener'; m.textContent = 'الاتجاهات';
+    m.href = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`; acts.appendChild(m);
+    d.append(info, acts); el.appendChild(d);
+  }
+  const b = document.createElement('button'); b.className = 'spk'; b.type = 'button'; b.setAttribute('aria-label', 'قراءة الرد'); b.innerHTML = ICON;
+  b.onclick = () => speak(reply, b); el.appendChild(b);
+  if (autoRead) speak(reply, b);
+  chat.scrollTop = chat.scrollHeight;
+}
+async function send(text) {
+  text = (text ?? inp.value).trim(); if (!text) return;
+  inp.value = ''; app.classList.add('started'); add(text, 'user');
+  if (!coords && /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|سحب|ونش/.test(text)) await locate();
+  const el = add('…', 'bot');
   try {
-    if (API_KEY && API_KEY !== "ضع_مفتاح_API_خاصتك_هنا") {
-      // اتصال حقيقي بذكاء Gemini الاصطناعي
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: "أنت مساعد طوارئ وإسعافات يدعى 'سند'. أجب باختصار ووضوح وبأسلوب مساعد: " + text }] }]
-        })
-      });
-      const data = await response.json();
-      const botText = data.candidates[0].content.parts[0].text;
-      loadingMsg.textContent = botText;
-    } else {
-      // رد احتياطي في حال عدم وضع API Key
-      loadingMsg.textContent = "لتفعيل الذكاء الاصطناعي الحقيقي، يرجى إضافة Gemini API Key داخل الكود. (تنبيه: للطوارئ يرجى الاتصال بالإسعاف 997).";
-    }
-  } catch (error) {
-    loadingMsg.textContent = "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي. يرجى التحقق من المفتاح أو الاتصال بالشبكة.";
-  }
+    const r = await fetch('/api/assist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, latitude: coords?.lat, longitude: coords?.lon }) });
+    const d = await r.json();
+    fillBot(el, d.reply || 'لم أحصل على رد.', d.services);
+  } catch { fillBot(el, 'تعذّر الاتصال بالخادم. شغّل الخادم بالأمر npm start وافتح الموقع من http://localhost:3000. في الطوارئ اتصل بـ 999.'); }
 }
+$('#f').onsubmit = e => { e.preventDefault(); send(); };
+document.querySelectorAll('.chip[data-q]').forEach(b => b.onclick = () => send(b.dataset.q));
+$('#sosBtn').onclick = () => $('#dlg').showModal();
 
-function quickSend(text) {
-  userInput.value = text;
-  sendMessage();
-}
-
-function appendMessage(text, type) {
-  const msg = document.createElement('div');
-  msg.className = `msg ${type}`;
-  msg.textContent = text;
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
-  return msg;
-}
-
-// تحديد الموقع (GPS)
-function getLocation() {
-  const locBox = document.getElementById('locBox');
+// ---- تحديد الموقع ----
+function setLoc(cls, t) { locEl.className = cls; locEl.textContent = t; }
+const getPos = o => new Promise((ok, no) => navigator.geolocation.getCurrentPosition(ok, no, o));
+async function locate() {
+  setLoc('', 'جارٍ تحديد موقعك…');
+  let denied = false;
   if (!window.isSecureContext) {
-    locBox.textContent = "خطأ أمني: تحديد الموقع يطلب تشغيل الملف عبر سيرفر محلي (localhost) أو HTTPS ولا يعمل عبر فتح الملف المباشر (file://).";
-    return;
-  }
-  if (navigator.geolocation) {
-    locBox.textContent = "جاري طلب إذن الموقع...";
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const lat = pos.coords.latitude.toFixed(5);
-        const lng = pos.coords.longitude.toFixed(5);
-        locBox.textContent = `خط العرض: ${lat}\nخط الطول: ${lng}\n\nرابط Google Maps:\nhttps://maps.google.com/?q=${lat},${lng}`;
-      },
-      (err) => {
-        locBox.textContent = "تم رفض الوصول للموقع أو تعذر تحديده.\nالسبب: " + err.message;
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+    setLoc('err', 'المتصفح يمنع GPS هنا. افتح الموقع من http://localhost:3000 أو عبر HTTPS، وليس من ملف مباشر أو عنوان IP.');
+  } else if (!navigator.geolocation) {
+    setLoc('err', 'المتصفح لا يدعم تحديد الموقع.');
   } else {
-    locBox.textContent = "المتصفح لا يدعم تحديد الموقع.";
-  }
-}
-
-// المايكروفون (التعرف على الصوت)
-let isRecording = false;
-let recognition;
-
-function initSpeech() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert("متصفحك لا يدعم التعرف على الصوت. استخدم متصفح Google Chrome.");
-    return null;
-  }
-  const rec = new SpeechRecognition();
-  rec.lang = 'ar-SA';
-  rec.continuous = false;
-  rec.interimResults = false;
-
-  rec.onresult = (e) => {
-    userInput.value = e.results[0][0].transcript;
-    stopMic();
-  };
-  rec.onerror = (e) => {
-    alert(" خطأ في المايكروفون: " + e.error + "\nتأكد من إعطاء الصلاحية للمتصفح.");
-    stopMic();
-  };
-  rec.onend = () => stopMic();
-  return rec;
-}
-
-function toggleMic() {
-  const micBtn = document.getElementById('micBtn');
-  if (!recognition) recognition = initSpeech();
-  if (!recognition) return;
-
-  if (!isRecording) {
-    try {
-      recognition.start();
-      isRecording = true;
-      micBtn.classList.add('recording');
-      micBtn.textContent = '🛑';
-    } catch (e) {
-      console.log(e);
+    // محاولتان: دقة عالية ثم دقة عادية (أجهزة الكمبيوتر غالبًا بلا GPS فتنتهي الأولى بمهلة)
+    for (const o of [{ enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 }]) {
+      try {
+        const p = await getPos(o);
+        coords = { lat: +p.coords.latitude.toFixed(6), lon: +p.coords.longitude.toFixed(6) };
+        setLoc('ok', `تم تحديد موقعك (دقة ${Math.round(p.coords.accuracy)} م)`); return coords;
+      } catch (e) { if (e.code === 1) { denied = true; break; } }
     }
-  } else {
-    stopMic();
   }
+  // احتياطي: موقع تقريبي من عنوان الشبكة
+  try {
+    const j = await (await fetch('https://ipwho.is/')).json();
+    if (j.success) { coords = { lat: j.latitude, lon: j.longitude }; setLoc('ok', 'موقع تقريبي حسب الشبكة. فعّل GPS لنتائج أدق.'); return coords; }
+  } catch {}
+  setLoc('err', denied ? 'تم رفض إذن الموقع. اضغط أيقونة القفل بجانب العنوان، اسمح بالموقع، ثم أعد المحاولة.' : 'تعذّر تحديد الموقع. فعّل خدمة الموقع في جهازك ثم أعد المحاولة.');
+  return null;
 }
+$('#locBtn').onclick = locate;
 
-function stopMic() {
-  const micBtn = document.getElementById('micBtn');
-  if (recognition && isRecording) {
-    recognition.stop();
-  }
-  isRecording = false;
-  micBtn.classList.remove('recording');
-  micBtn.textContent = '🎤';
-}
+// ---- الإدخال الصوتي ----
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false;
+$('#mic').onclick = () => {
+  if (!SR) return toast('المتصفح لا يدعم الإدخال الصوتي. استخدم Chrome أو Safari.');
+  if (!window.isSecureContext) return toast('الميكروفون يحتاج localhost أو HTTPS.');
+  if (listening) return rec.stop();
+  rec = new SR(); rec.lang = 'ar-AE'; rec.interimResults = true; rec.continuous = false;
+  const base = inp.value.trim();
+  rec.onstart = () => { listening = true; $('#mic').classList.add('on'); inp.placeholder = 'أنا أسمعك…'; };
+  rec.onresult = e => { inp.value = (base + ' ' + [...e.results].map(r => r[0].transcript).join(' ')).trim(); };
+  rec.onerror = e => toast(e.error === 'not-allowed' ? 'اسمح للمتصفح باستخدام الميكروفون.' : e.error === 'no-speech' ? 'لم أسمع شيئًا. حاول مرة أخرى.' : 'تعذّر الإدخال الصوتي (' + e.error + ').');
+  rec.onend = () => { listening = false; $('#mic').classList.remove('on'); inp.placeholder = 'اكتب أو اضغط الميكروفون وتحدث'; inp.focus(); };
+  try { rec.start(); } catch {}
+};
 </script>
 </body>
 </html>
