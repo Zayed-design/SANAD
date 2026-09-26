@@ -53,21 +53,26 @@ const OVERPASS_MIRRORS = [
   "https://overpass.kumi.systems/api/interpreter",
   "https://overpass.openstreetmap.ru/api/interpreter",
 ];
+// نجرّب كل مرايا Overpass بالتوازي ونأخذ أول رد ناجح، بدل تجربتها الواحدة تلو الأخرى
+// (تجربتها بالتتابع كانت تجعل أسوأ حالة انتظار = مجموع مهلات كل المرايا مجتمعة)
 async function queryOverpassOnce(q) {
-  for (const url of OVERPASS_MIRRORS) {
-    try {
-      const r = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "data=" + encodeURIComponent(q),
-        signal: AbortSignal.timeout(12000),
-      });
-      if (!r.ok) { console.error(`[overpass] ${url} -> HTTP ${r.status}`); continue; }
-      const data = await r.json();
-      return Array.isArray(data.elements) ? data.elements : [];
-    } catch (e) { console.error(`[overpass] ${url} failed:`, e?.name || "", e?.message || e); }
+  const attempts = OVERPASS_MIRRORS.map(async url => {
+    const r = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "data=" + encodeURIComponent(q),
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status} من ${url}`);
+    const data = await r.json();
+    return Array.isArray(data.elements) ? data.elements : [];
+  });
+  try {
+    return await Promise.any(attempts);
+  } catch (agg) {
+    (agg?.errors || [agg]).forEach(e => console.error("[overpass] mirror failed:", e?.message || e));
+    return null; // كل المرايا فشلت
   }
-  return null; // كل المرايا فشلت
 }
 
 async function nearby(kind, lat, lon) {
@@ -79,7 +84,7 @@ async function nearby(kind, lat, lon) {
   let elements = [];
   for (const radius of [7000, 20000]) {
     const around = kind.tags.map(t => `nwr(around:${radius},${lat},${lon})${t};`).join("");
-    const q = `[out:json][timeout:10];(${around});out center tags;`;
+    const q = `[out:json][timeout:7];(${around});out center tags;`;
     const res = await queryOverpassOnce(q);
     if (res && res.length) { elements = res; break; }
   }
@@ -152,22 +157,16 @@ function isQuota(e) {
   const s = String(e?.status || e?.code || e?.message || e || "");
   return /429|RESOURCE_EXHAUSTED/i.test(s);
 }
-// استدعاء Gemini: يجرّب كل نموذج في MODEL_CHAIN بالترتيب، وينتقل للتالي فورًا عند تجاوز الحصة
-// (429/RESOURCE_EXHAUSTED)، أو بعد استنفاد محاولاته عند خطأ مؤقت آخر (ضغط/شبكة)
+// استدعاء Gemini: محاولة واحدة سريعة لكل نموذج في MODEL_CHAIN، وانتقال فوري للتالي عند أي فشل
+// (لا داعي لإعادة محاولة نفس النموذج طالما هناك نماذج بديلة تنتظر دورها؛ هذا يقلّل أسوأ وقت انتظار للمستخدم بشكل كبير)
 async function askGemini(args, label) {
   let lastErr;
   for (const model of MODEL_CHAIN) {
-    const tries = 2;
-    for (let i = 0; i < tries; i++) {
-      try {
-        return await withTimeout(ai.models.generateContent({ ...args, model }), 15000);
-      } catch (e) {
-        lastErr = e;
-        console.error(`[${label}] ${model} error (try ${i + 1}/${tries}):`, e?.status || e?.code || "", e?.message || e);
-        if (isQuota(e)) break; // لا فائدة من إعادة نفس النموذج، انتقل للتالي مباشرة
-        if (i < tries - 1 && isTransient(e)) { await new Promise(r => setTimeout(r, 800)); continue; }
-        break; // خطأ غير مؤقت أو انتهت محاولات هذا النموذج، جرّب النموذج التالي
-      }
+    try {
+      return await withTimeout(ai.models.generateContent({ ...args, model }), 10000);
+    } catch (e) {
+      lastErr = e;
+      console.error(`[${label}] ${model} error:`, e?.status || e?.code || "", e?.message || e);
     }
   }
   throw lastErr;
