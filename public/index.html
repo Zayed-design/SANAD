@@ -41,6 +41,8 @@ h1{font-size:clamp(34px,7vw,52px);line-height:1.25;font-weight:700;letter-spacin
 .typing span:nth-child(3){animation-delay:.3s}
 @keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
 .user{align-self:flex-start;background:var(--g);color:#000;border-end-start-radius:6px}
+.user .icbtn{color:#000;opacity:.55}
+.user .icbtn:hover,.user .icbtn.on{opacity:1;color:#000;background:rgba(0,0,0,.12)}
 .bot{align-self:flex-end;background:var(--s2);border-end-end-radius:6px}
 .spk svg{width:18px;height:18px}
 .actions{display:flex;align-items:center;gap:4px;margin-top:8px}
@@ -68,6 +70,13 @@ form.c:focus-within{border-color:var(--g)}
 .ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none}
 .ic svg{width:22px;height:22px}
 #mic{background:var(--s1)}#mic:disabled{opacity:.5}
+#quickBtn{background:var(--s1)}
+.qopt{display:block;width:100%;text-align:start;padding:14px 16px;border-radius:14px;background:var(--s2);margin-bottom:8px;font-size:15px;transition:background .2s}
+.qopt:hover{background:color-mix(in srgb,var(--g) 15%,var(--s2))}
+#quickList{max-height:50vh;overflow-y:auto;margin:14px 0}
+.vidwrap{margin-top:10px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.vidwrap video{width:100%;display:block;background:#000;max-height:320px}
+.vidcap{font-size:12px;color:var(--mu);padding:6px 10px;background:var(--s1)}
 #mic.on{background:var(--red);animation:pulse 1.2s infinite}
 #send{background:var(--g);color:#000;box-shadow:0 0 18px color-mix(in srgb,var(--g) 35%,transparent)}
 @keyframes pulse{50%{box-shadow:0 0 0 10px #ff453a22}}
@@ -116,6 +125,7 @@ dialog h3{font-size:14px;color:var(--mu);font-weight:500;margin:18px 0 8px}
   <div id="chat" aria-live="polite"></div>
 
   <form class="c" id="f" autocomplete="off">
+    <button type="button" class="ic" id="quickBtn" aria-label="Quick guides"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
     <button type="button" class="ic" id="mic" aria-label="Mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
     <input id="inp" aria-label="Message">
     <button class="ic" id="send" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.500" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
@@ -157,6 +167,12 @@ dialog h3{font-size:14px;color:var(--mu);font-weight:500;margin:18px 0 8px}
   <form method="dialog"><button class="chip cls" data-i="close"></button></form>
 </dialog>
 
+<dialog id="quickDlg">
+  <h2 data-i="quickT"></h2>
+  <div id="quickList"></div>
+  <form method="dialog"><button class="chip cls" data-i="close"></button></form>
+</dialog>
+
 <script>
 const $ = s => document.querySelector(s);
 const app = $('#app'), chat = $('#chat'), inp = $('#inp'), locEl = $('#loc');
@@ -175,7 +191,7 @@ const T = {
     denied:'تم رفض إذن الموقع. اضغط أيقونة القفل بجانب العنوان واسمح بالموقع، أو اكتب منطقتك يدويًا.', failed:'تعذّر تحديد الموقع. اكتب منطقتك يدويًا من زر «موقعي».', notfound:'لم أجد هذا المكان. جرّب اسمًا آخر.', manualOk:'الموقع: ',
     nomic:'المتصفح لا يدعم تسجيل الصوت.', micDenied:'اسمح للمتصفح باستخدام الميكروفون.', nospeech:'لم أسمع كلامًا واضحًا. حاول مرة أخرى.', micFail:'تعذّر تحويل الصوت. تحقق من الاتصال وحاول مرة أخرى.',
     nots:'المتصفح لا يدعم قراءة النص.', call:'اتصال', dir:'الاتجاهات', down:'تعذّر الاتصال بالخادم. في الطوارئ اتصل بـ 999.', speak:'قراءة الرد',
-    copy:'نسخ', copied:'تم النسخ', step:'الخطوة', of:'من', nextStep:'الخطوة التالية', prevStep:'الخطوة السابقة', doneStep:'انتهت الخطوات'
+    copy:'نسخ', copied:'تم النسخ', step:'الخطوة', of:'من', nextStep:'الخطوة التالية', prevStep:'الخطوة السابقة', doneStep:'انتهت الخطوات', quickT:'دليل سريع'
   },
   en: {
     name:'Sanad', loc:'My location', sos:'Emergency', ph:'Type, or tap the mic and speak', listening:'Listening… tap to stop', trans:'Converting speech to text…',
@@ -189,7 +205,7 @@ const T = {
     denied:'Location permission was denied. Click the lock icon next to the address, allow location, or enter your area manually.', failed:'Could not find your location. Enter your area manually from "My location".', notfound:'Place not found. Try another name.', manualOk:'Location: ',
     nomic:'This browser cannot record audio.', micDenied:'Allow the browser to use the microphone.', nospeech:'I did not hear clear speech. Try again.', micFail:'Could not convert the audio. Check your connection and try again.',
     nots:'This browser does not support reading text aloud.', call:'Call', dir:'Directions', down:'Cannot reach the server. In an emergency call 999.', speak:'Read reply',
-    copy:'Copy', copied:'Copied', step:'Step', of:'of', nextStep:'Next step', prevStep:'Previous step', doneStep:'All steps done'
+    copy:'Copy', copied:'Copied', step:'Step', of:'of', nextStep:'Next step', prevStep:'Previous step', doneStep:'All steps done', quickT:'Quick guide'
   }
 };
 let cfg = { lang: 'ar', color: COLORS[0], read: false, theme: 'dark' }, gi = Math.floor(Math.random() * 8), coords = null;
@@ -218,6 +234,90 @@ $('#readOpt').onclick = () => { playClick(); cfg.read = !cfg.read; if (!cfg.read
 $('#setBtn').onclick = () => { playClick(); $('#setDlg').showModal(); };
 $('#sosBtn').onclick = () => { playClick(); $('#dlg').showModal(); };
 $('#locBtn').onclick = () => { playClick(); $('#locDlg').showModal(); };
+
+// ---- دليل الحالات السريع (فيديو + خطوات جاهزة بدون انتظار الذكاء الاصطناعي) ----
+const SCENARIOS = [
+  { id: 'nosebleed', test: /نزيف.*(أنف|الانف)|رعاف|nosebleed|nose\s*bleed/i,
+    title: { ar: 'نزيف الأنف', en: 'Nosebleed' },
+    video: { ar: 'videos/nosebleed_ar.mp4', en: null },
+    steps: { ar: '1. اجلس وانحنِ للأمام قليلًا، ولا تُميل رأسك للخلف.\n2. اضغط بلطف على الجزء اللين من الأنف لمدة 10 دقائق متواصلة.\n3. تنفّس من فمك أثناء ذلك.\n4. إن لم يتوقف النزيف خلال 20 دقيقة أو كان غزيرًا، اتصل بالإسعاف 998.',
+           en: '1. Sit down and lean slightly forward — don\'t tilt your head back.\n2. Pinch the soft part of the nose firmly for 10 continuous minutes.\n3. Breathe through your mouth meanwhile.\n4. If bleeding doesn\'t stop after 20 minutes or is heavy, call ambulance 998.' } },
+  { id: 'bleeding', test: /نزيف|ينزف|bleed/i,
+    title: { ar: 'التعامل مع النزيف', en: 'Dealing with bleeding' },
+    video: { ar: 'videos/bleeding_ar.mp4', en: null },
+    steps: { ar: '1. اتصل بالإسعاف 998 إذا كان النزيف شديدًا.\n2. اضغط على الجرح مباشرة بقطعة قماش نظيفة.\n3. ارفع الطرف المصاب فوق مستوى القلب إن أمكن.\n4. لا تنزع القماش حتى لو تشرّب بالدم، أضف طبقة فوقه.\n5. راقب علامات الصدمة (شحوب، برودة، دوخة) واطلب المساعدة فورًا إن ظهرت.',
+           en: '1. Call ambulance 998 if the bleeding is severe.\n2. Press directly on the wound with a clean cloth.\n3. Raise the injured limb above heart level if possible.\n4. Don\'t remove a soaked cloth — add another layer on top.\n5. Watch for shock signs (paleness, cold skin, dizziness) and get help immediately if they appear.' } },
+  { id: 'respiratory', test: /ضيق تنفس|صعوبة تنفس|ربو|أزمة تنفسية|breath|asthma|respiratory/i,
+    title: { ar: 'الأزمات التنفسية', en: 'Respiratory distress' },
+    video: { ar: 'videos/respiratory_ar.mp4', en: null },
+    steps: { ar: '1. اطلب من المصاب الجلوس بوضعية مستقيمة تسهّل التنفس.\n2. اطمئنه وحاول تهدئته لتقليل الذعر.\n3. إن كان يحمل بخاخًا (كالربو) ساعده على استخدامه.\n4. اتصل بالإسعاف 998 فورًا إذا اشتدت الصعوبة أو تغيّر لون الشفاه.',
+           en: '1. Help the person sit upright to ease breathing.\n2. Reassure them and try to keep them calm to reduce panic.\n3. If they carry an inhaler (e.g. for asthma), help them use it.\n4. Call ambulance 998 immediately if breathing worsens or lips turn blue.' } },
+  { id: 'choking', test: /اختناق|غصة|غصه|شرقة|choking|choke/i,
+    title: { ar: 'الاختناق والغصة', en: 'Choking' },
+    video: { ar: 'videos/choking_ar.mp4', en: 'videos/choking_en.mp4' },
+    steps: { ar: '1. اسأله: هل تستطيع السعال أو الكلام؟ إن استطاع، شجّعه على السعال بقوة.\n2. إن لم يستطع التنفس أو الكلام، أمِله للأمام واضرب بين لوحي كتفيه 5 ضربات بكعب يدك.\n3. إن لم ينفع، طبّق مناورة هايمليك: قف خلفه واضغط بقبضتك تحت القفص الصدري للأعلى وللداخل 5 مرات.\n4. كرر حتى يخرج الجسم الغريب أو يصل الإسعاف 998. مع الرضّع استخدم ضربات ظهر وضغطات صدر خفيفة بدل هايمليك.',
+           en: '1. Ask: can you cough or speak? If yes, encourage forceful coughing.\n2. If they can\'t breathe or speak, lean them forward and give 5 back blows between the shoulder blades with your palm.\n3. If that fails, do the Heimlich maneuver: stand behind them and give 5 upward abdominal thrusts.\n4. Repeat until the object clears or ambulance 998 arrives. For infants, use gentle back blows and chest thrusts instead of the Heimlich.' } },
+  { id: 'heat', test: /إجهاد حراري|اجهاد حراري|ضربة شمس|هبوط حراري|heat exhaustion|heat stroke/i,
+    title: { ar: 'الإجهاد الحراري', en: 'Heat exhaustion' },
+    video: { ar: 'videos/heat_ar.mp4', en: null },
+    steps: { ar: '1. انقل المصاب فورًا إلى مكان ظليل أو مكيّف.\n2. اخلع الملابس الزائدة ورطّب جلده بماء بارد أو مروحة.\n3. اسقه ماءً أو محلول إماهة ببطء إن كان واعيًا.\n4. اتصل بالإسعاف 998 إذا فقد الوعي أو ارتفعت حرارته بشدة أو لم يتحسن خلال 30 دقيقة.',
+           en: '1. Move the person immediately to a shaded or air-conditioned place.\n2. Remove excess clothing and cool their skin with cold water or a fan.\n3. If conscious, give small sips of water or rehydration solution.\n4. Call ambulance 998 if they lose consciousness, have a very high temperature, or don\'t improve within 30 minutes.' } },
+  { id: 'bites', test: /لدغة|لدغ|عضة سامة|أفعى|عقرب|snake bite|scorpion|venom/i,
+    title: { ar: 'اللدغات السامة', en: 'Venomous bites' },
+    video: { ar: 'videos/bites_ar.mp4', en: null },
+    steps: { ar: '1. أبعد المصاب عن مصدر الخطر بهدوء دون مطاردته.\n2. اجعله ثابتًا وقلل حركته قدر الإمكان لإبطاء انتشار السم.\n3. ثبّت الطرف المصاب أسفل مستوى القلب إن أمكن.\n4. لا تشق الجرح ولا تحاول امتصاص السم ولا تضع ثلجًا.\n5. اتصل بالإسعاف 998 فورًا واذهب للمستشفى بأسرع وقت.',
+           en: '1. Calmly move the person away from the danger without chasing it.\n2. Keep them still and minimize movement to slow venom spread.\n3. Position the bitten limb below heart level if possible.\n4. Don\'t cut the wound, suck out venom, or apply ice.\n5. Call ambulance 998 immediately and get to a hospital as fast as possible.' } },
+  { id: 'fire', test: /حريق|إخلاء|اخلاء|evacuat|fire/i,
+    title: { ar: 'إخلاء الحريق', en: 'Fire evacuation' },
+    video: { ar: 'videos/fire_evac_ar.mp4', en: 'videos/fire_evac_en.mp4' },
+    steps: { ar: '1. عند سماع الإنذار غادر فورًا عبر أقرب مخرج طوارئ، ولا تستخدم المصعد.\n2. ابقَ منخفضًا إن كان هناك دخان، وغطِّ أنفك وفمك بقماش.\n3. المس المقابض قبل فتح الأبواب؛ إن كانت ساخنة استخدم مخرجًا آخر.\n4. توجه لنقطة التجمع المحددة ولا تعد للداخل لأي سبب.\n5. اتصل بالدفاع المدني 997 فور الوصول لمكان آمن.',
+           en: '1. When the alarm sounds, leave immediately via the nearest emergency exit — never use the elevator.\n2. Stay low if there\'s smoke, and cover your nose and mouth with cloth.\n3. Check door handles before opening; if hot, use another exit.\n4. Go to the designated assembly point and never re-enter for any reason.\n5. Call Civil Defense 997 once you reach safety.' } },
+  { id: 'fracture', test: /كسر|fracture|broken bone/i,
+    title: { ar: 'حالات الكسور', en: 'Fractures' },
+    video: { ar: null, en: 'videos/fracture_en.mp4' },
+    steps: { ar: '1. لا تحرك الطرف المصاب ولا تحاول تعديله.\n2. ثبّته بجبيرة مؤقتة (لوح خشب أو مجلة مطوية) واربطه برفق.\n3. ضع كمادة باردة ملفوفة بقماش لتقليل التورم.\n4. راقب علامات ضعف الدورة الدموية (زرقة أو تنميل) وخفف الرباط إن ظهرت.\n5. اتصل بالإسعاف 998 لنقله دون تحريك الطرف المكسور.',
+           en: '1. Don\'t move or try to realign the injured limb.\n2. Splint it temporarily (a board or folded magazine) and secure it gently.\n3. Apply a cold pack wrapped in cloth to reduce swelling.\n4. Watch for poor circulation signs (blue color or numbness) and loosen the splint if they appear.\n5. Call ambulance 998 to transport them without moving the fractured limb.' } },
+  { id: 'wounds', test: /جرح|جروح|قطع عميق|wound|\bcut\b/i,
+    title: { ar: 'الجروح', en: 'Wounds & cuts' },
+    video: { ar: null, en: 'videos/wounds_en.mp4' },
+    steps: { ar: '1. اغسل يديك إن أمكن قبل التعامل مع الجرح.\n2. اضغط على الجرح بقماش نظيف لوقف النزيف.\n3. نظّف الجرح البسيط بماء نظيف وغطّه بضمادة معقمة.\n4. للجروح العميقة أو الواسعة لا تنظفها، فقط اضغط واطلب الإسعاف 998.\n5. راقب علامات الالتهاب (احمرار، تورم، حرارة) خلال الأيام التالية.',
+           en: '1. Wash your hands if possible before handling the wound.\n2. Press a clean cloth on the wound to stop bleeding.\n3. Clean a minor wound with clean water and cover with a sterile dressing.\n4. For deep or large wounds, don\'t clean them — just apply pressure and call ambulance 998.\n5. Watch for infection signs (redness, swelling, warmth) over the following days.' } },
+  { id: 'seizure', test: /تشنج|نوبة صرع|صرع|seizure|convulsion/i,
+    title: { ar: 'نوبات التشنج', en: 'Seizures' },
+    video: { ar: null, en: 'videos/seizure_en.mp4' },
+    steps: { ar: '1. أبعد أي أشياء حادة أو صلبة حول المصاب لحمايته من الإصابة.\n2. ضع شيئًا ناعمًا تحت رأسه ولا تقيّد حركته إطلاقًا.\n3. لا تضع أي شيء في فمه ولا تحاول فتحه بالقوة.\n4. بعد توقف التشنج ضعه على جنبه (وضعية الإفاقة) وابقَ معه حتى يستعيد وعيه.\n5. اتصل بالإسعاف 998 إذا استمر التشنج أكثر من 5 دقائق أو تكرر أو كانت أول مرة له.',
+           en: '1. Clear away any sharp or hard objects around the person to prevent injury.\n2. Place something soft under their head and never restrain their movements.\n3. Never put anything in their mouth or try to force it open.\n4. After the seizure stops, put them in the recovery position on their side and stay with them until they regain awareness.\n5. Call ambulance 998 if the seizure lasts more than 5 minutes, recurs, or is their first ever.' } },
+];
+function detectScenario(text) { if (!text) return null; for (const sc of SCENARIOS) if (sc.test.test(text)) return sc; return null; }
+function attachVideo(el, sc) {
+  const vid = sc.video[cfg.lang] || sc.video[cfg.lang === 'ar' ? 'en' : 'ar'];
+  if (!vid) return;
+  const wrap = document.createElement('div'); wrap.className = 'vidwrap';
+  const v = document.createElement('video'); v.src = vid; v.controls = true; v.preload = 'metadata'; v.playsInline = true;
+  wrap.appendChild(v);
+  if (!sc.video[cfg.lang]) { const cap = document.createElement('div'); cap.className = 'vidcap'; cap.textContent = cfg.lang === 'ar' ? 'الفيديو متاح بالإنجليزية فقط' : 'Video only available in Arabic'; wrap.appendChild(cap); }
+  el.appendChild(wrap);
+}
+function renderQuickList() {
+  $('#quickList').replaceChildren(...SCENARIOS.map(sc => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'qopt';
+    b.textContent = sc.title[cfg.lang];
+    b.onclick = () => { $('#quickDlg').close(); quickScenario(sc); };
+    return b;
+  }));
+}
+function quickScenario(sc) {
+  app.classList.add('started');
+  add(sc.title[cfg.lang], 'user'); playSend();
+  const el = add('', 'bot');
+  const full = sc.steps[cfg.lang];
+  const { intro, steps } = parseSteps(full);
+  el.textContent = intro; if (steps.length) el.appendChild(buildStepCard(steps));
+  attachVideo(el, sc);
+  addActions(el, full);
+  chat.scrollTop = chat.scrollHeight; playReceive();
+}
+$('#quickBtn').onclick = () => { playClick(); renderQuickList(); $('#quickDlg').showModal(); };
 
 // ---- أصوات خفيفة ----
 let actx;
@@ -306,11 +406,28 @@ function speak(text, btn) {
   const was = btn && btn.classList.contains('on');
   speechSynthesis.cancel(); document.querySelectorAll('.spk.on').forEach(b => b.classList.remove('on'));
   if (was) return;
-  const u = new SpeechSynthesisUtterance(text); u.lang = cfg.lang === 'ar' ? 'ar-SA' : 'en-US';
-  const v = speechSynthesis.getVoices().find(v => v.lang.toLowerCase().startsWith(cfg.lang));
+  const target = cfg.lang === 'ar' ? 'ar-SA' : 'en-US';
+  const u = new SpeechSynthesisUtterance(text); u.lang = target;
+  const list = (voicesCache.length ? voicesCache : speechSynthesis.getVoices());
+  const v = list.find(v => v.lang.toLowerCase() === target.toLowerCase()) || list.find(v => v.lang.toLowerCase().startsWith(cfg.lang));
   if (v) u.voice = v;
   if (btn) { btn.classList.add('on'); u.onend = u.onerror = () => btn.classList.remove('on'); }
   speechSynthesis.speak(u);
+}
+let voicesCache = [];
+if ('speechSynthesis' in window) {
+  voicesCache = speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged = () => { voicesCache = speechSynthesis.getVoices(); };
+}
+function addActions(el, fullText) {
+  const actions = document.createElement('div'); actions.className = 'actions';
+  const spk = document.createElement('button'); spk.type = 'button'; spk.className = 'icbtn spk'; spk.setAttribute('aria-label', t('speak')); spk.innerHTML = ICON;
+  spk.onclick = () => speak(fullText, spk);
+  const cpy = document.createElement('button'); cpy.type = 'button'; cpy.className = 'icbtn cpy'; cpy.setAttribute('aria-label', t('copy')); cpy.innerHTML = COPY_ICON;
+  cpy.onclick = () => copyText(fullText, cpy);
+  actions.append(spk, cpy); el.appendChild(actions);
+  if (cfg.read) speak(fullText, spk);
+  return spk;
 }
 
 // ---- المحادثة ----
@@ -324,7 +441,7 @@ function add(text, cls) {
   }
   chat.scrollTop = chat.scrollHeight; window.scrollTo(0, document.body.scrollHeight); return d;
 }
-function fillBot(el, reply, services = []) {
+function fillBot(el, reply, services = [], question = '') {
   const { intro, steps } = parseSteps(reply);
   if (steps.length >= 2) { el.textContent = intro; el.appendChild(buildStepCard(steps)); }
   else el.textContent = reply;
@@ -338,13 +455,9 @@ function fillBot(el, reply, services = []) {
     m.href = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`; acts.appendChild(m);
     d.append(info, acts); el.appendChild(d);
   }
-  const actions = document.createElement('div'); actions.className = 'actions';
-  const spk = document.createElement('button'); spk.type = 'button'; spk.className = 'icbtn spk'; spk.setAttribute('aria-label', t('speak')); spk.innerHTML = ICON;
-  spk.onclick = () => speak(reply, spk);
-  const cpy = document.createElement('button'); cpy.type = 'button'; cpy.className = 'icbtn cpy'; cpy.setAttribute('aria-label', t('copy')); cpy.innerHTML = COPY_ICON;
-  cpy.onclick = () => copyText(reply, cpy);
-  actions.append(spk, cpy); el.appendChild(actions);
-  if (cfg.read) speak(reply, spk);
+  const sc = detectScenario(question);
+  if (sc) attachVideo(el, sc);
+  addActions(el, reply);
   chat.scrollTop = chat.scrollHeight;
 }
 async function send(text) {
@@ -356,7 +469,7 @@ async function send(text) {
   try {
     const r = await fetch('/api/assist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, latitude: coords?.lat, longitude: coords?.lon, lang: cfg.lang }) });
     const d = await r.json();
-    fillBot(el, d.reply || '…', d.services); playReceive();
+    fillBot(el, d.reply || '…', d.services, text); playReceive();
   } catch { fillBot(el, t('down')); }
 }
 $('#f').onsubmit = e => { e.preventDefault(); send(); };
