@@ -59,7 +59,13 @@ async function queryOverpassOnce(q) {
   const attempts = OVERPASS_MIRRORS.map(async url => {
     const r = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        // مطلوب: بعض مرايا Overpass (خصوصًا overpass-api.de) ترفض الطلبات بدون
+        // User-Agent وصفي و Accept واضح وترجع 406 Not Acceptable
+        "User-Agent": "SanadEmergencyAssistant/2.0 (UAE safety app; contact: support@sanad.app)",
+        "Accept": "application/json, */*;q=0.5",
+      },
       body: "data=" + encodeURIComponent(q),
       signal: AbortSignal.timeout(8000),
     });
