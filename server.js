@@ -119,12 +119,22 @@ function arabicSpellingVariants(place) {
   return [...candidates].filter(Boolean).slice(0, 4);
 }
 
-async function geocodeOnce(q, lang, restrict) {
+// إحداثيات مؤكدة يدويًا لأسماء مناطق معروفة بأنها تتطابق خطأً مع شارع/نقطة صغيرة بنفس
+// الاسم داخل Nominatim (زي "الوثبة" اللي كانت ترجع شارع بوسط المدينة بدل الحي الحقيقي).
+// نتحقق منها هنا مباشرة بدل الاعتماد على الجيوكودينج لهذه الأسماء تحديدًا.
+const KNOWN_PLACES = [
+  { test: /^الوثبة?$|^al[\s-]?wathba$/i, lat: 24.2048, lon: 54.7056, name: "الوثبة، أبوظبي" },
+];
+function knownPlace(place) {
+  const norm = place.trim().replace(/[\u064B-\u0652]/g, "");
+  const hit = KNOWN_PLACES.find(p => p.test.test(norm));
+  return hit ? { lat: hit.lat, lon: hit.lon, name: hit.name } : null;
+}
+
+async function geocodeOnce(q, lang) {
   try {
     const r = await fetch(
-      "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ae"
-        + (restrict ? "&featureType=settlement" : "")
-        + "&accept-language=" + (lang === "en" ? "en" : "ar") + "&q=" + encodeURIComponent(q),
+      "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ae&accept-language=" + (lang === "en" ? "en" : "ar") + "&q=" + encodeURIComponent(q),
       { headers: { "User-Agent": "SanadEmergencyAssistant/2.0 (UAE safety app)" }, signal: AbortSignal.timeout(6000) }
     );
     if (!r.ok) return null;
@@ -134,15 +144,21 @@ async function geocodeOnce(q, lang, restrict) {
   } catch { return null; }
 }
 
-// نجرّب أولًا تقييد النتيجة على "منطقة سكنية/حي" (settlement) حتى ما يطابق اسم المكان
-// شارعًا أو نقطة صغيرة بنفس الاسم داخل مدينة ثانية؛ لو ما لقى شي نرجع للبحث العادي
+// الترتيب: (1) قائمة الأماكن الموثوقة يدويًا، (2) البحث مع إضافة "أبوظبي" لتحسين الدقة
+// (يفيد لما يتطابق اسم المنطقة مع نقطة صغيرة بمدينة ثانية)، (3) بحث حر عادي بدون إضافة
 async function geocodeText(place, lang) {
+  const known = knownPlace(place);
+  if (known) return known;
+
   const variants = arabicSpellingVariants(place);
-  for (const restrict of [true, false]) {
-    for (const candidate of variants) {
-      const hit = await geocodeOnce(candidate, lang, restrict);
-      if (hit) return hit;
-    }
+  const suffix = lang === "en" ? " Abu Dhabi" : " أبوظبي";
+  for (const v of variants) {
+    const hit = await geocodeOnce(v + suffix, lang);
+    if (hit) return hit;
+  }
+  for (const v of variants) {
+    const hit = await geocodeOnce(v, lang);
+    if (hit) return hit;
   }
   return null;
 }
