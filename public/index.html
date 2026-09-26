@@ -533,7 +533,8 @@ function fillBot(el, reply, services = [], question = '') {
 async function send(text) {
   text = (text ?? inp.value).trim(); if (!text) return;
   inp.value = ''; app.classList.add('started'); add(text, 'user'); playSend();
-  if (!coords && /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|سحب|ونش|nearest|nearby|hospital|clinic|mechanic|garage|tow/i.test(text)) await locate();
+  const namesPlace = /(?:بالقرب من|بجوار|بجانب|(?<![أاإ])قرب|(?<![أاإ])جنب|قريب من|مقابل|بمحاذاة|near|close to|beside|next to)\s+\S/i.test(text);
+  if (!coords && !namesPlace && /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|سحب|ونش|nearest|nearby|hospital|clinic|mechanic|garage|tow/i.test(text)) await locate();
   const el = add('', 'bot');
   el.innerHTML = '<span class="typing"><span></span><span></span><span></span></span>';
   try {
