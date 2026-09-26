@@ -244,7 +244,7 @@ const SCENARIOS = [
            en: '1. Sit down and lean slightly forward — don\'t tilt your head back.\n2. Pinch the soft part of the nose firmly for 10 continuous minutes.\n3. Breathe through your mouth meanwhile.\n4. If bleeding doesn\'t stop after 20 minutes or is heavy, call ambulance 998.' } },
   { id: 'bleeding', test: /نزيف|ينزف|bleed/i,
     title: { ar: 'التعامل مع النزيف', en: 'Dealing with bleeding' },
-    video: { ar: 'videos/bleeding_ar.mp4', en: null },
+    video: { ar: ['videos/bleeding_ar.mp4', 'videos/bleeding_ar_2.mp4'], en: null },
     steps: { ar: '1. اتصل بالإسعاف 998 إذا كان النزيف شديدًا.\n2. اضغط على الجرح مباشرة بقطعة قماش نظيفة.\n3. ارفع الطرف المصاب فوق مستوى القلب إن أمكن.\n4. لا تنزع القماش حتى لو تشرّب بالدم، أضف طبقة فوقه.\n5. راقب علامات الصدمة (شحوب، برودة، دوخة) واطلب المساعدة فورًا إن ظهرت.',
            en: '1. Call ambulance 998 if the bleeding is severe.\n2. Press directly on the wound with a clean cloth.\n3. Raise the injured limb above heart level if possible.\n4. Don\'t remove a soaked cloth — add another layer on top.\n5. Watch for shock signs (paleness, cold skin, dizziness) and get help immediately if they appear.' } },
   { id: 'respiratory', test: /ضيق تنفس|صعوبة تنفس|ربو|أزمة تنفسية|breath|asthma|respiratory/i,
@@ -252,14 +252,19 @@ const SCENARIOS = [
     video: { ar: 'videos/respiratory_ar.mp4', en: null },
     steps: { ar: '1. اطلب من المصاب الجلوس بوضعية مستقيمة تسهّل التنفس.\n2. اطمئنه وحاول تهدئته لتقليل الذعر.\n3. إن كان يحمل بخاخًا (كالربو) ساعده على استخدامه.\n4. اتصل بالإسعاف 998 فورًا إذا اشتدت الصعوبة أو تغيّر لون الشفاه.',
            en: '1. Help the person sit upright to ease breathing.\n2. Reassure them and try to keep them calm to reduce panic.\n3. If they carry an inhaler (e.g. for asthma), help them use it.\n4. Call ambulance 998 immediately if breathing worsens or lips turn blue.' } },
-  { id: 'choking', test: /اختناق|غصة|غصه|شرقة|choking|choke/i,
+  { id: 'child_choking', test: /طفل.*(اختناق|مختنق|غصة|غصه|شرقة)|(اختناق|مختنق|غصة|غصه|شرقة).*طفل|رضيع.*(اختناق|مختنق|غصة|غصه)|infant choking|baby choking|child choking/i,
+    title: { ar: 'اختناق الطفل', en: 'Choking child' },
+    video: { ar: 'videos/child_choking_ar.mp4', en: null },
+    steps: { ar: '1. اسأل الطفل إن استطاع: هل يمكنك السعال أو الكلام؟ إن استطاع، شجّعه على السعال بقوة.\n2. إن لم يستطع التنفس، أمِله للأمام وأسند صدره واضرب بين لوحي كتفيه 5 ضربات بكعب يدك.\n3. إن لم ينفع، أعطِ 5 ضغطات صدرية سريعة (وليس بطنية كالبالغين) في منتصف الصدر.\n4. مع الرضّع استخدم القوة نفسها لكن أخف بكثير، والطفل مستلقٍ على ساعدك ووجهه للأسفل أثناء الضربات.\n5. كرر حتى يخرج الجسم الغريب أو يفقد الوعي؛ اتصل بالإسعاف 998 فورًا في الحالتين.',
+           en: '1. If the child can, ask them to cough or speak; if so, encourage forceful coughing.\n2. If they can\'t breathe, lean them forward, support their chest and give 5 back blows between the shoulder blades.\n3. If that fails, give 5 quick chest thrusts (not abdominal, unlike adults) in the middle of the chest.\n4. For infants use the same idea but much gentler force, with the baby face-down along your forearm during back blows.\n5. Repeat until the object clears or they lose consciousness; call ambulance 998 immediately either way.' } },
+  { id: 'choking', test: /اختناق|مختنق|غصة|غصه|شرقة|choking|choke/i,
     title: { ar: 'الاختناق والغصة', en: 'Choking' },
-    video: { ar: 'videos/choking_ar.mp4', en: 'videos/choking_en.mp4' },
+    video: { ar: 'videos/choking_ar.mp4', en: ['videos/choking_en.mp4', 'videos/choking_en_2.mp4'] },
     steps: { ar: '1. اسأله: هل تستطيع السعال أو الكلام؟ إن استطاع، شجّعه على السعال بقوة.\n2. إن لم يستطع التنفس أو الكلام، أمِله للأمام واضرب بين لوحي كتفيه 5 ضربات بكعب يدك.\n3. إن لم ينفع، طبّق مناورة هايمليك: قف خلفه واضغط بقبضتك تحت القفص الصدري للأعلى وللداخل 5 مرات.\n4. كرر حتى يخرج الجسم الغريب أو يصل الإسعاف 998. مع الرضّع استخدم ضربات ظهر وضغطات صدر خفيفة بدل هايمليك.',
            en: '1. Ask: can you cough or speak? If yes, encourage forceful coughing.\n2. If they can\'t breathe or speak, lean them forward and give 5 back blows between the shoulder blades with your palm.\n3. If that fails, do the Heimlich maneuver: stand behind them and give 5 upward abdominal thrusts.\n4. Repeat until the object clears or ambulance 998 arrives. For infants, use gentle back blows and chest thrusts instead of the Heimlich.' } },
   { id: 'heat', test: /إجهاد حراري|اجهاد حراري|ضربة شمس|هبوط حراري|heat exhaustion|heat stroke/i,
     title: { ar: 'الإجهاد الحراري', en: 'Heat exhaustion' },
-    video: { ar: 'videos/heat_ar.mp4', en: null },
+    video: { ar: ['videos/heat_ar.mp4', 'videos/heat_ar_2.mp4'], en: null },
     steps: { ar: '1. انقل المصاب فورًا إلى مكان ظليل أو مكيّف.\n2. اخلع الملابس الزائدة ورطّب جلده بماء بارد أو مروحة.\n3. اسقه ماءً أو محلول إماهة ببطء إن كان واعيًا.\n4. اتصل بالإسعاف 998 إذا فقد الوعي أو ارتفعت حرارته بشدة أو لم يتحسن خلال 30 دقيقة.',
            en: '1. Move the person immediately to a shaded or air-conditioned place.\n2. Remove excess clothing and cool their skin with cold water or a fan.\n3. If conscious, give small sips of water or rehydration solution.\n4. Call ambulance 998 if they lose consciousness, have a very high temperature, or don\'t improve within 30 minutes.' } },
   { id: 'bites', test: /لدغة|لدغ|عضة سامة|أفعى|عقرب|snake bite|scorpion|venom/i,
@@ -267,14 +272,29 @@ const SCENARIOS = [
     video: { ar: 'videos/bites_ar.mp4', en: null },
     steps: { ar: '1. أبعد المصاب عن مصدر الخطر بهدوء دون مطاردته.\n2. اجعله ثابتًا وقلل حركته قدر الإمكان لإبطاء انتشار السم.\n3. ثبّت الطرف المصاب أسفل مستوى القلب إن أمكن.\n4. لا تشق الجرح ولا تحاول امتصاص السم ولا تضع ثلجًا.\n5. اتصل بالإسعاف 998 فورًا واذهب للمستشفى بأسرع وقت.',
            en: '1. Calmly move the person away from the danger without chasing it.\n2. Keep them still and minimize movement to slow venom spread.\n3. Position the bitten limb below heart level if possible.\n4. Don\'t cut the wound, suck out venom, or apply ice.\n5. Call ambulance 998 immediately and get to a hospital as fast as possible.' } },
+  { id: 'burns', test: /حرق|حروق|احتراق|burn|burns|scald/i,
+    title: { ar: 'التعامل مع الحروق', en: 'Dealing with burns' },
+    video: { ar: ['videos/burns_ar.mp4', 'videos/burns_ar_alt.mp4'], en: null },
+    steps: { ar: '1. بعّد المصاب فورًا عن مصدر الحرارة أو النار.\n2. برّد الحرق بماء جارٍ فاتر (ليس مثلجًا) لمدة 10-20 دقيقة.\n3. انزع الخواتم أو الملابس الضيقة القريبة من الحرق قبل أن يتورم، دون شد الجلد الملتصق.\n4. لا تضع معجون أسنان أو زبدة أو ثلجًا مباشرًا على الحرق، وغطّه بضمادة نظيفة غير لاصقة.\n5. اتصل بالإسعاف 998 إذا كان الحرق كبيرًا أو عميقًا أو كهربائيًا أو كيميائيًا أو في الوجه واليدين والمفاصل.',
+           en: '1. Move the person away from the heat source or fire immediately.\n2. Cool the burn under lukewarm (not icy) running water for 10-20 minutes.\n3. Remove rings or tight clothing near the burn before it swells, without pulling stuck fabric off the skin.\n4. Don\'t apply toothpaste, butter, or direct ice — cover with a clean, non-stick dressing instead.\n5. Call ambulance 998 if the burn is large, deep, electrical, chemical, or on the face, hands or joints.' } },
+  { id: 'fire_equipment', test: /طفاي[ةه]|فوهة\s*(?:ال)?[إا]طفاء|خرطوم\s*(?:ال)?[إا]طفاء|extinguisher|fire\s*hose|hydrant/i,
+    title: { ar: 'استخدام معدات إطفاء الحريق', en: 'Using firefighting equipment' },
+    video: { ar: ['videos/extinguisher_ar.mp4', 'videos/fire_hose_ar.mp4'], en: null },
+    steps: { ar: '1. اسحب مسمار الأمان من مقبض طفاية الحريق.\n2. وجّه الفوهة نحو قاعدة النار وليس نحو اللهب.\n3. اضغط على المقبض بثبات لإطلاق المادة.\n4. حرّك الفوهة يمينًا ويسارًا حتى تنطفئ النار تمامًا.\n5. عند استخدام خرطوم الإطفاء، افرده بالكامل قبل فتح الصمام واحتفظ بمخرج آمن خلفك دائمًا.\n6. إن لم تنطفئ النار خلال ثوانٍ قليلة، اترك المكان فورًا واتصل بالدفاع المدني 997.',
+           en: '1. Pull the safety pin from the extinguisher handle.\n2. Aim the nozzle at the base of the fire, not the flames.\n3. Squeeze the handle steadily to release the agent.\n4. Sweep the nozzle side to side until the fire is fully out.\n5. When using a fire hose, uncoil it fully before opening the valve and always keep a clear escape route behind you.\n6. If the fire doesn\'t go out within a few seconds, leave immediately and call Civil Defense 997.' } },
+  { id: 'gas_fire', test: /دبة\s*(?:غاز|الغاز)|اسطوانة\s*(?:غاز|الغاز)|أسطوانة\s*(?:غاز|الغاز)|تسرب\s*غاز|gas\s*cylinder|gas\s*leak|gas\s*fire/i,
+    title: { ar: 'حريق أو تسرب أسطوانة الغاز', en: 'Gas cylinder fire or leak' },
+    video: { ar: 'videos/gas_cylinder_fire.mp4', en: 'videos/gas_cylinder_fire.mp4' },
+    steps: { ar: '1. إذا كانت رائحة الغاز فقط دون اشتعال: لا تشغّل أي مفتاح كهرباء أو شعلة، أغلق صمام الأسطوانة إن أمكن بأمان، وهوّ المكان.\n2. أخلِ المكان فورًا وابتعد لمسافة آمنة.\n3. إذا اشتعلت الأسطوانة بالفعل، لا تحاول إطفاءها بنفسك ولا تحرّكها.\n4. أغلق الصمام فقط إذا كان ذلك ممكنًا دون أي خطر عليك.\n5. اتصل بالدفاع المدني 997 فورًا من مكان آمن.',
+           en: '1. If you only smell gas with no fire: don\'t use any switch or flame, close the cylinder valve if safely possible, and ventilate the area.\n2. Evacuate the area immediately and move to a safe distance.\n3. If the cylinder has already caught fire, don\'t try to extinguish it yourself or move it.\n4. Only close the valve if you can do so without any risk to yourself.\n5. Call Civil Defense 997 immediately from a safe location.' } },
   { id: 'fire', test: /حريق|إخلاء|اخلاء|evacuat|fire/i,
     title: { ar: 'إخلاء الحريق', en: 'Fire evacuation' },
-    video: { ar: 'videos/fire_evac_ar.mp4', en: 'videos/fire_evac_en.mp4' },
+    video: { ar: ['videos/fire_evac_ar.mp4', 'videos/building_evac_ar.mp4'], en: ['videos/fire_evac_en.mp4', 'videos/fire_rescue_en.mp4'] },
     steps: { ar: '1. عند سماع الإنذار غادر فورًا عبر أقرب مخرج طوارئ، ولا تستخدم المصعد.\n2. ابقَ منخفضًا إن كان هناك دخان، وغطِّ أنفك وفمك بقماش.\n3. المس المقابض قبل فتح الأبواب؛ إن كانت ساخنة استخدم مخرجًا آخر.\n4. توجه لنقطة التجمع المحددة ولا تعد للداخل لأي سبب.\n5. اتصل بالدفاع المدني 997 فور الوصول لمكان آمن.',
            en: '1. When the alarm sounds, leave immediately via the nearest emergency exit — never use the elevator.\n2. Stay low if there\'s smoke, and cover your nose and mouth with cloth.\n3. Check door handles before opening; if hot, use another exit.\n4. Go to the designated assembly point and never re-enter for any reason.\n5. Call Civil Defense 997 once you reach safety.' } },
   { id: 'fracture', test: /كسر|fracture|broken bone/i,
     title: { ar: 'حالات الكسور', en: 'Fractures' },
-    video: { ar: null, en: 'videos/fracture_en.mp4' },
+    video: { ar: 'videos/fracture_ar.mp4', en: 'videos/fracture_en.mp4' },
     steps: { ar: '1. لا تحرك الطرف المصاب ولا تحاول تعديله.\n2. ثبّته بجبيرة مؤقتة (لوح خشب أو مجلة مطوية) واربطه برفق.\n3. ضع كمادة باردة ملفوفة بقماش لتقليل التورم.\n4. راقب علامات ضعف الدورة الدموية (زرقة أو تنميل) وخفف الرباط إن ظهرت.\n5. اتصل بالإسعاف 998 لنقله دون تحريك الطرف المكسور.',
            en: '1. Don\'t move or try to realign the injured limb.\n2. Splint it temporarily (a board or folded magazine) and secure it gently.\n3. Apply a cold pack wrapped in cloth to reduce swelling.\n4. Watch for poor circulation signs (blue color or numbness) and loosen the splint if they appear.\n5. Call ambulance 998 to transport them without moving the fractured limb.' } },
   { id: 'wounds', test: /جرح|جروح|قطع عميق|wound|\bcut\b/i,
@@ -284,19 +304,36 @@ const SCENARIOS = [
            en: '1. Wash your hands if possible before handling the wound.\n2. Press a clean cloth on the wound to stop bleeding.\n3. Clean a minor wound with clean water and cover with a sterile dressing.\n4. For deep or large wounds, don\'t clean them — just apply pressure and call ambulance 998.\n5. Watch for infection signs (redness, swelling, warmth) over the following days.' } },
   { id: 'seizure', test: /تشنج|نوبة صرع|صرع|seizure|convulsion/i,
     title: { ar: 'نوبات التشنج', en: 'Seizures' },
-    video: { ar: null, en: 'videos/seizure_en.mp4' },
+    video: { ar: 'videos/seizure_ar.mp4', en: 'videos/seizure_en.mp4' },
     steps: { ar: '1. أبعد أي أشياء حادة أو صلبة حول المصاب لحمايته من الإصابة.\n2. ضع شيئًا ناعمًا تحت رأسه ولا تقيّد حركته إطلاقًا.\n3. لا تضع أي شيء في فمه ولا تحاول فتحه بالقوة.\n4. بعد توقف التشنج ضعه على جنبه (وضعية الإفاقة) وابقَ معه حتى يستعيد وعيه.\n5. اتصل بالإسعاف 998 إذا استمر التشنج أكثر من 5 دقائق أو تكرر أو كانت أول مرة له.',
            en: '1. Clear away any sharp or hard objects around the person to prevent injury.\n2. Place something soft under their head and never restrain their movements.\n3. Never put anything in their mouth or try to force it open.\n4. After the seizure stops, put them in the recovery position on their side and stay with them until they regain awareness.\n5. Call ambulance 998 if the seizure lasts more than 5 minutes, recurs, or is their first ever.' } },
+  { id: 'road_accident', test: /حادث\s*(?:سير|سيارة|مروري|دراجة)|حوادث\s*الطرق|car\s*accident|road\s*accident|traffic\s*accident|motorcycle\s*accident|bike\s*accident/i,
+    title: { ar: 'الإسعاف في حوادث الطرق', en: 'Road accident first aid' },
+    video: { ar: null, en: ['videos/car_accident_en.mp4', 'videos/bike_accident_en.mp4'] },
+    steps: { ar: '1. أوقف السيارة في مكان آمن وشغّل إشارات الخطر لتحذير السيارات الأخرى.\n2. اتصل بالإسعاف 998 والشرطة 999 فورًا.\n3. لا تحرك المصاب إلا إذا كان في خطر مباشر كحريق أو مرور سيارات.\n4. تحقق من وعيه وتنفسه، وأوقف أي نزيف شديد بالضغط المباشر.\n5. غطّه للحفاظ على دفئه وابقَ معه حتى وصول الإسعاف.',
+           en: '1. Pull over to a safe spot and turn on hazard lights to warn other traffic.\n2. Call ambulance 998 and police 999 immediately.\n3. Don\'t move the injured person unless they\'re in immediate danger, such as fire or oncoming traffic.\n4. Check their consciousness and breathing, and stop any severe bleeding with direct pressure.\n5. Keep them warm and stay with them until the ambulance arrives.' } },
+  { id: 'fainting', test: /إغماء|اغماء|أغمي|اغمي|غاب عن الوعي|فقدان الوعي|فقد الوعي|faint|fainting|passed out/i,
+    title: { ar: 'حالة الإغماء', en: 'Fainting' },
+    video: { ar: 'videos/fainting_ar.mp4', en: null },
+    steps: { ar: '1. مدّد الشخص على ظهره وارفع ساقيه قرابة 30 سم إن لم يكن هناك إصابة.\n2. حرّر أي ملابس ضيقة حول رقبته أو خصره ووفّر تهوية جيدة حوله.\n3. تحقق من تنفسه، وإن لم يستفق خلال دقيقة واحدة اتصل بالإسعاف 998 فورًا.\n4. عند استفاقته، أعطه الوقت قبل الجلوس أو الوقوف، وقدّم له ماءً إن كان واعيًا تمامًا.\n5. اتصل بالإسعاف 998 أيضًا إذا سقط وأصيب، أو كان حاملاً، أو رافقه ألم بالصدر أو خفقان غير منتظم.',
+           en: '1. Lay the person flat on their back and raise their legs about 30 cm if there\'s no sign of injury.\n2. Loosen any tight clothing around the neck or waist and give them fresh air.\n3. Check their breathing; if they don\'t come round within a minute, call ambulance 998 immediately.\n4. Once they wake up, give them time before sitting or standing, and offer water only once fully alert.\n5. Also call ambulance 998 if they were injured in a fall, are pregnant, or have chest pain or an irregular heartbeat.' } },
 ];
 function detectScenario(text) { if (!text) return null; for (const sc of SCENARIOS) if (sc.test.test(text)) return sc; return null; }
+// يدعم فيديو واحدًا أو أكثر لكل لغة (نص واحد أو مصفوفة نصوص) مع نفس منطق التبديل للغة الأخرى عند غيابه
 function attachVideo(el, sc) {
-  const vid = sc.video[cfg.lang] || sc.video[cfg.lang === 'ar' ? 'en' : 'ar'];
-  if (!vid) return;
-  const wrap = document.createElement('div'); wrap.className = 'vidwrap';
-  const v = document.createElement('video'); v.src = vid; v.controls = true; v.preload = 'metadata'; v.playsInline = true;
-  wrap.appendChild(v);
-  if (!sc.video[cfg.lang]) { const cap = document.createElement('div'); cap.className = 'vidcap'; cap.textContent = cfg.lang === 'ar' ? 'الفيديو متاح بالإنجليزية فقط' : 'Video only available in Arabic'; wrap.appendChild(cap); }
-  el.appendChild(wrap);
+  const other = cfg.lang === 'ar' ? 'en' : 'ar';
+  const norm = v => Array.isArray(v) ? v.filter(Boolean) : (v ? [v] : []);
+  let list = norm(sc.video[cfg.lang]);
+  const usingOther = !list.length;
+  if (usingOther) list = norm(sc.video[other]);
+  if (!list.length) return;
+  list.forEach(vid => {
+    const wrap = document.createElement('div'); wrap.className = 'vidwrap';
+    const v = document.createElement('video'); v.src = vid; v.controls = true; v.preload = 'metadata'; v.playsInline = true;
+    wrap.appendChild(v);
+    el.appendChild(wrap);
+  });
+  if (usingOther) { const cap = document.createElement('div'); cap.className = 'vidcap'; cap.textContent = cfg.lang === 'ar' ? 'الفيديو متاح بالإنجليزية فقط' : 'Video only available in Arabic'; el.appendChild(cap); }
 }
 function renderQuickList() {
   $('#quickList').replaceChildren(...SCENARIOS.map(sc => {
