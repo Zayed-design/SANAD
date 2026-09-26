@@ -73,6 +73,33 @@ async function nearby(kind, lat, lon) {
 
 const SAFETY = ["HARASSMENT", "HATE_SPEECH", "SEXUALLY_EXPLICIT", "DANGEROUS_CONTENT"].map(c => ({ category: "HARM_CATEGORY_" + c, threshold: "BLOCK_MEDIUM_AND_ABOVE" }));
 
+// استدعاء Gemini مع مهلة زمنية + محاولة إضافية واحدة عند الأخطاء المؤقتة (ضغط/شبكة)
+function withTimeout(promise, ms) {
+  let timer;
+  const to = new Promise((_, rej) => { timer = setTimeout(() => rej(new Error("TIMEOUT")), ms); });
+  return Promise.race([promise, to]).finally(() => clearTimeout(timer));
+}
+function isTransient(e) {
+  const s = String(e?.status || e?.code || e?.message || e || "");
+  return /429|500|502|503|504|RESOURCE_EXHAUSTED|UNAVAILABLE|DEADLINE|TIMEOUT|ECONNRESET|ETIMEDOUT|fetch failed/i.test(s);
+}
+function isQuota(e) {
+  const s = String(e?.status || e?.code || e?.message || e || "");
+  return /429|RESOURCE_EXHAUSTED/i.test(s);
+}
+async function askGemini(args, label) {
+  const tries = 2;
+  for (let i = 0; i < tries; i++) {
+    try {
+      return await withTimeout(ai.models.generateContent(args), 15000);
+    } catch (e) {
+      console.error(`[${label}] Gemini error (try ${i + 1}/${tries}):`, e?.status || e?.code || "", e?.message || e);
+      if (i === tries - 1 || !isTransient(e)) throw e;
+      await new Promise(r => setTimeout(r, 800));
+    }
+  }
+}
+
 app.post("/api/assist", limit, async (req, res) => {
   const { message, latitude, longitude, lang } = req.body || {};
   const L = lang === "en" ? "en" : "ar";
@@ -99,11 +126,10 @@ ${hasLoc ? `User GPS: ${la}, ${lo}` : "No GPS available."}
 Nearby results: ${services.length ? JSON.stringify(services) : "none"}`;
 
   try {
-    const r = await ai.models.generateContent({ model: MODEL, contents: text, config: { systemInstruction, safetySettings: SAFETY } });
+    const r = await askGemini({ model: MODEL, contents: text, config: { systemInstruction, safetySettings: SAFETY } }, "assist");
     res.json({ reply: r.text || REFUSE[L], services });
   } catch (e) {
-    console.error("Gemini error:", e);
-    res.status(500).json({ reply: L === "en" ? "AI connection error." : "حدث خطأ أثناء الاتصال بالذكاء الاصطناعي.", services });
+    res.status(500).json({ reply: L === "en" ? "AI connection error, please try again." : "تعذّر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.", services });
   }
 });
 
@@ -112,16 +138,16 @@ app.post("/api/transcribe", limit, async (req, res) => {
   const { audio, lang } = req.body || {};
   if (!ai || typeof audio !== "string" || audio.length < 200) return res.status(400).json({ text: "" });
   try {
-    const r = await ai.models.generateContent({
+    const r = await askGemini({
       model: MODEL,
       contents: [{ role: "user", parts: [
         { inlineData: { mimeType: "audio/wav", data: audio } },
         { text: `Transcribe the speech in this recording exactly, in its original language (${lang === "en" ? "probably English" : "probably Arabic"}). Return only the transcript text with no extra words. If there is no speech, return an empty string.` },
       ] }],
-    });
+    }, "transcribe");
     res.json({ text: (r.text || "").trim() });
   } catch (e) {
-    console.error("Transcribe error:", e);
+    console.error("Transcribe error:", e?.status || e?.code || "", e?.message || e);
     res.status(500).json({ text: "" });
   }
 });

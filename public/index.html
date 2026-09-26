@@ -42,7 +42,23 @@ h1{font-size:clamp(34px,7vw,52px);line-height:1.25;font-weight:700;letter-spacin
 @keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
 .user{align-self:flex-start;background:var(--g);color:#000;border-end-start-radius:6px}
 .bot{align-self:flex-end;background:var(--s2);border-end-end-radius:6px}
-.spk{display:inline-flex;margin-top:8px;color:var(--mu);padding:4px}.spk:hover,.spk.on{color:var(--g)}.spk svg{width:18px;height:18px}
+.spk svg{width:18px;height:18px}
+.actions{display:flex;align-items:center;gap:4px;margin-top:8px}
+.icbtn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;color:var(--mu);flex:none}
+.icbtn:hover,.icbtn.on{color:var(--g);background:color-mix(in srgb,var(--g) 12%,transparent)}
+.icbtn svg{width:16px;height:16px}
+.user-actions{justify-content:flex-end}
+.steps{margin-top:10px;padding:14px 16px;background:var(--s1);border:1px solid var(--line);border-radius:16px}
+.steps-label{font-size:12px;color:var(--mu);font-weight:700;letter-spacing:.3px}
+.steps-body{margin:10px 0 14px;font-size:16px;line-height:1.8;min-height:44px}
+.steps-body.anim{animation:stepIn .22s ease}
+@keyframes stepIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.steps-nav{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.stepbtn{width:38px;height:38px;border-radius:50%;background:var(--s2);color:var(--tx);flex:none}
+.stepbtn svg{width:18px;height:18px}
+.stepbtn.next{background:var(--g);color:#000}
+.stepbtn.next.done{background:var(--s2);color:var(--g)}
+.stepbtn:disabled{opacity:.35;pointer-events:none}
 .svc{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;background:var(--s1);border:1px solid var(--line);border-radius:14px;white-space:normal}
 .svc small{display:block;color:var(--mu)}.svc a{color:var(--g);text-decoration:none;font-size:14px;margin-inline-start:10px}
 form.c{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;margin:8px 0 16px;padding:8px;border-radius:99px;background:var(--s2);border:1px solid var(--line)}
@@ -158,7 +174,8 @@ const T = {
     ok:'تم تحديد موقعك (دقة {n} م)', lowacc:'الدقة منخفضة (نحو {n} كم). للنتائج الأدق اكتب منطقتك يدويًا.', approx:'موقع تقريبي حسب الشبكة وقد يكون بعيدًا. اكتب منطقتك يدويًا من زر «موقعي».',
     denied:'تم رفض إذن الموقع. اضغط أيقونة القفل بجانب العنوان واسمح بالموقع، أو اكتب منطقتك يدويًا.', failed:'تعذّر تحديد الموقع. اكتب منطقتك يدويًا من زر «موقعي».', notfound:'لم أجد هذا المكان. جرّب اسمًا آخر.', manualOk:'الموقع: ',
     nomic:'المتصفح لا يدعم تسجيل الصوت.', micDenied:'اسمح للمتصفح باستخدام الميكروفون.', nospeech:'لم أسمع كلامًا واضحًا. حاول مرة أخرى.', micFail:'تعذّر تحويل الصوت. تحقق من الاتصال وحاول مرة أخرى.',
-    nots:'المتصفح لا يدعم قراءة النص.', call:'اتصال', dir:'الاتجاهات', down:'تعذّر الاتصال بالخادم. في الطوارئ اتصل بـ 999.', speak:'قراءة الرد'
+    nots:'المتصفح لا يدعم قراءة النص.', call:'اتصال', dir:'الاتجاهات', down:'تعذّر الاتصال بالخادم. في الطوارئ اتصل بـ 999.', speak:'قراءة الرد',
+    copy:'نسخ', copied:'تم النسخ', step:'الخطوة', of:'من', nextStep:'الخطوة التالية', prevStep:'الخطوة السابقة', doneStep:'انتهت الخطوات'
   },
   en: {
     name:'Sanad', loc:'My location', sos:'Emergency', ph:'Type, or tap the mic and speak', listening:'Listening… tap to stop', trans:'Converting speech to text…',
@@ -171,7 +188,8 @@ const T = {
     ok:'Location found (accuracy {n} m)', lowacc:'Low accuracy (about {n} km). Enter your area manually for better results.', approx:'Approximate location from your network, it may be far off. Enter your area manually from "My location".',
     denied:'Location permission was denied. Click the lock icon next to the address, allow location, or enter your area manually.', failed:'Could not find your location. Enter your area manually from "My location".', notfound:'Place not found. Try another name.', manualOk:'Location: ',
     nomic:'This browser cannot record audio.', micDenied:'Allow the browser to use the microphone.', nospeech:'I did not hear clear speech. Try again.', micFail:'Could not convert the audio. Check your connection and try again.',
-    nots:'This browser does not support reading text aloud.', call:'Call', dir:'Directions', down:'Cannot reach the server. In an emergency call 999.', speak:'Read reply'
+    nots:'This browser does not support reading text aloud.', call:'Call', dir:'Directions', down:'Cannot reach the server. In an emergency call 999.', speak:'Read reply',
+    copy:'Copy', copied:'Copied', step:'Step', of:'of', nextStep:'Next step', prevStep:'Previous step', doneStep:'All steps done'
   }
 };
 let cfg = { lang: 'ar', color: COLORS[0], read: false, theme: 'dark' }, gi = Math.floor(Math.random() * 8), coords = null;
@@ -223,6 +241,66 @@ function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add
 
 // ---- قراءة النص ----
 const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.500 8.500a5 5 0 0 1 0 7"/></svg>';
+const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+const ARROW_NEXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>';
+const ARROW_PREV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+
+// ---- نسخ نص برسالة ----
+function copyText(text, btn) {
+  const done = () => {
+    btn.classList.add('on'); btn.innerHTML = CHECK_ICON; btn.setAttribute('aria-label', t('copied')); playClick();
+    setTimeout(() => { btn.classList.remove('on'); btn.innerHTML = COPY_ICON; btn.setAttribute('aria-label', t('copy')); }, 1400);
+  };
+  const fallback = () => {
+    const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); } catch {}
+    document.body.removeChild(ta); done();
+  };
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done).catch(fallback);
+  else fallback();
+}
+
+// ---- عرض خطوات مرقّمة (إسعافات أولية وغيرها) خطوة بخطوة مع سهم تقدّم ----
+function parseSteps(text) {
+  const lines = text.split('\n');
+  const re = /^\s*(\d+|[٠-٩]+)[.\)]\s*(.+)$/;
+  let intro = [], steps = [], started = false;
+  for (const line of lines) {
+    const m = line.match(re);
+    if (m) { started = true; steps.push(m[2].trim()); }
+    else if (!started) intro.push(line);
+    else if (line.trim() !== '') steps[steps.length - 1] += ' ' + line.trim();
+  }
+  return { intro: intro.join('\n').trim(), steps };
+}
+function buildStepCard(steps) {
+  const wrap = document.createElement('div'); wrap.className = 'steps';
+  const label = document.createElement('div'); label.className = 'steps-label';
+  const body = document.createElement('div'); body.className = 'steps-body';
+  const nav = document.createElement('div'); nav.className = 'steps-nav';
+  const prev = document.createElement('button'); prev.type = 'button'; prev.className = 'icbtn stepbtn prev'; prev.innerHTML = ARROW_PREV; prev.setAttribute('aria-label', t('prevStep'));
+  const next = document.createElement('button'); next.type = 'button'; next.className = 'icbtn stepbtn next'; next.setAttribute('aria-label', t('nextStep'));
+  let i = 0;
+  function render(animate) {
+    label.textContent = `${t('step')} ${i + 1} ${t('of')} ${steps.length}`;
+    body.textContent = steps[i];
+    if (animate) { body.classList.remove('anim'); void body.offsetWidth; body.classList.add('anim'); }
+    prev.disabled = i === 0;
+    const last = i === steps.length - 1;
+    next.innerHTML = last ? CHECK_ICON : ARROW_NEXT;
+    next.classList.toggle('done', last);
+    next.disabled = last;
+    next.setAttribute('aria-label', last ? t('doneStep') : t('nextStep'));
+  }
+  prev.onclick = () => { if (i > 0) { i--; render(true); playClick(); } };
+  next.onclick = () => { if (i < steps.length - 1) { i++; render(true); playClick(); } };
+  nav.append(prev, next);
+  wrap.append(label, body, nav);
+  render(false);
+  return wrap;
+}
 function speak(text, btn) {
   if (!('speechSynthesis' in window)) return toast(t('nots'));
   const was = btn && btn.classList.contains('on');
@@ -236,9 +314,20 @@ function speak(text, btn) {
 }
 
 // ---- المحادثة ----
-function add(text, cls) { const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; chat.appendChild(d); chat.scrollTop = chat.scrollHeight; window.scrollTo(0, document.body.scrollHeight); return d; }
+function add(text, cls) {
+  const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; chat.appendChild(d);
+  if (cls === 'user') {
+    const actions = document.createElement('div'); actions.className = 'actions user-actions';
+    const cpy = document.createElement('button'); cpy.type = 'button'; cpy.className = 'icbtn cpy'; cpy.setAttribute('aria-label', t('copy')); cpy.innerHTML = COPY_ICON;
+    cpy.onclick = () => copyText(text, cpy);
+    actions.appendChild(cpy); d.appendChild(actions);
+  }
+  chat.scrollTop = chat.scrollHeight; window.scrollTo(0, document.body.scrollHeight); return d;
+}
 function fillBot(el, reply, services = []) {
-  el.textContent = reply;
+  const { intro, steps } = parseSteps(reply);
+  if (steps.length >= 2) { el.textContent = intro; el.appendChild(buildStepCard(steps)); }
+  else el.textContent = reply;
   for (const s of services) {
     const d = document.createElement('div'); d.className = 'svc';
     const info = document.createElement('div'); info.textContent = s.name;
@@ -249,9 +338,13 @@ function fillBot(el, reply, services = []) {
     m.href = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`; acts.appendChild(m);
     d.append(info, acts); el.appendChild(d);
   }
-  const b = document.createElement('button'); b.className = 'spk'; b.type = 'button'; b.setAttribute('aria-label', t('speak')); b.innerHTML = ICON;
-  b.onclick = () => speak(reply, b); el.appendChild(b);
-  if (cfg.read) speak(reply, b);
+  const actions = document.createElement('div'); actions.className = 'actions';
+  const spk = document.createElement('button'); spk.type = 'button'; spk.className = 'icbtn spk'; spk.setAttribute('aria-label', t('speak')); spk.innerHTML = ICON;
+  spk.onclick = () => speak(reply, spk);
+  const cpy = document.createElement('button'); cpy.type = 'button'; cpy.className = 'icbtn cpy'; cpy.setAttribute('aria-label', t('copy')); cpy.innerHTML = COPY_ICON;
+  cpy.onclick = () => copyText(reply, cpy);
+  actions.append(spk, cpy); el.appendChild(actions);
+  if (cfg.read) speak(reply, spk);
   chat.scrollTop = chat.scrollHeight;
 }
 async function send(text) {
