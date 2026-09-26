@@ -94,10 +94,24 @@ async function nearby(kind, lat, lon) {
 
 // يلتقط اسم مكان مذكور داخل رسالة المستخدم نفسها (مثل "قريب من X" أو "near X") ويحوّله لإحداثيات عبر Nominatim
 const LOCATION_MENTION = /(?:بالقرب من|بجوار|بجانب|(?<![أاإ])قرب|(?<![أاإ])جنب|قريب من|مقابل|بمحاذاة|near|close to|beside|next to)\s+([^\n.,،؟!]{2,60})/i;
-async function geocodeText(place, lang) {
+// يولّد بدائل إملائية شائعة لاسم المكان (تاء مربوطة/هاء، ألف بأشكالها، ياء/ألف مقصورة، تشكيل)
+// حتى تنجح "الوثبه" كما تنجح "الوثبة" دون الحاجة لكتابة الاسم بشكل دقيق
+function arabicSpellingVariants(place) {
+  const strip = s => s.replace(/[\u064B-\u0652]/g, ""); // إزالة التشكيل
+  const base = strip(place.trim());
+  const swapEnd = (s, from, to) => s.replace(new RegExp(from + "(?=\\s|$)", "g"), to);
+  const candidates = new Set([base]);
+  const normalized = base.replace(/[إأآ]/g, "ا").replace(/ى/g, "ي");
+  candidates.add(normalized);
+  candidates.add(swapEnd(normalized, "ه", "ة"));
+  candidates.add(swapEnd(normalized, "ة", "ه"));
+  return [...candidates].filter(Boolean).slice(0, 4);
+}
+
+async function geocodeOnce(q, lang) {
   try {
     const r = await fetch(
-      "https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=" + (lang === "en" ? "en" : "ar") + "&q=" + encodeURIComponent(place),
+      "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ae&accept-language=" + (lang === "en" ? "en" : "ar") + "&q=" + encodeURIComponent(q),
       { headers: { "User-Agent": "SanadEmergencyAssistant/2.0 (UAE safety app)" }, signal: AbortSignal.timeout(6000) }
     );
     if (!r.ok) return null;
@@ -105,6 +119,15 @@ async function geocodeText(place, lang) {
     if (!j[0]) return null;
     return { lat: +j[0].lat, lon: +j[0].lon, name: j[0].display_name };
   } catch { return null; }
+}
+
+// يجرّب النص كما هو ثم بدائله الإملائية بالترتيب حتى ينجح أحدها
+async function geocodeText(place, lang) {
+  for (const candidate of arabicSpellingVariants(place)) {
+    const hit = await geocodeOnce(candidate, lang);
+    if (hit) return hit;
+  }
+  return null;
 }
 
 const SAFETY = ["HARASSMENT", "HATE_SPEECH", "SEXUALLY_EXPLICIT", "DANGEROUS_CONTENT"].map(c => ({ category: "HARM_CATEGORY_" + c, threshold: "BLOCK_MEDIUM_AND_ABOVE" }));
@@ -176,7 +199,10 @@ Nearby results: ${services.length ? JSON.stringify(services) : "none"}`;
     const r = await askGemini({ model: MODEL, contents: text, config: { systemInstruction, safetySettings: SAFETY } }, "assist");
     res.json({ reply: r.text || REFUSE[L], services });
   } catch (e) {
-    res.status(500).json({ reply: L === "en" ? "AI connection error, please try again." : "تعذّر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.", services });
+    const msg = isQuota(e)
+      ? { ar: "الخدمة مزدحمة حاليًا (تجاوز الحد المسموح من الطلبات)، حاول بعد دقيقة.", en: "The service is busy right now (rate limit reached), please try again in a minute." }
+      : { ar: "تعذّر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.", en: "AI connection error, please try again." };
+    res.status(500).json({ reply: msg[L], services });
   }
 });
 
