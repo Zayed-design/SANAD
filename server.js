@@ -60,12 +60,12 @@ async function queryOverpassOnce(q) {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: "data=" + encodeURIComponent(q),
-        signal: AbortSignal.timeout(6000),
+        signal: AbortSignal.timeout(12000),
       });
-      if (!r.ok) continue;
+      if (!r.ok) { console.error(`[overpass] ${url} -> HTTP ${r.status}`); continue; }
       const data = await r.json();
       return Array.isArray(data.elements) ? data.elements : [];
-    } catch { /* جرّب المرآة التالية */ }
+    } catch (e) { console.error(`[overpass] ${url} failed:`, e?.name || "", e?.message || e); }
   }
   return null; // كل المرايا فشلت
 }
@@ -79,7 +79,7 @@ async function nearby(kind, lat, lon) {
   let elements = [];
   for (const radius of [7000, 20000]) {
     const around = kind.tags.map(t => `nwr(around:${radius},${lat},${lon})${t};`).join("");
-    const q = `[out:json][timeout:6];(${around});out center tags;`;
+    const q = `[out:json][timeout:10];(${around});out center tags;`;
     const res = await queryOverpassOnce(q);
     if (res && res.length) { elements = res; break; }
   }
