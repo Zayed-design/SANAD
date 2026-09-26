@@ -401,15 +401,45 @@ function buildStepCard(steps) {
   render(false);
   return wrap;
 }
+// ينظّف النص من رموز التنسيق (مثل * و ** و # و _) قبل قراءته، حتى لا يقرأ المتصفح
+// الرمز "*" ككلمة "نجمة" (مثال: ***5*** كانت تُقرأ "نجمة نجمة نجمة خمسة...")
+function sanitizeForSpeech(str) {
+  return String(str || '')
+    .replace(/\*\*\*(.+?)\*\*\*/gs, '$1')
+    .replace(/\*\*(.+?)\*\*/gs, '$1')
+    .replace(/\*(.+?)\*/gs, '$1')
+    .replace(/__(.+?)__/gs, '$1')
+    .replace(/_(.+?)_/gs, '$1')
+    .replace(/`{1,3}(.+?)`{1,3}/gs, '$1')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/^\s*#{1,6}\s*/gm, '')
+    .replace(/^\s*[-•*]\s+/gm, '')
+    .replace(/[*_#`~>]/g, '')
+    .replace(/\n{2,}/g, '. ')
+    .replace(/\n/g, '. ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+// يفضّل أصواتًا أعلى جودة (Google / Natural / Neural) لصوت أقرب للبشري
+function pickVoice(list, target) {
+  const pool = list.filter(v => v.lang.toLowerCase() === target.toLowerCase());
+  const fallback = pool.length ? pool : list.filter(v => v.lang.toLowerCase().startsWith(cfg.lang));
+  if (!fallback.length) return null;
+  const score = v => (/google/i.test(v.name) ? 3 : 0) + (/natural|neural|premium|enhanced|online/i.test(v.name) ? 2 : 0) + (/female|أنثى|zira|salma|hoda/i.test(v.name) ? 1 : 0);
+  return fallback.slice().sort((a, b) => score(b) - score(a))[0];
+}
 function speak(text, btn) {
   if (!('speechSynthesis' in window)) return toast(t('nots'));
   const was = btn && btn.classList.contains('on');
   speechSynthesis.cancel(); document.querySelectorAll('.spk.on').forEach(b => b.classList.remove('on'));
   if (was) return;
   const target = cfg.lang === 'ar' ? 'ar-SA' : 'en-US';
-  const u = new SpeechSynthesisUtterance(text); u.lang = target;
+  const clean = sanitizeForSpeech(text);
+  if (!clean) return;
+  const u = new SpeechSynthesisUtterance(clean); u.lang = target;
+  u.rate = 0.97; u.pitch = 1;
   const list = (voicesCache.length ? voicesCache : speechSynthesis.getVoices());
-  const v = list.find(v => v.lang.toLowerCase() === target.toLowerCase()) || list.find(v => v.lang.toLowerCase().startsWith(cfg.lang));
+  const v = pickVoice(list, target);
   if (v) u.voice = v;
   if (btn) { btn.classList.add('on'); u.onend = u.onerror = () => btn.classList.remove('on'); }
   speechSynthesis.speak(u);
