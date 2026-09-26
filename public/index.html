@@ -62,7 +62,9 @@ h1{font-size:clamp(34px,7vw,52px);line-height:1.25;font-weight:700;letter-spacin
 .stepbtn.next.done{background:var(--s2);color:var(--g)}
 .stepbtn:disabled{opacity:.35;pointer-events:none}
 .svc{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;background:var(--s1);border:1px solid var(--line);border-radius:14px;white-space:normal}
+.svc.rec{border-color:var(--g)}
 .svc small{display:block;color:var(--mu)}.svc a{color:var(--g);text-decoration:none;font-size:14px;margin-inline-start:10px}
+.svc-badge{display:inline-block;margin-inline-start:8px;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--g) 18%,transparent);color:var(--g);font-size:11px;font-weight:700;vertical-align:middle}
 form.c{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;margin:8px 0 16px;padding:8px;border-radius:99px;background:var(--s2);border:1px solid var(--line)}
 form.c:focus-within{border-color:var(--g)}
 #inp{flex:1;min-width:0;background:none;border:0;outline:0;padding:10px 14px;font-size:16px}
@@ -191,7 +193,7 @@ const T = {
     denied:'تم رفض إذن الموقع. اضغط أيقونة القفل بجانب العنوان واسمح بالموقع، أو اكتب منطقتك يدويًا.', failed:'تعذّر تحديد الموقع. اكتب منطقتك يدويًا من زر «موقعي».', notfound:'لم أجد هذا المكان. جرّب اسمًا آخر.', manualOk:'الموقع: ',
     nomic:'المتصفح لا يدعم تسجيل الصوت.', micDenied:'اسمح للمتصفح باستخدام الميكروفون.', nospeech:'لم أسمع كلامًا واضحًا. حاول مرة أخرى.', micFail:'تعذّر تحويل الصوت. تحقق من الاتصال وحاول مرة أخرى.',
     nots:'المتصفح لا يدعم قراءة النص.', call:'اتصال', dir:'الاتجاهات', down:'تعذّر الاتصال بالخادم. في الطوارئ اتصل بـ 999.', speak:'قراءة الرد',
-    copy:'نسخ', copied:'تم النسخ', step:'الخطوة', of:'من', nextStep:'الخطوة التالية', prevStep:'الخطوة السابقة', doneStep:'انتهت الخطوات', quickT:'دليل سريع'
+    copy:'نسخ', copied:'تم النسخ', step:'الخطوة', of:'من', nextStep:'الخطوة التالية', prevStep:'الخطوة السابقة', doneStep:'انتهت الخطوات', quickT:'دليل سريع', nearest:'الأقرب'
   },
   en: {
     name:'Sanad', loc:'My location', sos:'Emergency', ph:'Type, or tap the mic and speak', listening:'Listening… tap to stop', trans:'Converting speech to text…',
@@ -205,7 +207,7 @@ const T = {
     denied:'Location permission was denied. Click the lock icon next to the address, allow location, or enter your area manually.', failed:'Could not find your location. Enter your area manually from "My location".', notfound:'Place not found. Try another name.', manualOk:'Location: ',
     nomic:'This browser cannot record audio.', micDenied:'Allow the browser to use the microphone.', nospeech:'I did not hear clear speech. Try again.', micFail:'Could not convert the audio. Check your connection and try again.',
     nots:'This browser does not support reading text aloud.', call:'Call', dir:'Directions', down:'Cannot reach the server. In an emergency call 999.', speak:'Read reply',
-    copy:'Copy', copied:'Copied', step:'Step', of:'of', nextStep:'Next step', prevStep:'Previous step', doneStep:'All steps done', quickT:'Quick guide'
+    copy:'Copy', copied:'Copied', step:'Step', of:'of', nextStep:'Next step', prevStep:'Previous step', doneStep:'All steps done', quickT:'Quick guide', nearest:'Nearest'
   }
 };
 let cfg = { lang: 'ar', color: COLORS[0], read: false, theme: 'dark' }, gi = Math.floor(Math.random() * 8), coords = null;
@@ -513,8 +515,9 @@ function fillBot(el, reply, services = [], question = '') {
   if (steps.length >= 2) { el.textContent = intro; el.appendChild(buildStepCard(steps)); }
   else el.textContent = reply;
   for (const s of services) {
-    const d = document.createElement('div'); d.className = 'svc';
+    const d = document.createElement('div'); d.className = 'svc' + (s.recommended ? ' rec' : '');
     const info = document.createElement('div'); info.textContent = s.name;
+    if (s.recommended) { const b = document.createElement('span'); b.className = 'svc-badge'; b.textContent = t('nearest'); info.appendChild(b); }
     const sm = document.createElement('small'); sm.textContent = s.distance; info.appendChild(sm);
     const acts = document.createElement('div');
     if (s.phone) { const a = document.createElement('a'); a.href = 'tel:' + s.phone.replace(/[^\d+]/g, ''); a.textContent = t('call'); acts.appendChild(a); }
