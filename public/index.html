@@ -574,12 +574,33 @@ async function locate() {
   setLoc('err', denied ? t('denied') : t('failed')); return null;
 }
 $('#auto').onclick = async () => { $('#locDlg').close(); await locate(); };
+// يولّد بدائل إملائية شائعة لاسم المكان (تاء مربوطة/هاء، ألف بأشكالها، ياء/ألف مقصورة، تشكيل)
+// حتى تنجح "الوثبه" كما تنجح "الوثبة" دون الحاجة لكتابة الاسم بشكل دقيق
+function arabicSpellingVariants(place) {
+  const strip = s => s.replace(/[\u064B-\u0652]/g, ''); // إزالة التشكيل
+  const base = strip(place.trim());
+  const swapEnd = (s, from, to) => s.replace(new RegExp(from + '(?=\\s|$)', 'g'), to);
+  const candidates = new Set([base]);
+  const normalized = base.replace(/[إأآ]/g, 'ا').replace(/ى/g, 'ي');
+  candidates.add(normalized);
+  candidates.add(swapEnd(normalized, 'ه', 'ة'));
+  candidates.add(swapEnd(normalized, 'ة', 'ه'));
+  return [...candidates].filter(Boolean).slice(0, 4);
+}
+async function geocodeOnce(q) {
+  try {
+    const r = await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ae&accept-language=' + cfg.lang + '&q=' + encodeURIComponent(q))).json();
+    return r[0] || null;
+  } catch { return null; }
+}
 $('#geoGo').onclick = async () => {
   const q = $('#geoQ').value.trim(); if (!q) return;
   try {
-    const r = await (await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&accept-language=' + cfg.lang + '&q=' + encodeURIComponent(q))).json();
-    if (!r[0]) return toast(t('notfound'));
-    got(+r[0].lat, +r[0].lon, 50); setLoc('ok', t('manualOk') + r[0].display_name.slice(0, 70)); $('#locDlg').close();
+    for (const candidate of arabicSpellingVariants(q)) {
+      const hit = await geocodeOnce(candidate);
+      if (hit) { got(+hit.lat, +hit.lon, 50); setLoc('ok', t('manualOk') + hit.display_name.slice(0, 70)); $('#locDlg').close(); return; }
+    }
+    toast(t('notfound'));
   } catch { toast(t('failed')); }
 };
 $('#geoQ').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); $('#geoGo').click(); } };
