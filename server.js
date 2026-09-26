@@ -119,10 +119,12 @@ function arabicSpellingVariants(place) {
   return [...candidates].filter(Boolean).slice(0, 4);
 }
 
-async function geocodeOnce(q, lang) {
+async function geocodeOnce(q, lang, restrict) {
   try {
     const r = await fetch(
-      "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ae&accept-language=" + (lang === "en" ? "en" : "ar") + "&q=" + encodeURIComponent(q),
+      "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ae"
+        + (restrict ? "&featureType=settlement" : "")
+        + "&accept-language=" + (lang === "en" ? "en" : "ar") + "&q=" + encodeURIComponent(q),
       { headers: { "User-Agent": "SanadEmergencyAssistant/2.0 (UAE safety app)" }, signal: AbortSignal.timeout(6000) }
     );
     if (!r.ok) return null;
@@ -132,11 +134,15 @@ async function geocodeOnce(q, lang) {
   } catch { return null; }
 }
 
-// يجرّب النص كما هو ثم بدائله الإملائية بالترتيب حتى ينجح أحدها
+// نجرّب أولًا تقييد النتيجة على "منطقة سكنية/حي" (settlement) حتى ما يطابق اسم المكان
+// شارعًا أو نقطة صغيرة بنفس الاسم داخل مدينة ثانية؛ لو ما لقى شي نرجع للبحث العادي
 async function geocodeText(place, lang) {
-  for (const candidate of arabicSpellingVariants(place)) {
-    const hit = await geocodeOnce(candidate, lang);
-    if (hit) return hit;
+  const variants = arabicSpellingVariants(place);
+  for (const restrict of [true, false]) {
+    for (const candidate of variants) {
+      const hit = await geocodeOnce(candidate, lang, restrict);
+      if (hit) return hit;
+    }
   }
   return null;
 }
