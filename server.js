@@ -105,6 +105,10 @@ async function nearby(kind, lat, lon) {
 
 // يلتقط اسم مكان مذكور داخل رسالة المستخدم نفسها (مثل "قريب من X" أو "near X") ويحوّله لإحداثيات عبر Nominatim
 const LOCATION_MENTION = /(?:بالقرب من|بجوار|بجانب|(?<![أاإ])قرب|(?<![أاإ])جنب|قريب من|مقابل|بمحاذاة|(?<![\u0600-\u06FF])في(?=\s)|(?<![\u0600-\u06FF])داخل(?=\s)|near|close to|beside|next to|\bin\b)\s+([^\n.,،؟!]{2,60})/i;
+// نمط ثاني شائع بالعامية: "أقرب/اقرب ورشة **من** X" — هنا "من" وحدها بمعنى "قريبة من"،
+// ما نقدر نضيفها بالنمط الأول لأنها كلمة عامة جدًا (تسبب أخطاء بجمل زي "من فضلك")
+// فنقيّدها بوجود "أقرب/اقرب" قبلها بنفس الجملة عشان نتأكد إنها فعلاً تدل على مكان
+const NEAREST_FROM_MENTION = /(?:أقرب|اقرب|nearest|closest)[^\n.,،؟!]*?(?:^|\s)من(?=\s)\s+([^\n.,،؟!]{2,60})/i;
 // يولّد بدائل إملائية شائعة لاسم المكان (تاء مربوطة/هاء، ألف بأشكالها، ياء/ألف مقصورة، تشكيل)
 // حتى تنجح "الوثبه" كما تنجح "الوثبة" دون الحاجة لكتابة الاسم بشكل دقيق
 function arabicSpellingVariants(place) {
@@ -207,7 +211,7 @@ app.post("/api/assist", limit, async (req, res) => {
 
   const kind = KINDS.find(k => k.test.test(text));
   // إذا ذكر المستخدم مكانًا داخل رسالته (مثل "قريب من X")، نحاول تحويله لإحداثيات ونستخدمه بدل الـ GPS
-  const locMatch = kind ? text.match(LOCATION_MENTION) : null;
+  const locMatch = kind ? (text.match(LOCATION_MENTION) || text.match(NEAREST_FROM_MENTION)) : null;
   if (locMatch) {
     const geo = await geocodeText(locMatch[1].trim(), L);
     if (geo) { la = geo.lat; lo = geo.lon; hasLoc = true; mentionedPlace = geo.name; }
