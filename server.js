@@ -106,8 +106,6 @@ async function geocodeText(place, lang) {
     return { lat: +j[0].lat, lon: +j[0].lon, name: j[0].display_name };
   } catch { return null; }
 }
-  } catch { return []; }
-}
 
 const SAFETY = ["HARASSMENT", "HATE_SPEECH", "SEXUALLY_EXPLICIT", "DANGEROUS_CONTENT"].map(c => ({ category: "HARM_CATEGORY_" + c, threshold: "BLOCK_MEDIUM_AND_ABOVE" }));
 
