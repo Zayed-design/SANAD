@@ -10,6 +10,12 @@ app.use(express.static("public"));
 
 const PORT = process.env.PORT || 3000;
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+// عند تجاوز حصة نموذج معيّن، نجرّب نماذج أخرى لها حصة يومية منفصلة بدل إظهار خطأ للمستخدم
+// يمكن تخصيصها عبر متغير البيئة GEMINI_MODELS (مفصولة بفواصل) بدل هذه القيمة الافتراضية
+const MODEL_CHAIN = [...new Set(
+  (process.env.GEMINI_MODELS || `${MODEL},gemini-3.1-flash-lite,gemini-3.5-flash`)
+    .split(",").map(s => s.trim()).filter(Boolean)
+)];
 const ai = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
 
 // حد بسيط للطلبات: 25 طلبًا في الدقيقة لكل عنوان
@@ -146,17 +152,25 @@ function isQuota(e) {
   const s = String(e?.status || e?.code || e?.message || e || "");
   return /429|RESOURCE_EXHAUSTED/i.test(s);
 }
+// استدعاء Gemini: يجرّب كل نموذج في MODEL_CHAIN بالترتيب، وينتقل للتالي فورًا عند تجاوز الحصة
+// (429/RESOURCE_EXHAUSTED)، أو بعد استنفاد محاولاته عند خطأ مؤقت آخر (ضغط/شبكة)
 async function askGemini(args, label) {
-  const tries = 2;
-  for (let i = 0; i < tries; i++) {
-    try {
-      return await withTimeout(ai.models.generateContent(args), 15000);
-    } catch (e) {
-      console.error(`[${label}] Gemini error (try ${i + 1}/${tries}):`, e?.status || e?.code || "", e?.message || e);
-      if (i === tries - 1 || !isTransient(e)) throw e;
-      await new Promise(r => setTimeout(r, 800));
+  let lastErr;
+  for (const model of MODEL_CHAIN) {
+    const tries = 2;
+    for (let i = 0; i < tries; i++) {
+      try {
+        return await withTimeout(ai.models.generateContent({ ...args, model }), 15000);
+      } catch (e) {
+        lastErr = e;
+        console.error(`[${label}] ${model} error (try ${i + 1}/${tries}):`, e?.status || e?.code || "", e?.message || e);
+        if (isQuota(e)) break; // لا فائدة من إعادة نفس النموذج، انتقل للتالي مباشرة
+        if (i < tries - 1 && isTransient(e)) { await new Promise(r => setTimeout(r, 800)); continue; }
+        break; // خطأ غير مؤقت أو انتهت محاولات هذا النموذج، جرّب النموذج التالي
+      }
     }
   }
+  throw lastErr;
 }
 
 app.post("/api/assist", limit, async (req, res) => {
