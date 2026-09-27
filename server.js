@@ -230,13 +230,28 @@ function curatedSectorMatch(place) {
   const dir = detectAreaDir(place);
   if (!dir) return null;
   const num = extractSectorNumber(place);
-  let exact = true;
-  let candidates = CURATED_WORKSHOPS.filter(c => c.area === dir && num != null && c.num === num);
-  if (!candidates.length) { candidates = CURATED_WORKSHOPS.filter(c => c.area === dir); exact = false; }
-  if (!candidates.length) return null;
-  const c = candidates[0];
+  const sameArea = CURATED_WORKSHOPS.filter(c => c.area === dir);
+  if (!sameArea.length) return null;
+
+  // تطابق دقيق: نفس الجهة ونفس رقم القطاع بالضبط
+  if (num != null) {
+    const exactHit = sameArea.find(c => c.num === num);
+    if (exactHit) {
+      const label = AREA_LABEL[dir] + " " + num;
+      return { lat: exactHit.lat, lon: exactHit.lon, name: `${label} (بالقرب من ${exactHit.name})`, exact: true };
+    }
+  }
+
+  // ما عندنا بيانات لهذا الرقم بالضبط: نختار أقرب رقم قطاع معروف عندنا لنفس الجهة (تقدير
+  // جغرافي تقريبي بدل ياخذ أول عنصر بالمصفوفة عشوائيًا)، ونوضح للمستخدم إنه تقدير
+  const numbered = sameArea.filter(c => c.num != null);
+  const pool = numbered.length ? numbered : sameArea;
+  const best = num != null
+    ? pool.reduce((a, b) => Math.abs((a.num ?? 0) - num) <= Math.abs((b.num ?? 0) - num) ? a : b)
+    : pool[0];
   const label = AREA_LABEL[dir] + (num != null ? " " + num : "");
-  return { lat: c.lat, lon: c.lon, name: `${label} (بالقرب من ${c.name})`, exact };
+  const near = best.num != null ? `${AREA_LABEL[dir]} ${best.num}` : best.name;
+  return { lat: best.lat, lon: best.lon, name: `${label} (تقدير تقريبي بناءً على أقرب قطاع معروف لدينا: ${near} — ${best.name})`, exact: false };
 }
 
 async function geocodeOnce(q, lang) {
