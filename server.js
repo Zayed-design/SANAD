@@ -1,6 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 dotenv.config();
 const app = express();
@@ -28,37 +33,18 @@ const limit = (req, res, next) => {
 
 // ورش/محلات إطارات حقيقية جمعها صاحب المشروع يدويًا بمناطق بني ياس/الشامخة/المفرق
 // (بيانات OpenStreetMap/Geoapify شحيحة بهالمناطق) — تُدمج مع نتائج Geoapify الحية بدالة nearby()
-// ولا تُلغي ترتيب "الأقرب أولًا"، فقط تضيف مرشّحين حقيقيين إضافيين لنفس الحساب
-const CURATED_WORKSHOPS = [
-  { name: "الفهد الأسود لتصليح كهرباء ومكيفات السيارات", phone: "0557774987", rating: 4.0, hours: "8:00ص–11:30م", lat: 24.2881317900941, lon: 54.64085099565195, area: "east", num: 9 },
-  { name: "ميزان اليرموك للإطارات (Yarmouk Tire Balance)", phone: "0555548963", rating: 4.3, hours: "8:00ص–11:00م", lat: 24.28816534457132, lon: 54.64075345748175, area: "east", num: 9 },
-  { name: "Superfix Auto Center - سوبرفكس لتصليح السيارات بني ياس", phone: "0501355924", rating: 4.8, hours: "8:00ص–11:00م", lat: 24.30426056958064, lon: 54.62143774585168, area: "mafraq" },
-  { name: "فايبر تراست لزينة وكهرباء وتكييف السيارات (Fiber Trust)", phone: "0544421123", rating: 3.9, hours: "8:30ص–12:00ص", lat: 24.304365594964914, lon: 54.61749480213131, area: "mafraq" },
-  { name: "Muhammad Hussain Auto Electrical LLC", phone: "0509392037", rating: 3.4, hours: "مواعيد متغيّرة", lat: 24.297043857022256, lon: 54.625107901622336, area: "west" },
-  { name: "الهيثم لزينة وكهرباء السيارات", phone: "0588986399", rating: 3.7, hours: "8:00ص–11:00م", lat: 24.288131624705624, lon: 54.64078775363773, area: "mafraq" },
-  { name: "Rashidi & Brothers Tyre Shop - محل رشيدي وإخوانه إطارات وتبديل زيوت", phone: "025821437", rating: 3.7, hours: "7:00ص–11:30م", lat: 24.321762268832742, lon: 54.61595118934476, area: "east", num: 2 },
-  { name: "Tire.ae - Baniyas (معبي تواير)", phone: "800145", rating: 4.0, hours: "8:00ص–11:30م", lat: 24.320242482610237, lon: 54.61409347858084, area: "east", num: 2 },
-  { name: "Al Mashal Tyre Repairs", phone: "0501864489", rating: 4.3, hours: "غالبًا 24 ساعة", lat: 24.2852141059973, lon: 54.64554398927204, area: "east", num: 9 },
-  { name: "FIXMATE AUTO SERVICE CENTER - فرع بني ياس الغرب", phone: "0543952954", rating: 4.8, hours: "8:00ص–11:00م", lat: 24.300157868075914, lon: 54.61593747976703, area: "west", num: 1 },
-  { name: "G4 TYRES AND OIL - ميزان جي 4 الإطارات", phone: "0561150222", rating: 4.4, hours: "8:00ص–11:00م", lat: 24.30948613814597, lon: 54.608211880192734, area: "east", num: 3 },
-  { name: "Alwarqaa Auto Repair - الورقاء لإصلاح السيارات", phone: "0585156603", rating: 4.3, hours: "9:00ص–10:00م", lat: 24.306383505392414, lon: 54.611821931342845, area: "mafraq" },
-  { name: "Al Hidya Auto Electrical Repairs", phone: "0505420399", rating: 3.5, hours: "24 ساعة", lat: 24.285326905809868, lon: 54.645494685855965, area: "east", num: 9 },
-  { name: "نجمة المفرق للإطارات وتصليح السيارات", phone: "", rating: 4.2, hours: "7:30ص–11:30م", lat: 24.30491065268256, lon: 54.61717149979409, area: "mafraq" },
-  { name: "AZRAH AUTO ELECTRICAL REPAIR", phone: "0503663718", rating: 4.3, hours: "", lat: 24.290425125176334, lon: 54.63723073650657, area: "west", num: 3 },
-  { name: "محمد محمود للإكسسوارات وتنجيد السيارات - المفرق", phone: "0552504824", rating: 3.5, hours: "9:00ص–9:00م/1:00ص", lat: 24.28916213652434, lon: 54.595070713574245, area: "mafraq" },
-  { name: "Jabal Baniyas Auto Electrical", phone: "0507016325", rating: 4.0, hours: "غالبًا 24 ساعة", lat: 24.297578286981032, lon: 54.625320143118714, area: "west", num: 3 },
-  { name: "Rashidi & Brothers Tyre Shop (فرع شرق 2)", phone: "025821437", rating: 3.7, hours: "7:00ص–11:30م", lat: 24.322300772035224, lon: 54.61596706079886, area: "east", num: 2 },
-  { name: "توب ايفو لخدمات وزينة وكهرباء السيارات", phone: "0556501271", rating: 4.8, hours: "9:00ص–12:00ص", lat: 24.358588936042906, lon: 54.65656995153736, area: "shamkha", num: 3 },
-  { name: "Carolyn Auto Care & Tyre Shop", phone: "0505040711", rating: 4.3, hours: "8:00ص–12:00ص", lat: 24.358704519129528, lon: 54.65667209967736, area: "shamkha", num: 3 },
-  { name: "اوبتك لخدمات السيارات - الشامخة", phone: "0555396605", rating: 3.3, hours: "9:00ص–11:55م", lat: 24.344036569518384, lon: 54.69537609376488, area: "shamkha", num: 23 },
-  { name: "Europestar Electronic LLC - ميزان يوروب استار", phone: "0561914666", rating: 4.3, hours: "8:00ص–12:30ص", lat: 24.38856676226497, lon: 54.71970918952345, area: "shamkha", num: 8 },
-  { name: "Phantom Auto Service Center", phone: "0588414355", rating: 3.4, hours: "9:00ص–11:00م", lat: 24.411212822494242, lon: 54.75629556291637, area: "shamkha", num: 1 },
-  { name: "Tokyo Land Car Service", phone: "0502874603", rating: 4.5, hours: "8:00ص–12:00ص", lat: 24.381479230236618, lon: 54.707020340604885, area: "shamkha", num: 13 },
-  { name: "Al Darb Car Electrical", phone: "0565551290", rating: 2.3, hours: "24 ساعة", lat: 24.395319241394226, lon: 54.72653947623492, area: "shamkha", num: 7 },
-  { name: "Liberty Tyre Center - الشامخة 36", phone: "0547808844", rating: 4.6, hours: "8:00ص–11:00م", lat: 24.39886873208669, lon: 54.69081989041933, area: "shamkha", num: 36 },
-  { name: "Shamkha Tyres", phone: "0547808844", rating: 3.6, hours: "8:00ص–12:00ص", lat: 24.39880932320199, lon: 54.690475138988276, area: "shamkha", num: 36 },
-  { name: "Lizof Car Care - الشامخة", phone: "0508830656", rating: 4.6, hours: "", lat: 24.388659054709994, lon: 54.719287739230616, area: "shamkha", num: 8 },
-];
+// ولا تُلغي ترتيب "الأقرب أولًا"، فقط تضيف مرشّحين حقيقيين إضافيين لنفس الحساب.
+// البيانات نفسها بملف data/workshops.json (مو هنا) عشان تنضاف ورش جديدة بدون تعديل الكود؛
+// استخدم scripts/add-workshops.js لإضافة دفعات جديدة تلقائيًا من نص خام.
+function loadCuratedWorkshops() {
+  try {
+    return JSON.parse(readFileSync(join(__dirname, "data", "workshops.json"), "utf8"));
+  } catch (e) {
+    console.error("[workshops] تعذّر قراءة data/workshops.json:", e?.message || e);
+    return [];
+  }
+}
+const CURATED_WORKSHOPS = loadCuratedWorkshops();
 
 const KINDS = [
   { test: /ميكانيك|ورشة|تصليح السيارة|سحب|ونش|قطع غيار|خدمة سيارات|mechanic|garage|tow/i, categories: ["service.vehicle.repair"], fallback: "ورشة سيارات", curated: CURATED_WORKSHOPS },
