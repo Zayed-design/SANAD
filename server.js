@@ -38,13 +38,14 @@ const limit = (req, res, next) => {
 // استخدم scripts/add-workshops.js لإضافة دفعات جديدة تلقائيًا من نص خام.
 function loadCuratedWorkshops() {
   try {
-    return JSON.parse(readFileSync(join(__dirname, "data", "workshops.json"), "utf8"));
+    return JSON.parse(readFileSync(join(__dirname, "workshops.json"), "utf8"));
   } catch (e) {
-    console.error("[workshops] تعذّر قراءة data/workshops.json:", e?.message || e);
+    console.error("[workshops] تعذّر قراءة workshops.json:", e?.message || e);
     return [];
   }
 }
 const CURATED_WORKSHOPS = loadCuratedWorkshops();
+console.log(`[workshops] تم تحميل ${CURATED_WORKSHOPS.length} ورشة من workshops.json`);
 
 const KINDS = [
   { test: /ميكانيك|ورشة|تصليح السيارة|سحب|ونش|قطع غيار|خدمة سيارات|mechanic|garage|tow/i, categories: ["service.vehicle.repair"], fallback: "ورشة سيارات", curated: CURATED_WORKSHOPS },
@@ -404,6 +405,6 @@ app.post("/api/transcribe", limit, async (req, res) => {
 });
 
 // نقطة فحص خفيفة لإبقاء الخدمة مستيقظة على Render (اربطها بخدمة بينغ خارجية كل ٥-١٠ دقائق)
-app.get("/health", (req, res) => res.status(200).send("ok"));
+app.get("/health", (req, res) => res.status(200).json({ ok: true, curatedWorkshops: CURATED_WORKSHOPS.length }));
 
 app.listen(PORT, () => console.log(`Sanad running on http://localhost:${PORT}`));

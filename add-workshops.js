@@ -1,7 +1,7 @@
 // أداة سريعة لإضافة ورش جديدة لملف data/workshops.json بدون تعديل server.js يدويًا.
 //
 // الاستخدام:
-//   node scripts/add-workshops.js path/to/new-workshops.txt
+//   node add-workshops.js path/to/new-workshops.txt
 //
 // الصق نص خام بنفس الصيغة المعتادة داخل ملف نصي (كل ورشة بفقرة منفصلة، مفصولة بسطر فاضي):
 //
@@ -25,7 +25,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_PATH = join(__dirname, "..", "data", "workshops.json");
+const DATA_PATH = join(__dirname, "workshops.json");
 
 const AR_NUM_WORDS = {
   "واحد": 1, "واحده": 1, "اثنين": 2, "ثنين": 2, "اثنان": 2, "ثلاثة": 3, "ثلاثه": 3, "ثلاث": 3,
@@ -118,7 +118,7 @@ function parseBlock(block) {
 function main() {
   const file = process.argv[2];
   if (!file) {
-    console.error("الاستخدام: node scripts/add-workshops.js path/to/new-workshops.txt");
+    console.error("الاستخدام: node add-workshops.js path/to/new-workshops.txt");
     process.exit(1);
   }
   const raw = readFileSync(file, "utf8");
