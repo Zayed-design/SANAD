@@ -55,6 +55,8 @@ h1{font-size:clamp(34px,7vw,52px);line-height:1.25;font-weight:700;letter-spacin
 .steps-body{margin:10px 0 14px;font-size:16px;line-height:1.8;min-height:44px}
 .steps-body.anim{animation:stepIn .22s ease}
 @keyframes stepIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.step-illus.anim svg{animation:illusIn .32s cubic-bezier(.22,1,.36,1)}
+@keyframes illusIn{from{opacity:0;transform:scale(.82) translateY(4px)}to{opacity:1;transform:scale(1) translateY(0)}}
 .steps-nav{display:flex;align-items:center;justify-content:flex-end;gap:8px}
 .stepbtn{width:38px;height:38px;border-radius:50%;background:var(--s2);color:var(--tx);flex:none}
 .stepbtn svg{width:18px;height:18px}
@@ -418,8 +420,11 @@ function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add
 const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.500 8.500a5 5 0 0 1 0 7"/></svg>';
 const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
 const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-const ARROW_NEXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>';
-const ARROW_PREV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+const CHEVRON_LEFT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>';
+const CHEVRON_RIGHT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+// في العربية (RTL) اتجاه "التالي" بصريًا لليسار، وفي الإنجليزية (LTR) لليمين — والعكس لزر "السابق"
+const nextChevron = () => cfg.lang === 'ar' ? CHEVRON_LEFT : CHEVRON_RIGHT;
+const prevChevron = () => cfg.lang === 'ar' ? CHEVRON_RIGHT : CHEVRON_LEFT;
 const X_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
 // ---- ملاحظة تنويه لطيفة تظهر مرة واحدة أعلى المحادثة مع زر إغلاق، ولا تعود بعد إغلاقها ----
@@ -816,7 +821,7 @@ function buildStepCard(steps) {
   const illus = document.createElement('div'); illus.className = 'step-illus';
   const body = document.createElement('div'); body.className = 'steps-body';
   const nav = document.createElement('div'); nav.className = 'steps-nav';
-  const prev = document.createElement('button'); prev.type = 'button'; prev.className = 'icbtn stepbtn prev'; prev.innerHTML = ARROW_PREV; prev.setAttribute('aria-label', t('prevStep'));
+  const prev = document.createElement('button'); prev.type = 'button'; prev.className = 'icbtn stepbtn prev'; prev.innerHTML = prevChevron(); prev.setAttribute('aria-label', t('prevStep'));
   const next = document.createElement('button'); next.type = 'button'; next.className = 'icbtn stepbtn next'; next.setAttribute('aria-label', t('nextStep'));
   let i = 0;
   function render(animate) {
@@ -824,10 +829,13 @@ function buildStepCard(steps) {
     const pic = illustrationFor(steps[i]);
     illus.innerHTML = pic || ''; illus.style.display = pic ? 'flex' : 'none';
     body.textContent = steps[i];
-    if (animate) { body.classList.remove('anim'); void body.offsetWidth; body.classList.add('anim'); }
+    if (animate) {
+      body.classList.remove('anim'); void body.offsetWidth; body.classList.add('anim');
+      if (pic) { illus.classList.remove('anim'); void illus.offsetWidth; illus.classList.add('anim'); }
+    }
     prev.disabled = i === 0;
     const last = i === steps.length - 1;
-    next.innerHTML = last ? CHECK_ICON : ARROW_NEXT;
+    next.innerHTML = last ? CHECK_ICON : nextChevron();
     next.classList.toggle('done', last);
     next.disabled = last;
     next.setAttribute('aria-label', last ? t('doneStep') : t('nextStep'));
