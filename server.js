@@ -70,9 +70,10 @@ async function nearby(kind, lat, lon) {
   const cached = nearbyCache.get(key);
   if (cached && Date.now() - cached.t < NEARBY_TTL) return cached.v;
 
-  // نوسّع نطاق البحث تدريجيًا (7 ثم 20 كم) إذا لم نجد شيئًا بالنطاق الأصغر
+  // نوسّع نطاق البحث تدريجيًا (7 ثم 20 ثم 40 كم) إذا لم نجد شيئًا بالنطاق الأصغر —
+  // بعض المناطق (زي أطراف بني ياس) قليلة التوثيق بقاعدة بيانات OpenStreetMap
   let features = [];
-  for (const radius of [7000, 20000]) {
+  for (const radius of [7000, 20000, 40000]) {
     try {
       const res = await geoapifyOnce(kind.categories, lat, lon, radius);
       if (res.length) { features = res; break; }
@@ -132,7 +133,7 @@ const KNOWN_PLACES = [
 function knownPlace(place) {
   const norm = place.trim().replace(/[\u064B-\u0652]/g, "");
   const hit = KNOWN_PLACES.find(p => p.test.test(norm));
-  return hit ? { lat: hit.lat, lon: hit.lon, name: hit.name } : null;
+  return hit ? { lat: hit.lat, lon: hit.lon, name: hit.name, exact: true } : null;
 }
 
 async function geocodeOnce(q, lang) {
@@ -148,21 +149,34 @@ async function geocodeOnce(q, lang) {
   } catch { return null; }
 }
 
-// الترتيب: (1) قائمة الأماكن الموثوقة يدويًا، (2) البحث مع إضافة "أبوظبي" لتحسين الدقة
-// (يفيد لما يتطابق اسم المنطقة مع نقطة صغيرة بمدينة ثانية)، (3) بحث حر عادي بدون إضافة
+// يبسّط اسم المكان تدريجيًا بحذف آخر كلمة كل مرة (زي رقم قطاع "13" أو اتجاه "شرق")
+// حتى لو ما قدر Nominatim يطابق الاسم الكامل بالضبط، نرجع لاسم المنطقة الأساسي
+function placeSimplifications(place) {
+  const words = place.trim().split(/\s+/).filter(Boolean);
+  const out = [];
+  for (let i = words.length; i >= 1; i--) out.push(words.slice(0, i).join(" "));
+  return out; // من الأكثر تحديدًا للأقل
+}
+
+// الترتيب: (1) قائمة الأماكن الموثوقة يدويًا، (2) الاسم كامل كما كتبه المستخدم (مع بدائله
+// الإملائية، ومع/بدون "أبوظبي")، (3) لو فشل، نبسّط الاسم تدريجيًا (نشيل آخر كلمة) ونعيد المحاولة.
+// نرجّع أيضًا exact:false لو احتجنا نبسّط الاسم، عشان نقدر نخبر المستخدم إننا قرّبنا للمنطقة
+// العامة فقط ومو للجزء الدقيق اللي كتبه (مثل رقم قطاع معيّن).
 async function geocodeText(place, lang) {
   const known = knownPlace(place);
   if (known) return known;
 
-  const variants = arabicSpellingVariants(place);
   const suffix = lang === "en" ? " Abu Dhabi" : " أبوظبي";
-  for (const v of variants) {
-    const hit = await geocodeOnce(v + suffix, lang);
-    if (hit) return hit;
+  const levels = placeSimplifications(place);
+  if (!levels.length) return null;
+
+  for (const v of arabicSpellingVariants(levels[0]).slice(0, 2)) {
+    const hit = (await geocodeOnce(v + suffix, lang)) || (await geocodeOnce(v, lang));
+    if (hit) return { ...hit, exact: true };
   }
-  for (const v of variants) {
-    const hit = await geocodeOnce(v, lang);
-    if (hit) return hit;
+  for (const level of levels.slice(1)) {
+    const hit = (await geocodeOnce(level + suffix, lang)) || (await geocodeOnce(level, lang));
+    if (hit) return { ...hit, exact: false, searchedFor: level };
   }
   return null;
 }
@@ -207,16 +221,23 @@ app.post("/api/assist", limit, async (req, res) => {
 
   const la0 = Number(latitude), lo0 = Number(longitude);
   let hasLoc = latitude != null && longitude != null && Number.isFinite(la0) && Number.isFinite(lo0);
-  let la = la0, lo = lo0, mentionedPlace = null;
+  let la = la0, lo = lo0, mentionedPlace = null, approxPlace = false;
 
   const kind = KINDS.find(k => k.test.test(text));
   // إذا ذكر المستخدم مكانًا داخل رسالته (مثل "قريب من X")، نحاول تحويله لإحداثيات ونستخدمه بدل الـ GPS
   const locMatch = kind ? (text.match(LOCATION_MENTION) || text.match(NEAREST_FROM_MENTION)) : null;
+  let geocodeFailed = false;
   if (locMatch) {
     const geo = await geocodeText(locMatch[1].trim(), L);
-    if (geo) { la = geo.lat; lo = geo.lon; hasLoc = true; mentionedPlace = geo.name; }
+    if (geo) {
+      la = geo.lat; lo = geo.lon; hasLoc = true; mentionedPlace = geo.name;
+      approxPlace = geo.exact === false; // طابقنا اسمًا مبسّطًا (بعد حذف رقم قطاع/اتجاه) مو النص بالضبط
+    }
+    // فشل تحديد المكان المذكور: لا نستخدم موقع الجهاز/الشبكة التقريبي بصمت لأنه غالبًا
+    // بعيد جدًا عن المكان الحقيقي المقصود، ونخلي الذكاء الاصطناعي يوضح ذلك للمستخدم صراحة
+    else { geocodeFailed = true; hasLoc = false; }
   }
-  const services = kind && hasLoc ? await nearby(kind, la, lo) : [];
+  const services = kind && hasLoc && !geocodeFailed ? await nearby(kind, la, lo) : [];
 
   if (!ai) return res.json({ reply: "AI is not enabled: set GEMINI_API_KEY. Emergency: 999.", services });
 
@@ -230,6 +251,8 @@ Ask as few questions as possible. Start with safety if there is danger. Never cl
 In "Nearby results", the item marked "recommended": true is the closest one and is your top pick — present it first and explicitly as your recommendation (e.g. "أقرب خيار لك هو..." / "Your closest option is..."), then briefly list the rest as alternatives. There is no price or rating data available, so never invent or estimate prices, ratings, or reviews for these places; base the recommendation on proximity only.
 If "Nearby results" is empty even though a location is available, say plainly that no matching places were found in the wider search area and suggest calling emergency numbers or trying a well-known nearby landmark name instead — never invent a place.
 ${mentionedPlace ? `The user named a specific place in their message; you searched near it ("${mentionedPlace}") instead of their GPS — mention briefly that you searched near that place.` : ""}
+${approxPlace ? `IMPORTANT: the exact sub-area/sector number the user typed could not be pinpointed, so you searched near the general area only ("${mentionedPlace}") rather than their precise sector — explicitly tell them this is an approximation of the general area, not their exact sector, so results may be a bit off.` : ""}
+${geocodeFailed ? `The user named a specific place ("${locMatch[1].trim()}") in their message, but its exact location could NOT be determined. Do NOT use or mention any device/network location as a substitute — there are no reliable Nearby results for what they asked. Tell them clearly and briefly that you couldn't pinpoint that exact place, and ask them to either try a more specific/well-known area name, or use the "My location" button for their current position.` : ""}
 Be brief and clear. Reply in ${L === "en" ? "English" : "Arabic"}. UAE emergency numbers: Police 999, Ambulance 998, Civil Defense 997.
 ${hasLoc ? `Search location used: ${la}, ${lo}` : "No GPS available."}
 Nearby results: ${services.length ? JSON.stringify(services) : "none"}`;
