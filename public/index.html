@@ -61,7 +61,11 @@ h1{font-size:clamp(34px,7vw,52px);line-height:1.25;font-weight:700;letter-spacin
 .stepbtn.next{background:var(--g);color:#000}
 .stepbtn.next.done{background:var(--s2);color:var(--g)}
 .stepbtn:disabled{opacity:.35;pointer-events:none}
-.svc{display:flex;flex-direction:column;gap:10px;margin-top:10px;padding:14px 16px;background:var(--s1);border:1px solid var(--line);border-radius:14px;white-space:normal}
+.step-illus{display:flex;justify-content:center;align-items:center;color:var(--g);min-height:70px;margin-bottom:4px}
+.step-illus svg{width:120px;height:88px}
+.caret{display:inline-block;width:2px;height:1em;background:var(--g);margin-inline-start:2px;vertical-align:-3px;animation:caretBlink .85s steps(1) infinite}
+@keyframes caretBlink{50%{opacity:0}}
+.svc{display:flex;flex-direction:column;gap:10px;margin-top:10px;padding:14px 16px;background:var(--s1);border:1px solid var(--line);border-radius:14px;white-space:normal;opacity:0;animation:msgIn .32s ease forwards;animation-delay:calc(var(--i,0) * .09s)}
 .svc.rec{border-color:var(--g)}
 .svc small{display:block;color:var(--mu);margin-top:2px}
 .svc-badge{display:inline-block;margin-inline-start:8px;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--g) 18%,transparent);color:var(--g);font-size:11px;font-weight:700;vertical-align:middle}
@@ -164,6 +168,7 @@ dialog h3{font-size:14px;color:var(--mu);font-weight:500;margin:18px 0 8px}
   <h3 data-i="manual"></h3>
   <div class="fld"><input id="geoQ" data-p="geoPh"><button class="go" id="geoGo" data-i="search"></button></div>
   <a class="lnk" id="verify" target="_blank" rel="noopener" data-i="verify"></a>
+  <p class="note" data-i="locNote"></p>
   <form method="dialog"><button class="chip cls" data-i="close"></button></form>
 </dialog>
 
@@ -198,6 +203,7 @@ const T = {
     chips:[['طوارئ طبية','أحتاج مساعدة طبية عاجلة'],['عطل في السيارة','سيارتي معطلة على الطريق، أحتاج ميكانيكي أو سحب'],['أقرب مستشفى','أبحث عن أقرب مستشفى'],['حريق','كيف أتصرف عند حدوث حريق؟'],['حروق','ما خطوات الإسعاف الأولي للحروق؟']],
     sosT:'أرقام الطوارئ في الإمارات', police:'الشرطة', amb:'الإسعاف', civil:'الدفاع المدني', sosN:'في الحالات الخطرة اتصل مباشرة. سند مساعد إرشادي ولا يتصل بالجهات نيابة عنك.', close:'إغلاق',
     locT:'موقعك', auto:'تحديد تلقائي', manual:'أو اكتب منطقتك يدويًا', geoPh:'مثال: مدينة خليفة، أبوظبي', search:'بحث', verify:'تحقق من موقعك على الخريطة',
+    locNote:'قد يخطئ تحديد الموقع أحيانًا، خصوصًا بالمناطق الجديدة أو ضعيفة التغطية. تحقق من موقعك على الخريطة قبل الاعتماد عليه بالكامل.',
     setT:'الإعدادات', themeL:'المظهر', light:'صباحي', dark:'مسائي', langL:'اللغة', colorL:'اللون', readL:'قراءة الردود بصوت عالٍ', on:'مفعّلة', off:'متوقفة',
     locating:'جارٍ تحديد موقعك…', insecure:'المتصفح يمنع GPS هنا. افتح الموقع عبر HTTPS.', nogeo:'المتصفح لا يدعم تحديد الموقع.',
     ok:'تم تحديد موقعك (دقة {n} م)', lowacc:'الدقة منخفضة (نحو {n} كم). للنتائج الأدق اكتب منطقتك يدويًا.', approx:'موقع تقريبي حسب الشبكة وقد يكون بعيدًا. اكتب منطقتك يدويًا من زر «موقعي».',
@@ -212,6 +218,7 @@ const T = {
     chips:[['Medical emergency','I need urgent medical help'],['Car breakdown','My car broke down on the road, I need a mechanic or towing'],['Nearest hospital','Find the nearest hospital'],['Fire','What should I do in a fire?'],['Burns','What is the first aid for burns?']],
     sosT:'UAE emergency numbers', police:'Police', amb:'Ambulance', civil:'Civil Defense', sosN:'In danger, call directly. Sanad is a guide and does not call anyone for you.', close:'Close',
     locT:'Your location', auto:'Detect automatically', manual:'Or enter your area manually', geoPh:'e.g. Khalifa City, Abu Dhabi', search:'Search', verify:'Check your location on the map',
+    locNote:'Location detection can sometimes be off, especially in newer or poorly-mapped areas. Check the map before fully relying on it.',
     setT:'Settings', themeL:'Appearance', light:'Morning', dark:'Evening', langL:'Language', colorL:'Color', readL:'Read replies aloud', on:'On', off:'Off',
     locating:'Finding your location…', insecure:'The browser blocks GPS here. Open the site over HTTPS.', nogeo:'This browser does not support location.',
     ok:'Location found (accuracy {n} m)', lowacc:'Low accuracy (about {n} km). Enter your area manually for better results.', approx:'Approximate location from your network, it may be far off. Enter your area manually from "My location".',
@@ -360,12 +367,17 @@ function quickScenario(sc) {
   app.classList.add('started');
   add(sc.title[cfg.lang], 'user'); playSend();
   const el = add('', 'bot');
-  const full = sc.steps[cfg.lang];
-  const { intro, steps } = parseSteps(full);
-  el.textContent = intro; if (steps.length) el.appendChild(buildStepCard(steps));
-  attachVideo(el, sc);
-  addActions(el, full);
-  chat.scrollTop = chat.scrollHeight; playReceive();
+  el.innerHTML = '<span class="typing"><span></span><span></span><span></span></span>';
+  setTimeout(async () => {
+    const full = sc.steps[cfg.lang];
+    const { intro, steps } = parseSteps(full);
+    el.textContent = '';
+    await typeText(el, intro);
+    if (steps.length) el.appendChild(buildStepCard(steps));
+    attachVideo(el, sc);
+    addActions(el, full);
+    chat.scrollTop = chat.scrollHeight; playReceive();
+  }, 260);
 }
 $('#quickBtn').onclick = () => { playClick(); renderQuickList(); $('#quickDlg').showModal(); };
 
@@ -425,9 +437,34 @@ function parseSteps(text) {
   }
   return { intro: intro.join('\n').trim(), steps };
 }
+// ---- رسوم متحركة بسيطة توضّح خطوات إسعاف معيّنة (مثال أولي: الضغط بقماش نظيف على النزيف) ----
+// نمط توضيحي بخط واحد بلون هوية الموقع (currentColor) يتحرك بحلقة بسيطة: القماش ينزل فوق
+// الجرح، الجرح يختفي (توقف النزيف)، ثم سهمان يوضّحان الضغط، ثم تعيد الحلقة نفسها.
+const FA_PRESSURE_SVG = `<svg viewBox="0 0 120 90" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<style>
+.fa-w{animation:faW 3s ease-in-out infinite}
+.fa-c{animation:faC 3s ease-in-out infinite}
+.fa-p{animation:faP 3s ease-in-out infinite}
+@keyframes faW{0%,12%{opacity:1}38%,100%{opacity:0}}
+@keyframes faC{0%{transform:translateY(-24px)}32%,72%{transform:translateY(0)}100%{transform:translateY(-24px)}}
+@keyframes faP{0%,38%{opacity:0;transform:scale(.6)}48%{opacity:1;transform:scale(1)}74%{opacity:1}86%,100%{opacity:0;transform:scale(.6)}}
+</style>
+<rect x="14" y="30" width="92" height="40" rx="14"/>
+<path class="fa-w" d="M50 44l6 8 6-8 6 8 6-8"/>
+<g class="fa-c"><rect x="42" y="14" width="36" height="24" rx="4"/><path d="M42 22h36M42 30h36" opacity=".55"/></g>
+<g class="fa-p"><path d="M40 6v9M40 6l-4.5 4.5M40 6l4.5 4.5"/><path d="M80 6v9M80 6l-4.5 4.5M80 6l4.5 4.5"/></g>
+</svg>`;
+const STEP_ILLUSTRATIONS = [
+  { test: /(قماش|ضماد[ةه]).{0,25}(نظيف|النزيف|الجرح)|اضغط.{0,25}(الجرح|النزيف)|clean cloth|direct pressure|press.{0,20}wound/i, svg: FA_PRESSURE_SVG },
+];
+function illustrationFor(stepText) {
+  const hit = STEP_ILLUSTRATIONS.find(x => x.test.test(stepText));
+  return hit ? hit.svg : null;
+}
 function buildStepCard(steps) {
   const wrap = document.createElement('div'); wrap.className = 'steps';
   const label = document.createElement('div'); label.className = 'steps-label';
+  const illus = document.createElement('div'); illus.className = 'step-illus';
   const body = document.createElement('div'); body.className = 'steps-body';
   const nav = document.createElement('div'); nav.className = 'steps-nav';
   const prev = document.createElement('button'); prev.type = 'button'; prev.className = 'icbtn stepbtn prev'; prev.innerHTML = ARROW_PREV; prev.setAttribute('aria-label', t('prevStep'));
@@ -435,6 +472,8 @@ function buildStepCard(steps) {
   let i = 0;
   function render(animate) {
     label.textContent = `${t('step')} ${i + 1} ${t('of')} ${steps.length}`;
+    const pic = illustrationFor(steps[i]);
+    illus.innerHTML = pic || ''; illus.style.display = pic ? 'flex' : 'none';
     body.textContent = steps[i];
     if (animate) { body.classList.remove('anim'); void body.offsetWidth; body.classList.add('anim'); }
     prev.disabled = i === 0;
@@ -447,7 +486,7 @@ function buildStepCard(steps) {
   prev.onclick = () => { if (i > 0) { i--; render(true); playClick(); } };
   next.onclick = () => { if (i < steps.length - 1) { i++; render(true); playClick(); } };
   nav.append(prev, next);
-  wrap.append(label, body, nav);
+  wrap.append(label, illus, body, nav);
   render(false);
   return wrap;
 }
@@ -510,6 +549,21 @@ function addActions(el, fullText) {
   return spk;
 }
 
+// ---- تحريك ظهور نص الرد تدريجيًا بدل ظهوره فجأة دفعة وحدة ----
+const reduceMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+function typeText(el, text) {
+  return new Promise(resolve => {
+    if (!text || reduceMotion()) { el.textContent = text || ''; resolve(); return; }
+    el.textContent = ''; const caret = document.createElement('span'); caret.className = 'caret'; el.appendChild(caret);
+    let i = 0;
+    const step = () => {
+      i = Math.min(text.length, i + (Math.random() < 0.08 ? 1 : 3));
+      el.textContent = text.slice(0, i); el.appendChild(caret);
+      if (i < text.length) setTimeout(step, 12); else { caret.remove(); resolve(); }
+    };
+    step();
+  });
+}
 // ---- المحادثة ----
 function add(text, cls) {
   const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text; chat.appendChild(d);
@@ -524,12 +578,13 @@ function add(text, cls) {
 const DIR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>';
 const CALL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
 const STAR_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01z"/></svg>';
-function fillBot(el, reply, services = [], question = '') {
+async function fillBot(el, reply, services = [], question = '') {
   const { intro, steps } = parseSteps(reply);
-  if (steps.length >= 2) { el.textContent = intro; el.appendChild(buildStepCard(steps)); }
-  else el.textContent = reply;
-  for (const s of services) {
-    const d = document.createElement('div'); d.className = 'svc' + (s.recommended ? ' rec' : '');
+  el.textContent = '';
+  await typeText(el, steps.length >= 2 ? intro : reply);
+  if (steps.length >= 2) el.appendChild(buildStepCard(steps));
+  services.forEach((s, idx) => {
+    const d = document.createElement('div'); d.className = 'svc' + (s.recommended ? ' rec' : ''); d.style.setProperty('--i', idx);
     const top = document.createElement('div'); top.className = 'svc-top';
     const info = document.createElement('div'); info.textContent = s.name;
     if (s.recommended) { const b = document.createElement('span'); b.className = 'svc-badge'; b.textContent = t('nearest'); info.appendChild(b); }
@@ -547,7 +602,7 @@ function fillBot(el, reply, services = [], question = '') {
     m.innerHTML = DIR_ICON + '<span>' + t('dir') + '</span>';
     m.href = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`; acts.appendChild(m);
     d.append(top, acts); el.appendChild(d);
-  }
+  });
   const sc = detectScenario(question);
   if (sc) attachVideo(el, sc);
   addActions(el, reply);
@@ -563,8 +618,8 @@ async function send(text) {
   try {
     const r = await fetch('/api/assist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, latitude: coords?.lat, longitude: coords?.lon, lang: cfg.lang }) });
     const d = await r.json();
-    fillBot(el, d.reply || '…', d.services, text); playReceive();
-  } catch { fillBot(el, t('down')); }
+    playReceive(); await fillBot(el, d.reply || '…', d.services, text);
+  } catch { await fillBot(el, t('down')); }
 }
 $('#f').onsubmit = e => { e.preventDefault(); send(); };
 
