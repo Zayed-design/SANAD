@@ -63,6 +63,10 @@ h1{font-size:clamp(34px,7vw,52px);line-height:1.25;font-weight:700;letter-spacin
 .stepbtn.next{background:var(--g);color:#000}
 .stepbtn.next.done{background:var(--s2);color:var(--g)}
 .stepbtn:disabled{opacity:.35;pointer-events:none}
+/* اتجاه السهم يُحدَّد عبر CSS حسب dir الفعلي للصفحة، لا عبر شرط لغة بجافاسكربت، لضمان عدم انعكاسه أبدًا */
+.stepbtn.prev svg{transform:scaleX(-1)}
+html[dir="rtl"] .stepbtn.prev svg{transform:scaleX(1)}
+html[dir="rtl"] .stepbtn.next svg{transform:scaleX(-1)}
 .step-illus{position:relative;display:flex;justify-content:center;align-items:center;color:var(--g);min-height:78px;margin-bottom:6px}
 .step-illus::before{content:'';position:absolute;width:104px;height:78px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--g) 16%,transparent),transparent 72%);animation:illusGlow 3.6s ease-in-out infinite}
 @keyframes illusGlow{0%,100%{opacity:.55;transform:scale(.94)}50%{opacity:1;transform:scale(1.04)}}
@@ -104,7 +108,8 @@ form.c:focus-within{border-color:var(--g)}
 #quickList{max-height:50vh;overflow-y:auto;margin:14px 0}
 .vidwrap{margin-top:10px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
 .vidwrap video{width:100%;display:block;background:#000;max-height:320px}
-.vidcap{font-size:12px;color:var(--mu);padding:6px 10px;background:var(--s1)}
+.vidcap{display:flex;align-items:center;justify-content:center;gap:7px;font-size:12.5px;color:var(--mu);padding:9px 12px;background:linear-gradient(0deg,var(--s1),color-mix(in srgb,var(--g) 5%,var(--s1)));border-top:1px dashed var(--line);font-style:italic}
+.vidcap svg{width:14px;height:14px;flex:none;opacity:.75;color:var(--g)}
 #mic.on{background:var(--red);animation:pulse 1.2s infinite}
 #send{background:var(--g);color:#000;box-shadow:0 0 18px color-mix(in srgb,var(--g) 35%,transparent)}
 @keyframes pulse{50%{box-shadow:0 0 0 10px #ff453a22}}
@@ -367,7 +372,12 @@ function attachVideo(el, sc) {
     wrap.appendChild(v);
     el.appendChild(wrap);
   });
-  if (usingOther) { const cap = document.createElement('div'); cap.className = 'vidcap'; cap.textContent = cfg.lang === 'ar' ? 'الفيديو متاح بالإنجليزية فقط' : 'Video only available in Arabic'; el.appendChild(cap); }
+  if (usingOther) {
+    const cap = document.createElement('div'); cap.className = 'vidcap';
+    cap.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 6 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-6-3.8-9s1.3-6.3 3.8-9z"/></svg><span></span>';
+    cap.querySelector('span').textContent = cfg.lang === 'ar' ? 'الفيديو متاح بالإنجليزية فقط' : 'Video only available in Arabic';
+    el.appendChild(cap);
+  }
 }
 function renderQuickList() {
   $('#quickList').replaceChildren(...SCENARIOS.map(sc => {
@@ -420,11 +430,9 @@ function toast(m) { const el = $('#toast'); el.textContent = m; el.classList.add
 const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.500 8.500a5 5 0 0 1 0 7"/></svg>';
 const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
 const CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-const CHEVRON_LEFT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>';
-const CHEVRON_RIGHT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
-// في العربية (RTL) اتجاه "التالي" بصريًا لليسار، وفي الإنجليزية (LTR) لليمين — والعكس لزر "السابق"
-const nextChevron = () => cfg.lang === 'ar' ? CHEVRON_LEFT : CHEVRON_RIGHT;
-const prevChevron = () => cfg.lang === 'ar' ? CHEVRON_RIGHT : CHEVRON_LEFT;
+// سهم واحد فقط بجافاسكربت يشاور لليمين دائمًا؛ الانعكاس الفعلي (لزر السابق أو في RTL) يتم بالكامل عبر CSS بالأعلى
+// (.stepbtn.prev / html[dir="rtl"]) بدل شرط لغة بجافاسكربت، حتى لا ينعكس بالخطأ مرة أخرى
+const CHEVRON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
 const X_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
 // ---- ملاحظة تنويه لطيفة تظهر مرة واحدة أعلى المحادثة مع زر إغلاق، ولا تعود بعد إغلاقها ----
@@ -821,7 +829,7 @@ function buildStepCard(steps) {
   const illus = document.createElement('div'); illus.className = 'step-illus';
   const body = document.createElement('div'); body.className = 'steps-body';
   const nav = document.createElement('div'); nav.className = 'steps-nav';
-  const prev = document.createElement('button'); prev.type = 'button'; prev.className = 'icbtn stepbtn prev'; prev.innerHTML = prevChevron(); prev.setAttribute('aria-label', t('prevStep'));
+  const prev = document.createElement('button'); prev.type = 'button'; prev.className = 'icbtn stepbtn prev'; prev.innerHTML = CHEVRON; prev.setAttribute('aria-label', t('prevStep'));
   const next = document.createElement('button'); next.type = 'button'; next.className = 'icbtn stepbtn next'; next.setAttribute('aria-label', t('nextStep'));
   let i = 0;
   function render(animate) {
@@ -835,7 +843,7 @@ function buildStepCard(steps) {
     }
     prev.disabled = i === 0;
     const last = i === steps.length - 1;
-    next.innerHTML = last ? CHECK_ICON : nextChevron();
+    next.innerHTML = last ? CHECK_ICON : CHEVRON;
     next.classList.toggle('done', last);
     next.disabled = last;
     next.setAttribute('aria-label', last ? t('doneStep') : t('nextStep'));
