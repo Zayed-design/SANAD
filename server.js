@@ -176,10 +176,26 @@ function arabicSpellingVariants(place) {
 const KNOWN_PLACES = [
   { test: /^الوثبة?$|^al[\s-]?wathba$/i, lat: 24.2048, lon: 54.7056, name: "الوثبة، أبوظبي" },
 ];
+
+// مراكز تقريبية لمناطق فرعية (بني ياس شرق/غرب، الشامخة، المفرق) محسوبة من إحداثيات
+// الورش الحقيقية اللي جمعناها لنفس المناطق — تتجاوز Nominatim كليًا لهذي الأسماء الشائعة،
+// عشان أرقام القطاعات المكتوبة بالحروف (زي "ثمانية" بدل "8") ما تفشّل الطلب كامل.
+// exact:false دايمًا لأنها مركز عام للمنطقة مو نقطة القطاع بالضبط
+const KNOWN_AREAS = [
+  { test: /(?:بني\s+ياس|بنياس)\s*شرق|baniyas\s*east/i, lat: 24.303, lon: 54.622, name: "بني ياس شرق (تقريبي)" },
+  { test: /(?:بني\s+ياس|بنياس)\s*غرب|baniyas\s*west/i, lat: 24.296, lon: 54.626, name: "بني ياس غرب (تقريبي)" },
+  { test: /الشامخة|شامخة|shamkha/i, lat: 24.38, lon: 54.70, name: "الشامخة (تقريبي)" },
+  { test: /المفرق|mafraq/i, lat: 24.298, lon: 54.608, name: "المفرق (تقريبي)" },
+  { test: /بني\s+ياس|بنياس|baniyas/i, lat: 24.31, lon: 54.62, name: "بني ياس (تقريبي)" },
+];
+
 function knownPlace(place) {
   const norm = place.trim().replace(/[\u064B-\u0652]/g, "");
-  const hit = KNOWN_PLACES.find(p => p.test.test(norm));
-  return hit ? { lat: hit.lat, lon: hit.lon, name: hit.name, exact: true } : null;
+  const exact = KNOWN_PLACES.find(p => p.test.test(norm));
+  if (exact) return { lat: exact.lat, lon: exact.lon, name: exact.name, exact: true };
+  const area = KNOWN_AREAS.find(p => p.test.test(norm));
+  if (area) return { lat: area.lat, lon: area.lon, name: area.name, exact: false };
+  return null;
 }
 
 async function geocodeOnce(q, lang) {
