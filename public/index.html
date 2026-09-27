@@ -61,10 +61,16 @@ h1{font-size:clamp(34px,7vw,52px);line-height:1.25;font-weight:700;letter-spacin
 .stepbtn.next{background:var(--g);color:#000}
 .stepbtn.next.done{background:var(--s2);color:var(--g)}
 .stepbtn:disabled{opacity:.35;pointer-events:none}
-.svc{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;padding:12px 14px;background:var(--s1);border:1px solid var(--line);border-radius:14px;white-space:normal}
+.svc{display:flex;flex-direction:column;gap:10px;margin-top:10px;padding:14px 16px;background:var(--s1);border:1px solid var(--line);border-radius:14px;white-space:normal}
 .svc.rec{border-color:var(--g)}
-.svc small{display:block;color:var(--mu)}.svc a{color:var(--g);text-decoration:none;font-size:14px;margin-inline-start:10px}
+.svc small{display:block;color:var(--mu);margin-top:2px}
 .svc-badge{display:inline-block;margin-inline-start:8px;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--g) 18%,transparent);color:var(--g);font-size:11px;font-weight:700;vertical-align:middle}
+.svc-actions{display:flex;gap:8px}
+.svc-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border-radius:12px;font-size:13.5px;font-weight:700;text-decoration:none;border:1px solid var(--line);color:var(--tx);transition:opacity .2s ease,transform .05s ease}
+.svc-btn:active{transform:scale(.97)}
+.svc-btn svg{width:15px;height:15px;flex:none}
+.svc-btn.dir{background:var(--s2);color:var(--g);border-color:var(--g)}
+.svc-btn.call{background:var(--g);color:#04140a;border-color:var(--g)}
 form.c{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;margin:8px 0 16px;padding:8px;border-radius:99px;background:var(--s2);border:1px solid var(--line)}
 form.c:focus-within{border-color:var(--g)}
 #inp{flex:1;min-width:0;background:none;border:0;outline:0;padding:10px 14px;font-size:16px}
@@ -510,6 +516,8 @@ function add(text, cls) {
   }
   chat.scrollTop = chat.scrollHeight; window.scrollTo(0, document.body.scrollHeight); return d;
 }
+const DIR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>';
+const CALL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
 function fillBot(el, reply, services = [], question = '') {
   const { intro, steps } = parseSteps(reply);
   if (steps.length >= 2) { el.textContent = intro; el.appendChild(buildStepCard(steps)); }
@@ -519,9 +527,10 @@ function fillBot(el, reply, services = [], question = '') {
     const info = document.createElement('div'); info.textContent = s.name;
     if (s.recommended) { const b = document.createElement('span'); b.className = 'svc-badge'; b.textContent = t('nearest'); info.appendChild(b); }
     const sm = document.createElement('small'); sm.textContent = s.distance; info.appendChild(sm);
-    const acts = document.createElement('div');
-    if (s.phone) { const a = document.createElement('a'); a.href = 'tel:' + s.phone.replace(/[^\d+]/g, ''); a.textContent = t('call'); acts.appendChild(a); }
-    const m = document.createElement('a'); m.target = '_blank'; m.rel = 'noopener'; m.textContent = t('dir');
+    const acts = document.createElement('div'); acts.className = 'svc-actions';
+    if (s.phone) { const a = document.createElement('a'); a.className = 'svc-btn call'; a.href = 'tel:' + s.phone.replace(/[^\d+]/g, ''); a.innerHTML = CALL_ICON + '<span>' + t('call') + '</span>'; acts.appendChild(a); }
+    const m = document.createElement('a'); m.target = '_blank'; m.rel = 'noopener'; m.className = 'svc-btn dir';
+    m.innerHTML = DIR_ICON + '<span>' + t('dir') + '</span>';
     m.href = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`; acts.appendChild(m);
     d.append(info, acts); el.appendChild(d);
   }

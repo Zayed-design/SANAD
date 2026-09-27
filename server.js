@@ -189,13 +189,15 @@ const KNOWN_AREAS = [
   { test: /بني\s+ياس|بنياس|baniyas/i, lat: 24.31, lon: 54.62, name: "بني ياس (تقريبي)" },
 ];
 
-function knownPlace(place) {
+function knownExactPlace(place) {
   const norm = place.trim().replace(/[\u064B-\u0652]/g, "");
   const exact = KNOWN_PLACES.find(p => p.test.test(norm));
-  if (exact) return { lat: exact.lat, lon: exact.lon, name: exact.name, exact: true };
+  return exact ? { lat: exact.lat, lon: exact.lon, name: exact.name, exact: true } : null;
+}
+function knownAreaFallback(place) {
+  const norm = place.trim().replace(/[\u064B-\u0652]/g, "");
   const area = KNOWN_AREAS.find(p => p.test.test(norm));
-  if (area) return { lat: area.lat, lon: area.lon, name: area.name, exact: false };
-  return null;
+  return area ? { lat: area.lat, lon: area.lon, name: area.name, exact: false } : null;
 }
 
 async function geocodeOnce(q, lang) {
@@ -220,17 +222,17 @@ function placeSimplifications(place) {
   return out; // من الأكثر تحديدًا للأقل
 }
 
-// الترتيب: (1) قائمة الأماكن الموثوقة يدويًا، (2) الاسم كامل كما كتبه المستخدم (مع بدائله
-// الإملائية، ومع/بدون "أبوظبي")، (3) لو فشل، نبسّط الاسم تدريجيًا (نشيل آخر كلمة) ونعيد المحاولة.
-// نرجّع أيضًا exact:false لو احتجنا نبسّط الاسم، عشان نقدر نخبر المستخدم إننا قرّبنا للمنطقة
-// العامة فقط ومو للجزء الدقيق اللي كتبه (مثل رقم قطاع معيّن).
+// الترتيب: (1) قائمة الأماكن الموثوقة يدويًا (تطابق دقيق)، (2) الاسم كامل كما كتبه
+// المستخدم عبر Nominatim (مع بدائله الإملائية، ومع/بدون "أبوظبي") — نحاول الرقم/القطاع
+// المحدد بالضبط قبل أي تعميم، (3) لو فشل، نبسّط الاسم تدريجيًا (نشيل آخر كلمة) ونعيد
+// المحاولة عبر Nominatim، (4) وأخيرًا وبس لو فشل كل شي، مركز المنطقة العامة كحل أخير.
 async function geocodeText(place, lang) {
-  const known = knownPlace(place);
+  const known = knownExactPlace(place);
   if (known) return known;
 
   const suffix = lang === "en" ? " Abu Dhabi" : " أبوظبي";
   const levels = placeSimplifications(place);
-  if (!levels.length) return null;
+  if (!levels.length) return knownAreaFallback(place);
 
   for (const v of arabicSpellingVariants(levels[0]).slice(0, 2)) {
     const hit = (await geocodeOnce(v + suffix, lang)) || (await geocodeOnce(v, lang));
@@ -240,7 +242,7 @@ async function geocodeText(place, lang) {
     const hit = (await geocodeOnce(level + suffix, lang)) || (await geocodeOnce(level, lang));
     if (hit) return { ...hit, exact: false, searchedFor: level };
   }
-  return null;
+  return knownAreaFallback(place);
 }
 
 const SAFETY = ["HARASSMENT", "HATE_SPEECH", "SEXUALLY_EXPLICIT", "DANGEROUS_CONTENT"].map(c => ({ category: "HARM_CATEGORY_" + c, threshold: "BLOCK_MEDIUM_AND_ABOVE" }));
