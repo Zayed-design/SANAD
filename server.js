@@ -220,7 +220,7 @@ const KNOWN_AREAS = [
 // ملاحظة: إحداثيات شخبوط/الرحبة/الشهامة/السويحان/خليفة/مدينة محمد بن زايد تقريبية — عدّلها هنا إذا عندك نقطة أدق.
 const normAr = s => String(s || "").replace(/[ً-ْ]/g, "").replace(/[إأآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").toLowerCase();
 const GAZETTEER = [
-  { re: /(?:^|\s)(?:ال)?(?:شخبوط|شخبوت)(?=\s|$)|shakh?bou?t/, lat: 24.37, lon: 54.63, name: "مدينة شخبوط (تقريبي)" },
+  { re: /(?:^|\s)(?:ال)?شخبو[طتظد]?(?=\s|$)|shakh?bou?[td]?/, lat: 24.351516, lon: 54.62203, name: "مدينة شخبوط", exact: true },
   { re: /(?:^|\s)(?:ال)?(?:سويحان|سويحن)(?=\s|$)|su?weih?an|swaihan/, lat: 24.4583, lon: 55.3442, name: "السويحان (تقريبي)" },
   { re: /(?:^|\s)(?:ال)?رحبه(?=\s|$)|rahba/, lat: 24.525, lon: 54.715, name: "الرحبة (تقريبي)" },
   { re: /(?:^|\s)(?:ال)?شهامه(?=\s|$)|shahama/, lat: 24.52, lon: 54.66, name: "الشهامة (تقريبي)" },
@@ -240,7 +240,7 @@ function gazetteerMatch(place, strict) {
       const rest = s.replace(g.re, " ").replace(GAZ_FILLER, " ").replace(/\s+/g, " ").trim();
       if (rest) continue;
     }
-    return { lat: g.lat, lon: g.lon, name: g.name, exact: false };
+    return { lat: g.lat, lon: g.lon, name: g.name, exact: g.exact === true };
   }
   return null;
 }
