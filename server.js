@@ -89,12 +89,12 @@ async function nearby(kind, lat, lon) {
   const cached = nearbyCache.get(key);
   if (cached && Date.now() - cached.t < NEARBY_TTL) return cached.v;
 
-  // نوسّع نطاق البحث تدريجيًا (7 ثم 20 ثم 40 كم) إذا لم نجد شيئًا بالنطاق الأصغر —
+  // نوسّع نطاق البحث تدريجيًا (7 ثم 20 ثم 40 ثم 100 كم) إذا لم نجد شيئًا بالنطاق الأصغر —
   // بعض المناطق (زي أطراف بني ياس) قليلة التوثيق بقاعدة بيانات OpenStreetMap
   let features = [];
-  let usedRadius = 40000; // نستخدمه كحد أقصى لضم القائمة اليدوية حتى لو Geoapify ما رجع شي
+  let usedRadius = 0; // نطاق Geoapify الذي رجّع نتائج فعلًا (0 = لم يرجع شيئًا)
   if (GEOAPIFY_KEY) {
-    for (const radius of [7000, 20000, 40000]) {
+    for (const radius of [7000, 20000, 40000, 100000]) {
       try {
         const res = await geoapifyOnce(kind.categories, lat, lon, radius);
         if (res.length) { features = res; usedRadius = radius; break; }
@@ -131,8 +131,30 @@ async function nearby(kind, lat, lon) {
       m: meters(lat, lon, c.lat, c.lon),
     }));
 
-    const out = [...fromApi, ...fromCurated]
-      .filter(x => Number.isFinite(x.m) && x.m <= usedRadius)
+    // القائمة اليدوية تغطي الإمارات السبع: نوسّع نطاقها تدريجيًا (حتى 250 كم) لين نلقى 3 ورش على الأقل،
+    // بحيث أي موقع داخل الدولة (دبي، الشارقة، عجمان، أم القيوين، رأس الخيمة، الفجيرة، أبوظبي) يرجّع نتائج
+    let curatedRadius = 0;
+    for (const r of [7000, 20000, 40000, 80000, 150000, 250000]) {
+      if (fromCurated.filter(x => x.m <= r).length >= 3) { curatedRadius = r; break; }
+    }
+    const maxRadius = Math.max(usedRadius, curatedRadius);
+
+    // نمنع تكرار نفس الورشة إذا طلعت من القائمة اليدوية ومن Geoapify (نفس الموقع تقريبًا + اسم/رقم متشابه)،
+    // ونفضّل نسخة القائمة اليدوية لأن فيها تقييم وساعات دوام
+    const nameKey = s => String(s || "").toLowerCase().replace(/[^a-z0-9؀-ۿ]/g, "");
+    const kept = [];
+    for (const x of [...fromCurated, ...fromApi]) {
+      if (!Number.isFinite(x.m) || x.m > maxRadius) continue;
+      const k = nameKey(x.name);
+      const dup = kept.some(y => {
+        if (!Number.isFinite(y.lat) || !Number.isFinite(x.lat) || meters(y.lat, y.lon, x.lat, x.lon) > 60) return false;
+        const k2 = nameKey(y.name);
+        return (x.phone && x.phone === y.phone) || k === k2 || (k.length >= 6 && k2.length >= 6 && (k.includes(k2) || k2.includes(k)));
+      });
+      if (!dup) kept.push(x);
+    }
+
+    const out = kept
       .sort((a, b) => a.m - b.m)
       .slice(0, 6)
       .map(({ m, ...s }, i) => ({ ...s, distance: (m / 1000).toFixed(1) + " km", recommended: i === 0 }));
@@ -178,6 +200,14 @@ const KNOWN_AREAS = [
   { test: /الشامخة|شامخة|shamkha/i, lat: 24.38, lon: 54.70, name: "الشامخة (تقريبي)" },
   { test: /المفرق|mafraq/i, lat: 24.298, lon: 54.608, name: "المفرق (تقريبي)" },
   { test: /بني\s+ياس|بنياس|baniyas/i, lat: 24.31, lon: 54.62, name: "بني ياس (تقريبي)" },
+  // مراكز المدن الرئيسية بباقي الإمارات — حل أخير إذا فشل Nominatim بتحديد الاسم
+  { test: /(?<![؀-ۿ])دبي(?![؀-ۿ])|dubai/i, lat: 25.2048, lon: 55.2708, name: "دبي (تقريبي)" },
+  { test: /(?<![؀-ۿ])الشارقة(?![؀-ۿ])|sharjah/i, lat: 25.3463, lon: 55.4209, name: "الشارقة (تقريبي)" },
+  { test: /(?<![؀-ۿ])عجمان(?![؀-ۿ])|ajman/i, lat: 25.4052, lon: 55.5136, name: "عجمان (تقريبي)" },
+  { test: /(?<![؀-ۿ])ا?م القيوين(?![؀-ۿ])|umm al quwain/i, lat: 25.5647, lon: 55.5552, name: "أم القيوين (تقريبي)" },
+  { test: /(?<![؀-ۿ])ر[أا]س الخيمة(?![؀-ۿ])|ras al khaimah/i, lat: 25.7895, lon: 55.9432, name: "رأس الخيمة (تقريبي)" },
+  { test: /(?<![؀-ۿ])الفجيرة(?![؀-ۿ])|fujairah/i, lat: 25.1288, lon: 56.3265, name: "الفجيرة (تقريبي)" },
+  { test: /(?<![؀-ۿ])العين(?![؀-ۿ])|al ain/i, lat: 24.2075, lon: 55.7447, name: "العين (تقريبي)" },
 ];
 
 function knownExactPlace(place) {
@@ -223,6 +253,8 @@ function detectAreaDir(text) {
 }
 const AREA_LABEL = { east: "بني ياس شرق", west: "بني ياس غرب", shamkha: "الشامخة", mafraq: "المفرق" };
 function curatedSectorMatch(place) {
+  // "شرق/غرب + رقم" تسمية محلية لبني ياس/الشامخة (أبوظبي)؛ إذا ذكر المستخدم إمارة ثانية نتجاهلها
+  if (/(?<![؀-ۿ])(?:العين|دبي|الشارقة|عجمان|أم القيوين|ام القيوين|رأس الخيمة|راس الخيمة|الفجيرة)(?![؀-ۿ])|al ain|dubai|sharjah|ajman|umm al quwain|ras al khaimah|fujairah/i.test(place)) return null;
   const dir = detectAreaDir(place);
   if (!dir) return null;
   const num = extractSectorNumber(place);
@@ -250,10 +282,31 @@ function curatedSectorMatch(place) {
   return { lat: best.lat, lon: best.lon, name: `${label} (تقدير تقريبي بناءً على أقرب قطاع معروف لدينا: ${near} — ${best.name})`, exact: false };
 }
 
-async function geocodeOnce(q, lang) {
+// أقرب إمارة لإحداثيات المستخدم (مراكز تقريبية) — نستخدمها لإضافة اسم الإمارة الصحيحة عند البحث عن
+// اسم مكان بدل تثبيت "أبوظبي" دائمًا، حتى تشتغل الميزة بالإمارات السبع
+const EMIRATE_CENTERS = [
+  { ar: "أبوظبي", en: "Abu Dhabi", lat: 24.45, lon: 54.4 },
+  { ar: "العين", en: "Al Ain", lat: 24.2, lon: 55.75 },
+  { ar: "دبي", en: "Dubai", lat: 25.2, lon: 55.3 },
+  { ar: "الشارقة", en: "Sharjah", lat: 25.35, lon: 55.4 },
+  { ar: "عجمان", en: "Ajman", lat: 25.4, lon: 55.5 },
+  { ar: "أم القيوين", en: "Umm Al Quwain", lat: 25.56, lon: 55.55 },
+  { ar: "رأس الخيمة", en: "Ras Al Khaimah", lat: 25.78, lon: 55.95 },
+  { ar: "الفجيرة", en: "Fujairah", lat: 25.12, lon: 56.33 },
+];
+const EMIRATE_MENTION = /(?<![؀-ۿ])(?:أبوظبي|ابوظبي|ابو ظبي|أبو ظبي|العين|دبي|الشارقة|عجمان|أم القيوين|ام القيوين|رأس الخيمة|راس الخيمة|الفجيرة)(?![؀-ۿ])|abu dhabi|al ain|dubai|sharjah|ajman|umm al quwain|ras al khaimah|fujairah/i;
+function nearestEmirate(bias) {
+  if (!bias) return EMIRATE_CENTERS[0]; // الافتراضي القديم: أبوظبي
+  return EMIRATE_CENTERS.reduce((a, b) =>
+    meters(bias.lat, bias.lon, a.lat, a.lon) <= meters(bias.lat, bias.lon, b.lat, b.lon) ? a : b);
+}
+
+async function geocodeOnce(q, lang, bias) {
   try {
+    // نحيّز النتائج (بدون حصرها) لمنطقة المستخدم إن كانت إحداثياته معروفة
+    const vb = bias ? `&viewbox=${bias.lon - 0.5},${bias.lat + 0.5},${bias.lon + 0.5},${bias.lat - 0.5}` : "";
     const r = await fetch(
-      "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ae&accept-language=" + (lang === "en" ? "en" : "ar") + "&q=" + encodeURIComponent(q),
+      "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=ae" + vb + "&accept-language=" + (lang === "en" ? "en" : "ar") + "&q=" + encodeURIComponent(q),
       { headers: { "User-Agent": "SanadEmergencyAssistant/2.0 (UAE safety app)" }, signal: AbortSignal.timeout(6000) }
     );
     if (!r.ok) return null;
@@ -276,23 +329,26 @@ function placeSimplifications(place) {
 // الورش الحقيقية (أدق من Nominatim لأسماء قطاعات محلية زي "شرق 9" غير موجودة بخرائط OSM)،
 // (3) الاسم كامل عبر Nominatim (مع بدائله الإملائية، ومع/بدون "أبوظبي")، (4) لو فشل، نبسّط
 // الاسم تدريجيًا ونعيد المحاولة عبر Nominatim، (5) وأخيرًا مركز المنطقة العامة كحل أخير.
-async function geocodeText(place, lang) {
+async function geocodeText(place, lang, bias) {
   const known = knownExactPlace(place);
   if (known) return known;
 
   const sector = curatedSectorMatch(place);
   if (sector && sector.exact) return sector; // تطابق دقيق لنفس الجهة ونفس الرقم
 
-  const suffix = lang === "en" ? " Abu Dhabi" : " أبوظبي";
+  // اسم الإمارة المضاف للبحث: لو المستخدم ذكر إمارة بنفسه ما نضيف شي، وإلا نستخدم أقرب إمارة
+  // لموقعه (أو أبوظبي إذا ما عندنا موقعه، مثل السلوك القديم)
+  const em = nearestEmirate(bias);
+  const suffix = EMIRATE_MENTION.test(place) ? "" : " " + (lang === "en" ? em.en : em.ar);
   const levels = placeSimplifications(place);
   if (!levels.length) return sector || knownAreaFallback(place);
 
   for (const v of arabicSpellingVariants(levels[0]).slice(0, 2)) {
-    const hit = (await geocodeOnce(v + suffix, lang)) || (await geocodeOnce(v, lang));
+    const hit = (await geocodeOnce(v + suffix, lang, bias)) || (await geocodeOnce(v, lang, bias));
     if (hit) return { ...hit, exact: true };
   }
   for (const level of levels.slice(1)) {
-    const hit = (await geocodeOnce(level + suffix, lang)) || (await geocodeOnce(level, lang));
+    const hit = (await geocodeOnce(level + suffix, lang, bias)) || (await geocodeOnce(level, lang, bias));
     if (hit) return { ...hit, exact: false, searchedFor: level };
   }
   return sector || knownAreaFallback(place);
@@ -355,7 +411,7 @@ app.post("/api/assist", limit, async (req, res) => {
   const locMatch = kind ? (text.match(LOCATION_MENTION) || text.match(NEAREST_FROM_MENTION)) : null;
   let geocodeFailed = false;
   if (locMatch) {
-    const geo = await geocodeText(locMatch[1].trim(), L);
+    const geo = await geocodeText(locMatch[1].trim(), L, hasLoc ? { lat: la0, lon: lo0 } : null);
     if (geo) {
       la = geo.lat; lo = geo.lon; hasLoc = true; mentionedPlace = geo.name;
       approxPlace = geo.exact === false; // طابقنا اسمًا مبسّطًا (بعد حذف رقم قطاع/اتجاه) مو النص بالضبط
@@ -378,6 +434,7 @@ Ask as few questions as possible. Start with safety if there is danger. Never cl
 You can see the recent turns of this conversation above (if any). Never ask the user to repeat information they already gave earlier in this same conversation — if an earlier message already describes the emergency or situation, treat it as known and continue directly with the next actionable guidance. Give the immediate, concrete first action right away in every reply; only ask a clarifying question if it is truly essential to safety, and never let a question be the entire reply — always pair it with the safe first step to take in the meantime.
 In "Nearby results", the item marked "recommended": true is the closest one and is your top pick — present it first and explicitly as your recommendation (e.g. "أقرب خيار لك هو..." / "Your closest option is..."), then briefly list the rest as alternatives. Some entries include a real "rating" (out of 5) and/or "hours" field from verified data — if an entry has these, you may mention them accurately (e.g. "تقييمه 4.3 من 5"); if an entry does NOT have them, never invent or estimate a rating, price, hours, or review for it. Base your top recommendation on proximity first; rating/hours are just extra helpful detail when available, not the ranking criteria.
 If "Nearby results" is empty even though a location is available, say plainly that no matching places were found in the wider search area and suggest calling emergency numbers or trying a well-known nearby landmark name instead — never invent a place.
+Coverage is all seven emirates of the UAE. If the closest result is more than about 30 km away, say so plainly (the distance field is real) and suggest calling roadside/emergency numbers if it is urgent — never present a far result as nearby.
 ${mentionedPlace ? `The user named a specific place in their message; you searched near it ("${mentionedPlace}") instead of their GPS — mention briefly that you searched near that place.` : ""}
 ${approxPlace ? `IMPORTANT: the exact sub-area/sector number the user typed could not be pinpointed, so you searched near the general area only ("${mentionedPlace}") rather than their precise sector — explicitly tell them this is an approximation of the general area, not their exact sector, so results may be a bit off.` : ""}
 ${geocodeFailed ? `The user named a specific place ("${locMatch[1].trim()}") in their message, but its exact location could NOT be determined. Do NOT use or mention any device/network location as a substitute — there are no reliable Nearby results for what they asked. Tell them clearly and briefly that you couldn't pinpoint that exact place, and ask them to either try a more specific/well-known area name, or use the "My location" button for their current position.` : ""}
