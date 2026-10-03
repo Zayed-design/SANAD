@@ -31,6 +31,19 @@ const limit = (req, res, next) => {
   n > 25 ? res.status(429).json({ reply: "طلبات كثيرة، انتظر دقيقة. / Too many requests, wait a minute." }) : next();
 };
 
+// سقف عام لاستدعاءات الذكاء الاصطناعي بالدقيقة (لكل المستخدمين معًا) لحماية حصة Gemini المجانية من الزحام المفاجئ،
+// وكاش للأسئلة العامة المتكررة (بدون موقع ولا سياق محادثة) حتى لا نستهلك الحصة على نفس السؤال مرتين.
+const GLOBAL_AI_PER_MIN = Number(process.env.GLOBAL_AI_PER_MIN) || 90;
+let globalAiHits = 0;
+setInterval(() => { globalAiHits = 0; }, 60000).unref();
+const replyCache = new Map();
+const REPLY_TTL = 10 * 60 * 1000, REPLY_MAX = 300;
+const replyKey = (text, L) => L + ":" + String(text).toLowerCase().replace(/[\s\u064B-\u065F\u0640،,.!?؟]+/g, " ").trim();
+const EMERGENCY_LINE = {
+  ar: " في الطوارئ اتصل مباشرة: الشرطة 999 · الإسعاف 998 · الدفاع المدني 997.",
+  en: " In an emergency call directly: Police 999 · Ambulance 998 · Civil Defense 997.",
+};
+
 // ورش/محلات إطارات حقيقية جمعها صاحب المشروع يدويًا بمناطق بني ياس/الشامخة/المفرق
 // (بيانات OpenStreetMap/Geoapify شحيحة بهالمناطق) — تُدمج مع نتائج Geoapify الحية بدالة nearby()
 // ولا تُلغي ترتيب "الأقرب أولًا"، فقط تضيف مرشّحين حقيقيين إضافيين لنفس الحساب.
@@ -559,7 +572,7 @@ If asked who made/built/developed you, or who owns/runs this app, answer that Sa
 Ask as few questions as possible. Start with safety if there is danger. Never claim you called anyone or sent a location. For nearby services use ONLY the provided "Nearby results" list — never suggest, invent, or add any place, business, or category (like a fuel station, dealership, or generic landmark) that is not in that list, even as a "by the way" suggestion, even if it seems helpful; if the list doesn't have what the user asked for, say so plainly instead of substituting something else. If there is no GPS and nearby search is needed, ask the user to open "My location".
 You can see the recent turns of this conversation above (if any). Never ask the user to repeat information they already gave earlier in this same conversation — if an earlier message already describes the emergency or situation, treat it as known and continue directly with the next actionable guidance. Give the immediate, concrete first action right away in every reply; only ask a clarifying question if it is truly essential to safety, and never let a question be the entire reply — always pair it with the safe first step to take in the meantime.
 In "Nearby results", the item marked "recommended": true is the closest one and is your top pick — present it first and explicitly as your recommendation (e.g. "أقرب خيار لك هو..." / "Your closest option is..."), then briefly list the rest as alternatives. Some entries include a real "rating" (out of 5) and/or "hours" field from verified data — if an entry has these, you may mention them accurately (e.g. "تقييمه 4.3 من 5"); if an entry does NOT have them, never invent or estimate a rating, price, hours, or review for it. Base your top recommendation on proximity first; rating/hours are just extra helpful detail when available, not the ranking criteria. The list is already filtered to the kind of place the user asked for: by default only real car repair garages (tyre/puncture shops, oil-change and car-wash places are deliberately excluded unless the user asked for them), so never add or suggest such places yourself. If an entry has a \"website\" field the app already shows a website button for it, so don't print the URL.
-If "Nearby results" is empty even though a location is available, say plainly that no matching places were found in the wider search area and suggest calling emergency numbers or trying a well-known nearby landmark name instead — never invent a place.
+Road numbers (Abu Dhabi): for a MINOR accident with NO injuries, the user should call Saaed (ساعد) on 800 72233 to report/plan the accident and move the vehicles off the road; to secure the road and tow a stalled or crashed vehicle on main roads, call Road Assistance Musanada (مساندة الطرق) on 800 850; any injury, fire, or danger means call 999 (police) / 998 (ambulance) first. Mention these numbers only for road accidents or breakdowns, only once, and never claim to have called anyone. Outside Abu Dhabi, say that minor-accident reporting differs by emirate and 999 is always valid.\nIf "Nearby results" is empty even though a location is available, say plainly that no matching places were found in the wider search area and suggest calling emergency numbers or trying a well-known nearby landmark name instead — never invent a place.
 Coverage is all seven emirates of the UAE. If the closest result is more than about 30 km away, say so plainly (the distance field is real) and suggest calling roadside/emergency numbers if it is urgent — never present a far result as nearby.
 ${mentionedPlace ? `The user named a specific place in their message; you searched near it ("${mentionedPlace}") instead of their GPS — mention briefly that you searched near that place.` : ""}
 ${approxPlace ? `IMPORTANT: the exact sub-area/sector number the user typed could not be pinpointed, so you searched near the general area only ("${mentionedPlace}") rather than their precise sector — explicitly tell them this is an approximation of the general area, not their exact sector, so results may be a bit off.` : ""}
@@ -568,15 +581,32 @@ Be brief and clear. Speak warmly and naturally, like a calm, caring person the u
 ${hasLoc ? `Search location used: ${la}, ${lo}` : "No GPS available."}
 Nearby results: ${services.length ? JSON.stringify(services) : "none"}`;
 
+  // أسئلة عامة متكررة (بلا موقع/ورش ولا سياق محادثة): نرجّع الرد المخزّن إن وُجد
+  const cacheable = !kind && safeHistory.length === 0;
+  const ck = cacheable ? replyKey(text, L) : "";
+  if (cacheable) {
+    const hit = replyCache.get(ck);
+    if (hit && Date.now() - hit.t < REPLY_TTL) return res.json({ reply: hit.v, services });
+  }
+  // سقف عام: عند الزحام الشديد نرجّع رسالة لطيفة مع أرقام الطوارئ بدل ما نفشل بصمت (والورش تظهر لأنها ما تحتاج الذكاء الاصطناعي)
+  if (++globalAiHits > GLOBAL_AI_PER_MIN) {
+    const busy = { ar: "الخدمة مزدحمة حاليًا، حاول بعد دقيقة." , en: "The service is busy right now, please try again in a minute." };
+    return res.status(429).json({ reply: busy[L] + EMERGENCY_LINE[L], services });
+  }
+
   try {
     const contents = [...safeHistory, { role: "user", parts: [{ text }] }];
     const r = await askGemini({ model: MODEL, contents, config: { systemInstruction, safetySettings: SAFETY } }, "assist");
+    if (cacheable && r.text) {
+      if (replyCache.size >= REPLY_MAX) replyCache.delete(replyCache.keys().next().value);
+      replyCache.set(ck, { t: Date.now(), v: r.text });
+    }
     res.json({ reply: r.text || REFUSE[L], services });
   } catch (e) {
     const msg = isQuota(e)
       ? { ar: "الخدمة مزدحمة حاليًا (تجاوز الحد المسموح من الطلبات)، حاول بعد دقيقة.", en: "The service is busy right now (rate limit reached), please try again in a minute." }
       : { ar: "تعذّر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.", en: "AI connection error, please try again." };
-    res.status(500).json({ reply: msg[L], services });
+    res.status(500).json({ reply: msg[L] + EMERGENCY_LINE[L], services });
   }
 });
 

@@ -132,7 +132,10 @@ dialog h2{font-size:20px;margin-bottom:16px}
 dialog h3{font-size:14px;color:var(--mu);font-weight:500;margin:18px 0 8px}
 .nums{display:grid;gap:10px}
 .num{display:flex;justify-content:space-between;align-items:center;padding:16px;border-radius:16px;background:var(--s2);color:var(--tx);text-decoration:none}
-.num b{font-size:24px;color:var(--g);direction:ltr}
+.num b{font-size:24px;color:var(--g);direction:ltr;white-space:nowrap}
+.num small{display:block;margin-top:3px;color:var(--mu);font-size:11.5px;font-weight:500;line-height:1.4}
+.num>span{min-width:0;padding-inline-end:10px}
+dialog#dlg{max-height:90vh;overflow-y:auto}
 .note{margin-top:14px;font-size:13px;color:var(--mu);line-height:1.7}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .opt{padding:10px 18px;border-radius:99px;background:var(--s2);border:1px solid transparent}
@@ -184,6 +187,8 @@ dialog h3{font-size:14px;color:var(--mu);font-weight:500;margin:18px 0 8px}
     <a class="num" href="tel:999"><span data-i="police"></span><b>999</b></a>
     <a class="num" href="tel:998"><span data-i="amb"></span><b>998</b></a>
     <a class="num" href="tel:997"><span data-i="civil"></span><b>997</b></a>
+    <a class="num" href="tel:800850"><span><span data-i="musanad"></span><small data-i="musanadN"></small></span><b>800 850</b></a>
+    <a class="num" href="tel:80072233"><span><span data-i="saaed"></span><small data-i="saaedN"></small></span><b>800 72233</b></a>
   </div>
   <p class="note" data-i="sosN"></p>
   <form method="dialog"><button class="chip cls" data-i="close"></button></form>
@@ -228,7 +233,7 @@ const T = {
     name:'سند', loc:'موقعي', sos:'طوارئ', ph:'اكتب أو اضغط الميكروفون وتحدث', listening:'أنا أسمعك… اضغط للإيقاف', trans:'جارٍ تحويل الصوت إلى نص…',
     greet:['أهلًا بك، بماذا أساعدك؟','سند معك. ما الذي تحتاجه؟','أخبرني ما الذي يحدث.','أنا هنا. من أين نبدأ؟','ما الأمر؟ أنا أسمعك.','في أي شيء تحتاج سندًا؟','قل لي ما تحتاجه الآن.','خذ نفسًا، ثم أخبرني.'],
     chips:[['طوارئ طبية','أحتاج مساعدة طبية عاجلة'],['عطل في السيارة','سيارتي معطلة على الطريق، أحتاج ميكانيكي أو سحب'],['أقرب مستشفى','أبحث عن أقرب مستشفى'],['حريق','كيف أتصرف عند حدوث حريق؟'],['حروق','ما خطوات الإسعاف الأولي للحروق؟']],
-    sosT:'أرقام الطوارئ في الإمارات', police:'الشرطة', amb:'الإسعاف', civil:'الدفاع المدني', sosN:'في الحالات الخطرة اتصل مباشرة. سند مساعد إرشادي ولا يتصل بالجهات نيابة عنك.', close:'إغلاق',
+    sosT:'أرقام الطوارئ في الإمارات', police:'الشرطة', amb:'الإسعاف', civil:'الدفاع المدني', musanad:'مساندة الطرق', musanadN:'أبوظبي · تأمين الطريق وسحب المركبة المتعطلة', saaed:'ساعد', saaedN:'أبوظبي · الحوادث البسيطة بدون إصابات وتخطيط الحادث', sosN:'في الحالات الخطرة اتصل مباشرة. سند مساعد إرشادي ولا يتصل بالجهات نيابة عنك.', close:'إغلاق',
     locT:'موقعك', auto:'تحديد تلقائي', manual:'أو اكتب منطقتك يدويًا', geoPh:'مثال: مدينة خليفة، أبوظبي', search:'بحث', verify:'تحقق من موقعك على الخريطة',
     locNote:'قد يخطئ تحديد الموقع أحيانًا، خصوصًا بالمناطق الجديدة أو ضعيفة التغطية. تحقق من موقعك على الخريطة قبل الاعتماد عليه بالكامل.',
     setT:'الإعدادات', themeL:'المظهر', light:'صباحي', dark:'مسائي', langL:'اللغة', colorL:'اللون', readL:'قراءة الردود بصوت عالٍ', on:'مفعّلة', off:'متوقفة',
@@ -244,7 +249,7 @@ const T = {
     name:'Sanad', loc:'My location', sos:'Emergency', ph:'Type, or tap the mic and speak', listening:'Listening… tap to stop', trans:'Converting speech to text…',
     greet:['Hello, how can I help?','Sanad is with you. What do you need?','Tell me what is happening.','I am here. Where do we start?','What is going on? I am listening.','What do you need help with?','Tell me what you need now.','Take a breath, then tell me.'],
     chips:[['Medical emergency','I need urgent medical help'],['Car breakdown','My car broke down on the road, I need a mechanic or towing'],['Nearest hospital','Find the nearest hospital'],['Fire','What should I do in a fire?'],['Burns','What is the first aid for burns?']],
-    sosT:'UAE emergency numbers', police:'Police', amb:'Ambulance', civil:'Civil Defense', sosN:'In danger, call directly. Sanad is a guide and does not call anyone for you.', close:'Close',
+    sosT:'UAE emergency numbers', police:'Police', amb:'Ambulance', civil:'Civil Defense', musanad:'Road assistance (Musanada)', musanadN:'Abu Dhabi · road securing & towing a stalled vehicle', saaed:'Saaed', saaedN:'Abu Dhabi · minor accidents with no injuries, accident reporting', sosN:'In danger, call directly. Sanad is a guide and does not call anyone for you.', close:'Close',
     locT:'Your location', auto:'Detect automatically', manual:'Or enter your area manually', geoPh:'e.g. Khalifa City, Abu Dhabi', search:'Search', verify:'Check your location on the map',
     locNote:'Location detection can sometimes be off, especially in newer or poorly-mapped areas. Check the map before fully relying on it.',
     setT:'Settings', themeL:'Appearance', light:'Morning', dark:'Evening', langL:'Language', colorL:'Color', readL:'Read replies aloud', on:'On', off:'Off',
@@ -360,8 +365,8 @@ const SCENARIOS = [
   { id: 'road_accident', test: /حادث\s*(?:سير|سيارة|مروري|دراجة)|حوادث\s*الطرق|car\s*accident|road\s*accident|traffic\s*accident|motorcycle\s*accident|bike\s*accident/i,
     title: { ar: 'الإسعاف في حوادث الطرق', en: 'Road accident first aid' },
     video: { ar: null, en: ['videos/car_accident_en.mp4', 'videos/bike_accident_en.mp4'] },
-    steps: { ar: '1. أوقف السيارة في مكان آمن وشغّل إشارات الخطر لتحذير السيارات الأخرى.\n2. اتصل بالإسعاف 998 والشرطة 999 فورًا.\n3. لا تحرك المصاب إلا إذا كان في خطر مباشر كحريق أو مرور سيارات.\n4. تحقق من وعيه وتنفسه، وأوقف أي نزيف شديد بالضغط المباشر.\n5. غطّه للحفاظ على دفئه وابقَ معه حتى وصول الإسعاف.',
-           en: '1. Pull over to a safe spot and turn on hazard lights to warn other traffic.\n2. Call ambulance 998 and police 999 immediately.\n3. Don\'t move the injured person unless they\'re in immediate danger, such as fire or oncoming traffic.\n4. Check their consciousness and breathing, and stop any severe bleeding with direct pressure.\n5. Keep them warm and stay with them until the ambulance arrives.' } },
+    steps: { ar: '1. أوقف السيارة في مكان آمن وشغّل إشارات الخطر لتحذير السيارات الأخرى.\n2. اتصل بالإسعاف 998 والشرطة 999 فورًا.\n3. لا تحرك المصاب إلا إذا كان في خطر مباشر كحريق أو مرور سيارات.\n4. تحقق من وعيه وتنفسه، وأوقف أي نزيف شديد بالضغط المباشر.\n5. غطّه للحفاظ على دفئه وابقَ معه حتى وصول الإسعاف.\n6. في أبوظبي: لو الحادث بسيط وبدون إصابات اتصل بـ «ساعد» 80072233 لتخطيط الحادث، ولتأمين الطريق وسحب المركبة اتصل بمساندة الطرق 800850.',
+           en: '1. Pull over to a safe spot and turn on hazard lights to warn other traffic.\n2. Call ambulance 998 and police 999 immediately.\n3. Don\'t move the injured person unless they\'re in immediate danger, such as fire or oncoming traffic.\n4. Check their consciousness and breathing, and stop any severe bleeding with direct pressure.\n5. Keep them warm and stay with them until the ambulance arrives.\n6. In Abu Dhabi: for a minor accident with no injuries call Saaed 80072233 to report it, and call Road Assistance (Musanada) 800850 to secure the road and tow the vehicle.' } },
   { id: 'fainting', test: /إغماء|اغماء|أغمي|اغمي|غاب عن الوعي|فقدان الوعي|فقد الوعي|faint|fainting|passed out/i,
     title: { ar: 'حالة الإغماء', en: 'Fainting' },
     video: { ar: 'videos/fainting_ar.mp4', en: null },
