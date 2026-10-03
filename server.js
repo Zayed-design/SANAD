@@ -96,6 +96,27 @@ function classifyService(name) {
   return "repair";
 }
 
+
+// تخصص الورشة (كهرباء، تكييف، سمكرة...) يُستنتج من اسمها، ويظهر للمستخدم كشارة بأيقونة. تقدر تثبّته يدويًا لأي ورشة
+// بإضافة حقل "specialty" بملف workshops.json (نص أو مصفوفة)، مثل: "specialty": ["electrical", "ac"]
+const SPECIALTY_RULES = [
+  ["electrical", /كهرب|electric|elect\b|elect\.|elct|\becu\b|radar|alternator|دينمو|سلف/i],
+  ["ac", /مكيف|تكييف|تبريد|a\/c|\bac\b|a\.c\b|air ?con|refriger|cooling|\bref\b/i],
+  ["body", /سمكر|دهان|صبغ|\bpaint|body ?shop|bodyshop|\bdent\b|collision/i],
+  ["mechanic", /ميكانيك|مكانيك|mechanic|engine|محرك|مكين|maint|gear|جير|transmission|brake|فرامل|عفش|suspension|radiator|ردياتر|راديتر|injector|انجكتر|صيانة/i],
+  ["glass", /زجاج|\bglass|windshield/i],
+  ["battery", /بطاري|batter/i],
+  ["accessories", /[إا]كسسوار|accessor|تنجيد|upholst|تظليل|\btint|زينة|زينه|modif|تعديل|audio/i],
+  ["tow", /سحب|ونش|recover|towing|\btow\b/i],
+];
+const SPECIALTY_KEYS = SPECIALTY_RULES.map(r => r[0]).concat("general");
+function specialtiesOf(name, override) {
+  const ov = (Array.isArray(override) ? override : override ? [override] : []).filter(k => SPECIALTY_KEYS.includes(k));
+  if (ov.length) return ov.slice(0, 3);
+  const found = SPECIALTY_RULES.filter(([, re]) => re.test(String(name || ""))).map(([k]) => k);
+  return found.length ? found.slice(0, 3) : ["general"];
+}
+
 // ينظّف رابط الموقع الإلكتروني: يصلح الفاصلة بدل النقطة (www,sanad)، يضيف https:// عند غيابها، ويقبل http/https فقط
 function cleanUrl(u) {
   let s = String(u || "").trim().replace(/[\s،,.;)]+$/g, "");
@@ -180,7 +201,7 @@ async function nearby(kind, lat, lon, want = "repair") {
     // ونحسب المسافة الحقيقية لكل واحدة عشان الترتيب "الأقرب أولًا" يبقى شغّال على الاثنين معًا
     const fromCurated = (kind.curated || []).map(c => ({
       name: c.name, phone: c.phone || "", rating: c.rating, hours: c.hours || undefined,
-      website: cleanUrl(c.website),
+      website: cleanUrl(c.website), specialty: c.specialty,
       service: SERVICE_TYPES.includes(c.type) ? c.type : classifyService(c.name),
       lat: c.lat, lon: c.lon,
       m: meters(lat, lon, c.lat, c.lon),
@@ -219,8 +240,8 @@ async function nearby(kind, lat, lon, want = "repair") {
       .filter(x => x.service === want)
       .sort((a, b) => a.m - b.m)
       .slice(0, 6)
-      .map(({ m, service, ...s }, i) => {
-        const o = { ...s, distance: (m / 1000).toFixed(1) + " km", recommended: i === 0 };
+      .map(({ m, service, specialty, ...s }, i) => {
+        const o = { ...s, specialties: specialtiesOf(s.name, specialty), distance: (m / 1000).toFixed(1) + " km", recommended: i === 0 };
         if (!o.website) delete o.website;
         return o;
       });
