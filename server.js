@@ -215,6 +215,36 @@ const KNOWN_AREAS = [
   { test: /(?<![؀-ۿ])العين(?![؀-ۿ])|al ain/i, lat: 24.2075, lon: 55.7447, name: "العين (تقريبي)" },
 ];
 
+// مناطق أبوظبي الكبيرة اللي كان Nominatim يفشل بتحديدها: مراكز تقريبية (مو نقطة دقيقة) تُستخدم قبل Nominatim
+// إذا كتب المستخدم اسم المنطقة لوحدها (مع اتجاه/رقم اختياري زي "الرحبة شمال")، وكحل أخير إذا فشل Nominatim.
+// ملاحظة: إحداثيات شخبوط/الرحبة/الشهامة/السويحان/خليفة/مدينة محمد بن زايد تقريبية — عدّلها هنا إذا عندك نقطة أدق.
+const normAr = s => String(s || "").replace(/[ً-ْ]/g, "").replace(/[إأآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").toLowerCase();
+const GAZETTEER = [
+  { re: /(?:^|\s)(?:ال)?(?:شخبوط|شخبوت)(?=\s|$)|shakh?bou?t/, lat: 24.37, lon: 54.63, name: "مدينة شخبوط (تقريبي)" },
+  { re: /(?:^|\s)(?:ال)?(?:سويحان|سويحن)(?=\s|$)|su?weih?an|swaihan/, lat: 24.4583, lon: 55.3442, name: "السويحان (تقريبي)" },
+  { re: /(?:^|\s)(?:ال)?رحبه(?=\s|$)|rahba/, lat: 24.525, lon: 54.715, name: "الرحبة (تقريبي)" },
+  { re: /(?:^|\s)(?:ال)?شهامه(?=\s|$)|shahama/, lat: 24.52, lon: 54.66, name: "الشهامة (تقريبي)" },
+  { re: /(?:^|\s)(?:ال)?خليفه(?=\s|$)|khalifa city/, lat: 24.4175, lon: 54.5806, name: "مدينة خليفة (تقريبي)" },
+  { re: /محمد بن زايد|mohamm?ed bin zayed|(?:^|\s)mbz(?=\s|$)/, lat: 24.345, lon: 54.54, name: "مدينة محمد بن زايد (تقريبي)" },
+  { re: /(?:^|\s)(?:ال)?عين(?=\s|$)|al ain/, lat: 24.2075, lon: 55.7447, name: "العين (تقريبي)" },
+  { re: /(?:^|\s)(?:ابوظبي|ابو ظبي)(?=\s|$)|abu dhabi/, lat: 24.467, lon: 54.367, name: "مدينة أبوظبي (تقريبي)" },
+];
+const GAZ_FILLER = /(?:^|\s)(?:مدينه|منطقه|حي|ضاحيه|city|area|district|town|شمال|جنوب|شرق|غرب|الشمال|الجنوب|الشرقيه|الغربيه|الشرقي|الغربي|north|south|east|west|\d+)(?=\s|$)/g;
+// strict=true: نطابق فقط لو ما بقي بالنص كلام ثاني (يعني اسم المنطقة لوحدها)، strict=false: أي ذكر للمنطقة
+function gazetteerMatch(place, strict) {
+  const s = normAr(place).replace(/\s+/g, " ").trim();
+  for (const g of GAZETTEER) {
+    const m = s.match(g.re);
+    if (!m) continue;
+    if (strict) {
+      const rest = s.replace(g.re, " ").replace(GAZ_FILLER, " ").replace(/\s+/g, " ").trim();
+      if (rest) continue;
+    }
+    return { lat: g.lat, lon: g.lon, name: g.name, exact: false };
+  }
+  return null;
+}
+
 function knownExactPlace(place) {
   const norm = place.trim().replace(/[\u064B-\u0652]/g, "");
   const exact = KNOWN_PLACES.find(p => p.test.test(norm));
@@ -341,12 +371,16 @@ async function geocodeText(place, lang, bias) {
   const sector = curatedSectorMatch(place);
   if (sector && sector.exact) return sector; // تطابق دقيق لنفس الجهة ونفس الرقم
 
+  // اسم منطقة معروفة لوحدها (شخبوط، الرحبة، السويحان...): مركزها التقريبي أضمن من Nominatim
+  const gazStrict = gazetteerMatch(place, true);
+  if (gazStrict) return gazStrict;
+
   // اسم الإمارة المضاف للبحث: لو المستخدم ذكر إمارة بنفسه ما نضيف شي، وإلا نستخدم أقرب إمارة
   // لموقعه (أو أبوظبي إذا ما عندنا موقعه، مثل السلوك القديم)
   const em = nearestEmirate(bias);
   const suffix = EMIRATE_MENTION.test(place) ? "" : " " + (lang === "en" ? em.en : em.ar);
   const levels = placeSimplifications(place);
-  if (!levels.length) return sector || knownAreaFallback(place);
+  if (!levels.length) return sector || gazetteerMatch(place, false) || knownAreaFallback(place);
 
   for (const v of arabicSpellingVariants(levels[0]).slice(0, 2)) {
     const hit = (await geocodeOnce(v + suffix, lang, bias)) || (await geocodeOnce(v, lang, bias));
@@ -356,7 +390,7 @@ async function geocodeText(place, lang, bias) {
     const hit = (await geocodeOnce(level + suffix, lang, bias)) || (await geocodeOnce(level, lang, bias));
     if (hit) return { ...hit, exact: false, searchedFor: level };
   }
-  return sector || knownAreaFallback(place);
+  return sector || gazetteerMatch(place, false) || knownAreaFallback(place);
 }
 
 const SAFETY = ["HARASSMENT", "HATE_SPEECH", "SEXUALLY_EXPLICIT", "DANGEROUS_CONTENT"].map(c => ({ category: "HARM_CATEGORY_" + c, threshold: "BLOCK_MEDIUM_AND_ABOVE" }));
