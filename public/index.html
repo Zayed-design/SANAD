@@ -1001,7 +1001,7 @@ async function send(text) {
   inp.value = ''; app.classList.add('started'); insertDisclaimer(); add(text, 'user'); playSend();
   pushHistory('user', text);
   const namesPlace = /(?:بالقرب من|بجوار|بجانب|(?<![أاإ])قرب|(?<![أاإ])جنب|قريب من|مقابل|بمحاذاة|near|close to|beside|next to)\s+\S/i.test(text);
-  const needsPlace = /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|سحب|ونش|nearest|nearby|hospital|clinic|mechanic|garage|tow/i.test(text);
+  const needsPlace = /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|بنشر|تواير|إطار|اطار|غسيل|زيت|سحب|ونش|nearest|nearby|hospital|clinic|mechanic|garage|tow/i.test(text);
   // إذا كانت الرسالة تطابق سيناريو إسعافي معروف (وليست طلب بحث عن مكان)، نعرض الخطوات والفيديو
   // فورًا من الدليل الجاهز بدل انتظار رد الذكاء الاصطناعي — أسرع وأدق في حالات الطوارئ
   const sc = !needsPlace ? detectScenario(text) : null;
