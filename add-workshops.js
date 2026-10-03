@@ -15,6 +15,7 @@
 //   - الرقم: أي رقم هاتف إماراتي الشكل (05xxxxxxxx / 02xxxxxxx / 800xxxx)
 //   - ساعات الدوام: الجملة اللي فيها "يفتح ... يسكر ..."
 //   - الإحداثيات: أول رقمين عشريين بمدى إحداثيات الإمارات (خط عرض 22-27، خط طول 50-58)
+//   - الموقع الإلكتروني (اختياري): أي رابط يبدأ بـ http/https أو www (يصلّح www,site لو كتبت فاصلة بالغلط)
 //   - الجهة/رقم القطاع: من كلمات "شرق/غرب/شامخة/مفرق" + رقم قريب منها (رقم أو بالحروف)
 //
 // النتيجة تُضاف (append) لملف data/workshops.json، وتُطبع بالتيرمينال كمان عشان تراجعها.
@@ -84,12 +85,34 @@ function extractCoords(text) {
   return null;
 }
 
+function cleanUrl(u) {
+  let s = String(u || "").trim().replace(/[\s،,.;)]+$/g, "");
+  if (!s) return "";
+  if (!/^https?:\/\//i.test(s)) {
+    if (!/^www[.,]|\.[a-z]{2,}(\/|$)/i.test(s)) return "";
+    s = "https://" + s;
+  }
+  s = s.replace(/^(https?:\/\/[^\/?#]*)/i, m => m.replace(/,/g, "."));
+  try {
+    const x = new URL(s);
+    if (!/^https?:$/.test(x.protocol) || !x.hostname.includes(".")) return "";
+    return x.href;
+  } catch { return ""; }
+}
+
+function extractWebsite(text) {
+  const m = text.match(/(?:https?:\/\/|www[.,])[^\s،]+/i);
+  return m ? { raw: m[0], url: cleanUrl(m[0]) } : null;
+}
+
 function parseBlock(block) {
   const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
   if (!lines.length) return null;
   const name = lines[0].replace(/^[-*•]\s*/, "");
   const rest = lines.slice(1).join(" ");
-  const whole = block;
+  // نستخرج الرابط أولًا ونشيله من النص عشان ما يلخبط التقاط الجهة/الأرقام (مثلاً east داخل الرابط)
+  const site = extractWebsite(block);
+  const whole = site ? block.replace(site.raw, " ") : block;
 
   const coords = extractCoords(whole);
   if (!coords) {
@@ -105,6 +128,7 @@ function parseBlock(block) {
     phone: extractPhone(whole),
     rating: extractRating(whole),
     hours: extractHours(whole),
+    website: site ? site.url : undefined,
     lat: coords.lat,
     lon: coords.lon,
   };
