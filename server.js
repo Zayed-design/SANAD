@@ -60,33 +60,8 @@ function loadCuratedWorkshops() {
 const CURATED_WORKSHOPS = loadCuratedWorkshops();
 console.log(`[workshops] تم تحميل ${CURATED_WORKSHOPS.length} ورشة من workshops.json`);
 
-function loadRecovery() {
-  try {
-    return JSON.parse(readFileSync(join(__dirname, "recovery.json"), "utf8"));
-  } catch (e) {
-    console.error("[recovery] تعذّر قراءة recovery.json:", e?.message || e);
-    return [];
-  }
-}
-const CURATED_RECOVERY = loadRecovery();
-console.log(`[recovery] تم تحميل ${CURATED_RECOVERY.length} رقم ريكفري من recovery.json`);
-
-const RECOVERY_INTENT = /ريكفري|ونش|سطحة|سحب|recovery|tow|winch|حادث|صدمت|مصدوم|انقلبت|accident|crash|collision|ورشة|ميكانيك|garage|mechanic|breakdown|معطل|tow truck/i;
-const WORKSHOP_INTENT = /ورشة|ميكانيك|garage|mechanic|تصليح السيارة|بنشر|تواير|اطار|إطار|زيت|غسيل|car wash|tyre|tire/i;
-const TOW_ONLY_INTENT = /ريكفري|ونش|سطحة|recovery|tow|winch|سطحه/i;
-function wantsRecovery(text) {
-  return RECOVERY_INTENT.test(String(text || ""));
-}
-function towOnlyRequest(text) {
-  const t = String(text || "");
-  return TOW_ONLY_INTENT.test(t) && !WORKSHOP_INTENT.test(t);
-}
-function phoneKey(phones) {
-  return (Array.isArray(phones) ? phones : [phones]).map(p => String(p || "").replace(/\D/g, "")).filter(Boolean).sort().join("|");
-}
-
 const KINDS = [
-  { test: /ميكانيك|ورشة|تصليح السيارة|سحب|ونش|ريكفري|سطحة|قطع غيار|خدمة سيارات|بنشر|تواير|اطار|إطار|تبديل زيت|تغيير زيت|مغسلة|غسيل سيارة|mechanic|garage|tow|recovery|winch|tyre|tire|puncture|oil change|car wash/i, categories: ["service.vehicle.repair"], fallback: "ورشة سيارات", curated: CURATED_WORKSHOPS },
+  { test: /ميكانيك|ورشة|تصليح السيارة|سحب|ونش|قطع غيار|خدمة سيارات|بنشر|تواير|اطار|إطار|تبديل زيت|تغيير زيت|مغسلة|غسيل سيارة|mechanic|garage|tow|tyre|tire|puncture|oil change|car wash/i, categories: ["service.vehicle.repair"], fallback: "ورشة سيارات", curated: CURATED_WORKSHOPS },
   { test: /مستشفى|عيادة|مركز صحي|hospital|clinic/i, categories: ["healthcare.hospital", "healthcare.clinic_or_praxis"], fallback: "منشأة صحية" },
 ];
 
@@ -100,58 +75,6 @@ function meters(a, b, c, d) {
   const R = 6371000, r = Math.PI / 180, x = (c - a) * r, y = (d - b) * r;
   const h = Math.sin(x / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(y / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-}
-
-function nearbyRecovery(lat, lon) {
-  const hard = CURATED_RECOVERY.filter(c => c.kind === "hard");
-  const areas = CURATED_RECOVERY.filter(c => c.kind !== "hard").map(c => ({
-    name: c.name,
-    area: c.area || "",
-    phones: Array.isArray(c.phones) ? c.phones.filter(Boolean) : (c.phone ? [c.phone] : []),
-    note: c.note || "",
-    lat: c.lat,
-    lon: c.lon,
-    m: meters(lat, lon, c.lat, c.lon),
-  })).filter(x => x.phones.length && Number.isFinite(x.m)).sort((a, b) => a.m - b.m);
-
-  const picked = [];
-  const seen = new Set();
-  for (const x of areas) {
-    const k = phoneKey(x.phones);
-    if (k && seen.has(k)) continue;
-    if (k) seen.add(k);
-    picked.push(x);
-    if (picked.length >= 2) break;
-  }
-
-  const mapRow = (x, i, extra = {}) => {
-    const o = {
-      name: x.name,
-      area: x.area,
-      phones: x.phones,
-      lat: x.lat,
-      lon: x.lon,
-      distance: extra.kind === "hard" || !Number.isFinite(x.m) ? "" : (x.m / 1000).toFixed(1) + " km",
-      recommended: i === 0 && extra.kind !== "hard",
-      kind: extra.kind || "recovery",
-    };
-    if (x.note) o.note = x.note;
-    return o;
-  };
-
-  const out = picked.map((x, i) => mapRow(x, i));
-  for (const h of hard) {
-    out.push(mapRow({
-      name: h.name,
-      area: h.area || "",
-      phones: Array.isArray(h.phones) ? h.phones : [h.phones].filter(Boolean),
-      note: h.note || "",
-      lat: h.lat,
-      lon: h.lon,
-      m: meters(lat, lon, h.lat, h.lon),
-    }, out.length, { kind: "hard" }));
-  }
-  return out;
 }
 
 
@@ -606,7 +529,7 @@ app.post("/api/assist", limit, async (req, res) => {
   const L = lang === "en" ? "en" : "ar";
   const text = String(message || "").trim().slice(0, 2000);
   if (!text) return res.status(400).json({ reply: L === "en" ? "Type your message first." : "اكتب رسالتك أولًا." });
-  if (POLITICS.test(text)) return res.json({ reply: REFUSE[L], services: [], recovery: [] });
+  if (POLITICS.test(text)) return res.json({ reply: REFUSE[L], services: [] });
 
   // نمرّر آخر رسائل المحادثة (إن وُجدت) لنموذج الذكاء الاصطناعي حتى لا يطلب من المستخدم
   // إعادة شرح حالته إذا كان قد ذكرها في رسالة سابقة بنفس الجلسة
@@ -624,8 +547,7 @@ app.post("/api/assist", limit, async (req, res) => {
 
   const kind = KINDS.find(k => k.test.test(text));
   // إذا ذكر المستخدم مكانًا داخل رسالته (مثل "قريب من X")، نحاول تحويله لإحداثيات ونستخدمه بدل الـ GPS
-  const locMatchRaw = (kind || wantsRecovery(text)) ? (text.match(LOCATION_MENTION) || text.match(NEAREST_FROM_MENTION)) : null;
-  const locMatch = locMatchRaw && !/^(?:موقعي|موقعى|هنا|here|my location|my current location)$/i.test(locMatchRaw[1].trim()) ? locMatchRaw : null;
+  const locMatch = kind ? (text.match(LOCATION_MENTION) || text.match(NEAREST_FROM_MENTION)) : null;
   let geocodeFailed = false;
   if (locMatch) {
     const geo = await geocodeText(locMatch[1].trim(), L, hasLoc ? { lat: la0, lon: lo0 } : null);
@@ -637,11 +559,9 @@ app.post("/api/assist", limit, async (req, res) => {
     // بعيد جدًا عن المكان الحقيقي المقصود، ونخلي الذكاء الاصطناعي يوضح ذلك للمستخدم صراحة
     else { geocodeFailed = true; hasLoc = false; }
   }
-  const skipGarages = towOnlyRequest(text);
-  const services = kind && hasLoc && !geocodeFailed && !skipGarages ? await nearby(kind, la, lo, wantedService(text)) : [];
-  const recovery = wantsRecovery(text) && hasLoc && !geocodeFailed ? nearbyRecovery(la, lo) : [];
+  const services = kind && hasLoc && !geocodeFailed ? await nearby(kind, la, lo, wantedService(text)) : [];
 
-  if (!ai) return res.json({ reply: "AI is not enabled: set GEMINI_API_KEY. Emergency: 999.", services, recovery });
+  if (!ai) return res.json({ reply: "AI is not enabled: set GEMINI_API_KEY. Emergency: 999.", services });
 
   const systemInstruction = `You are "Sanad" (سند), a safety and services assistant in the UAE.
 SCOPE: only emergencies, first aid, safety guidance (fire, accidents, disasters), car breakdowns and roadside help, and finding nearby services (hospitals, clinics, garages).
@@ -659,21 +579,19 @@ ${approxPlace ? `IMPORTANT: the exact sub-area/sector number the user typed coul
 ${geocodeFailed ? `The user named a specific place ("${locMatch[1].trim()}") in their message, but its exact location could NOT be determined. Do NOT use or mention any device/network location as a substitute — there are no reliable Nearby results for what they asked. Tell them clearly and briefly that you couldn't pinpoint that exact place, and ask them to either try a more specific/well-known area name, or use the "My location" button for their current position.` : ""}
 Be brief and clear. Speak warmly and naturally, like a calm, caring person the user trusts in a stressful moment — not like a rigid instruction bot. Vary your phrasing instead of repeating the same fixed sentence pattern every time, and where it fits naturally, open with a short human touch (e.g. "خذنا خطوة خطوة" / "تنفّس، أنا وياك") before the steps — without adding filler or making the reply longer than needed. Reply in ${L === "en" ? "English" : "Arabic"}. UAE emergency numbers: Police 999, Ambulance 998, Civil Defense 997.
 ${hasLoc ? `Search location used: ${la}, ${lo}` : "No GPS available."}
-Nearby results: ${services.length ? JSON.stringify(services) : "none"}
-Recovery/winch results: ${recovery.length ? JSON.stringify(recovery) : "none"}
-If Recovery/winch results are provided, you MUST mention the closest one by name and area (the item with "recommended": true) and tell the user they can tap the call/WhatsApp buttons in the app. Never invent a recovery number or company — use ONLY that list. If someone is stuck in an unknown/desert/sand place, also mention the hard-rescue entry if present, and advise sending WhatsApp live location to the driver. Distance is approximate (to the coverage area), not a door-to-door measurement.`
+Nearby results: ${services.length ? JSON.stringify(services) : "none"}`;
 
   // أسئلة عامة متكررة (بلا موقع/ورش ولا سياق محادثة): نرجّع الرد المخزّن إن وُجد
-  const cacheable = !kind && !recovery.length && safeHistory.length === 0;
+  const cacheable = !kind && safeHistory.length === 0;
   const ck = cacheable ? replyKey(text, L) : "";
   if (cacheable) {
     const hit = replyCache.get(ck);
-    if (hit && Date.now() - hit.t < REPLY_TTL) return res.json({ reply: hit.v, services, recovery });
+    if (hit && Date.now() - hit.t < REPLY_TTL) return res.json({ reply: hit.v, services });
   }
   // سقف عام: عند الزحام الشديد نرجّع رسالة لطيفة مع أرقام الطوارئ بدل ما نفشل بصمت (والورش تظهر لأنها ما تحتاج الذكاء الاصطناعي)
   if (++globalAiHits > GLOBAL_AI_PER_MIN) {
     const busy = { ar: "الخدمة مزدحمة حاليًا، حاول بعد دقيقة." , en: "The service is busy right now, please try again in a minute." };
-    return res.status(429).json({ reply: busy[L] + EMERGENCY_LINE[L], services, recovery });
+    return res.status(429).json({ reply: busy[L] + EMERGENCY_LINE[L], services });
   }
 
   try {
@@ -683,33 +601,13 @@ If Recovery/winch results are provided, you MUST mention the closest one by name
       if (replyCache.size >= REPLY_MAX) replyCache.delete(replyCache.keys().next().value);
       replyCache.set(ck, { t: Date.now(), v: r.text });
     }
-    res.json({ reply: r.text || REFUSE[L], services, recovery });
+    res.json({ reply: r.text || REFUSE[L], services });
   } catch (e) {
     const msg = isQuota(e)
       ? { ar: "الخدمة مزدحمة حاليًا (تجاوز الحد المسموح من الطلبات)، حاول بعد دقيقة.", en: "The service is busy right now (rate limit reached), please try again in a minute." }
       : { ar: "تعذّر الاتصال بالذكاء الاصطناعي، حاول مرة أخرى.", en: "AI connection error, please try again." };
-    res.status(500).json({ reply: msg[L] + EMERGENCY_LINE[L], services, recovery });
+    res.status(500).json({ reply: msg[L] + EMERGENCY_LINE[L], services });
   }
-});
-
-app.post("/api/recovery", limit, async (req, res) => {
-  const { message, latitude, longitude, lang } = req.body || {};
-  const L = lang === "en" ? "en" : "ar";
-  const text = String(message || "").trim().slice(0, 2000);
-  const la0 = Number(latitude), lo0 = Number(longitude);
-  let hasLoc = latitude != null && longitude != null && Number.isFinite(la0) && Number.isFinite(lo0);
-  let la = la0, lo = lo0;
-  if (text) {
-    const locMatchRaw = text.match(LOCATION_MENTION) || text.match(NEAREST_FROM_MENTION);
-    const locMatch = locMatchRaw && !/^(?:موقعي|موقعى|هنا|here|my location|my current location)$/i.test(locMatchRaw[1].trim()) ? locMatchRaw : null;
-    if (locMatch) {
-      const geo = await geocodeText(locMatch[1].trim(), L, hasLoc ? { lat: la0, lon: lo0 } : null);
-      if (geo) { la = geo.lat; lo = geo.lon; hasLoc = true; }
-      else hasLoc = false;
-    }
-  }
-  const recovery = hasLoc ? nearbyRecovery(la, lo) : [];
-  res.json({ recovery });
 });
 
 // تحويل الصوت إلى نص (يعمل على أي متصفح)
@@ -732,6 +630,6 @@ app.post("/api/transcribe", limit, async (req, res) => {
 });
 
 // نقطة فحص خفيفة لإبقاء الخدمة مستيقظة على Render (اربطها بخدمة بينغ خارجية كل ٥-١٠ دقائق)
-app.get("/health", (req, res) => res.status(200).json({ ok: true, curatedWorkshops: CURATED_WORKSHOPS.length, curatedRecovery: CURATED_RECOVERY.length }));
+app.get("/health", (req, res) => res.status(200).json({ ok: true, curatedWorkshops: CURATED_WORKSHOPS.length }));
 
 app.listen(PORT, () => console.log(`Sanad running on http://localhost:${PORT}`));

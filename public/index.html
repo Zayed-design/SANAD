@@ -106,10 +106,6 @@ html[dir="rtl"] .stepbtn.next svg{transform:scaleX(-1)}
 .svc-chip svg{width:13px;height:13px;flex:none}
 .svc-sep{display:flex;align-items:center;gap:10px;margin-top:16px;color:var(--mu);font-size:12px;font-weight:600;white-space:normal}
 .svc-sep::before,.svc-sep::after{content:"";flex:1;height:1px;background:var(--line)}
-.svc.tow{border-color:color-mix(in srgb,var(--g) 55%,var(--line))}
-.svc.tow.hard{border-style:dashed;border-color:var(--warn)}
-.svc-btn.wa{background:transparent;color:#25D366;border-color:#25D366}
-.recov-tip{margin-top:10px;font-size:12.5px;line-height:1.7;color:var(--mu);white-space:normal}
 form.c{position:sticky;bottom:0;display:flex;align-items:center;gap:8px;margin:8px 0 16px;padding:8px;border-radius:99px;background:var(--s2);border:1px solid var(--line)}
 form.c:focus-within{border-color:var(--g)}
 #inp{flex:1;min-width:0;background:none;border:0;outline:0;padding:10px 14px;font-size:16px}
@@ -140,6 +136,8 @@ dialog h3{font-size:14px;color:var(--mu);font-weight:500;margin:18px 0 8px}
 .num small{display:block;margin-top:3px;color:var(--mu);font-size:11.5px;font-weight:500;line-height:1.4}
 .num>span{min-width:0;padding-inline-end:10px}
 dialog#dlg{max-height:90vh;overflow-y:auto}
+dialog#nearDlg{max-height:90vh;overflow-y:auto}
+dialog#nearDlg h3{margin-top:20px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px dashed var(--line);color:var(--g);font-size:15px;font-weight:700}
 .note{margin-top:14px;font-size:13px;color:var(--mu);line-height:1.7}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .opt{padding:10px 18px;border-radius:99px;background:var(--s2);border:1px solid transparent}
@@ -161,6 +159,7 @@ dialog#dlg{max-height:90vh;overflow-y:auto}
     <div class="logo"><span class="logo-ico" aria-hidden="true"></span><span data-i="name"></span></div>
     <div class="bar">
       <button class="pill" id="locBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s7-6.200 7-11.500A7 7 0 0 0 5 9.500C5 14.800 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/></svg><span data-i="loc"></span></button>
+      <button class="pill sq" id="nearBtn" aria-label="Near Discovery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
       <button class="pill sq" id="setBtn" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button>
       <button class="pill sos" id="sosBtn" data-i="sos"></button>
     </div>
@@ -227,6 +226,121 @@ dialog#dlg{max-height:90vh;overflow-y:auto}
   <form method="dialog"><button class="chip cls" data-i="close"></button></form>
 </dialog>
 
+<dialog id="nearDlg">
+  <h2 data-i="nearT"></h2>
+  <h3 data-i="emergencyS"></h3>
+  <div class="nums">
+    <a class="num" href="tel:0565542225"><span><span data-i="rescueAll"></span><small data-i="rescueAllN"></small></span><b>0565542225</b></a>
+  </div>
+  <p class="note" data-i="liveLocTip"></p>
+
+  <h3>📍 إمارة أبوظبي وضواحيها</h3>
+  <div class="nums">
+    <a class="num" href="tel:0501216458"><span>بني ياس</span><b>0501216458</b></a>
+    <a class="num" href="tel:0559227724"><span>الشامخة</span><b>0559227724</b></a>
+    <a class="num" href="tel:0509983960"><span>الفلاح</span><b>0509983960</b></a>
+    <a class="num" href="tel:0509210785"><span>المصفح</span><b>0509210785</b></a>
+    <a class="num" href="tel:0545457589"><span>مدينة محمد بن زايد / مدينة شخبوط / الشوامخ</span><b>0545457589</b></a>
+    <a class="num" href="tel:0569078756"><span>الشهامة / الرحبة</span><b>0569078756</b></a>
+    <a class="num" href="tel:0552528522"><span>جزيرة ياس / جزيرة الريم</span><b>0552528522</b></a>
+    <a class="num" href="tel:0509725785"><span>الخالدية / البطين / شارع الكورنيش</span><b>0509725785</b></a>
+  </div>
+
+  <h3>🌴 مدينة العين وتوابعها</h3>
+  <div class="nums">
+    <a class="num" href="tel:0545352055"><span><span>Al Ain Recovery</span><small>ونشات حديثة ونقل هيدروليك</small></span><b>0545352055</b></a>
+    <a class="num" href="tel:0507527798"><span><span>Al Ain Recovery</span><small>ونشات حديثة ونقل هيدروليك</small></span><b>0507527798</b></a>
+    <a class="num" href="tel:0509983960"><span><span>خدمة ونش العين الشاملة</span><small>الرقم الأول</small></span><b>0509983960</b></a>
+    <a class="num" href="tel:0508466263"><span><span>خدمة ونش العين الشاملة</span><small>الرقم الثاني</small></span><b>0508466263</b></a>
+    <a class="num" href="tel:0555562883"><span><span>ريكفري البلوشي</span><small>كافة مناطق ومخارج العين</small></span><b>0555562883</b></a>
+    <a class="num" href="tel:0522450678"><span><span>إنقاذ بدع بنت سعود وجبل حفيت</span><small>سحب رمال وجبال</small></span><b>0522450678</b></a>
+    <a class="num" href="tel:0503024949"><span><span>منطقة الهيلي والصناعية</span><small>الرقم الأول</small></span><b>0503024949</b></a>
+    <a class="num" href="tel:0553141344"><span><span>منطقة الهيلي والصناعية</span><small>الرقم الثاني</small></span><b>0553141344</b></a>
+    <a class="num" href="tel:0528662883"><span>اليحر / السليمات / الهير / المقام</span><b>0528662883</b></a>
+    <a class="num" href="tel:0508466263"><span>زاخر / وسط المدينة</span><b>0508466263</b></a>
+  </div>
+
+  <h3>🏜️ منطقة الظفرة (الإمارة الغربية)</h3>
+  <div class="nums">
+    <a class="num" href="tel:0559227724"><span>منطقة الظفرة عامة</span><b>0559227724</b></a>
+    <a class="num" href="tel:0569078756"><span>مدينة زايد / غياثي</span><b>0569078756</b></a>
+    <a class="num" href="tel:0528662883"><span><span>المرفأ / السلع</span><small>الرقم الأول</small></span><b>0528662883</b></a>
+    <a class="num" href="tel:0566906537"><span><span>المرفأ / السلع</span><small>الرقم الثاني</small></span><b>0566906537</b></a>
+    <a class="num" href="tel:0569078756"><span><span>ليوا</span><small>الرقم الأول</small></span><b>0569078756</b></a>
+    <a class="num" href="tel:0565309242"><span><span>ليوا</span><small>الرقم الثاني</small></span><b>0565309242</b></a>
+    <a class="num" href="tel:0509210785"><span><span>الرويس</span><small>الرقم الأول</small></span><b>0509210785</b></a>
+    <a class="num" href="tel:0527879800"><span><span>الرويس</span><small>الرقم الثاني</small></span><b>0527879800</b></a>
+  </div>
+
+  <h3>🏙️ إمارة دبي</h3>
+  <div class="nums">
+    <a class="num" href="tel:0551515721"><span><span>ريكفري دبي الشامل</span><small>كافة المناطق</small></span><b>0551515721</b></a>
+    <a class="num" href="tel:0555231405"><span>ونش البرشاء والشيخ زايد السريع</span><b>0555231405</b></a>
+    <a class="num" href="tel:0586121286"><span><span>ريكفري وليد</span><small>ديرة والقصيص وقريب الشارقة</small></span><b>0586121286</b></a>
+    <a class="num" href="tel:0541979348"><span>المهمات السريعة (الشوارع الخارجية)</span><b>0541979348</b></a>
+    <a class="num" href="tel:0555771623"><span><span>ريكفري الإمارات</span><small>جميرا والمرسى وسيارات فارهة</small></span><b>0555771623</b></a>
+    <a class="num" href="tel:0509983960"><span>ريكفري دبي المركزي</span><b>0509983960</b></a>
+    <a class="num" href="tel:0509983960"><span>البرشاء / جبل علي / المرابع العربية</span><b>0509983960</b></a>
+    <a class="num" href="tel:0552728860"><span>ديرة / الخوانيج / الورقاء / الراشدية / دبي مارينا / المزهر</span><b>0552728860</b></a>
+    <a class="num" href="tel:0545457589"><span>القصيص / المحيصنة</span><b>0545457589</b></a>
+    <a class="num" href="tel:0522450678"><span>الخليج التجاري</span><b>0522450678</b></a>
+  </div>
+
+  <h3>🕌 إمارة الشارقة</h3>
+  <div class="nums">
+    <a class="num" href="tel:0501516758"><span><span>خدمة بلال</span><small>أوقات الذروة</small></span><b>0501516758</b></a>
+    <a class="num" href="tel:0553628674"><span>مويلح / النهدة / الصناعية</span><b>0553628674</b></a>
+    <a class="num" href="tel:0582020865"><span><span>ريكفري أسامة</span><small>حوادث وسيارات متعطلة</small></span><b>0582020865</b></a>
+    <a class="num" href="tel:0507964082"><span>نقل السيارات بين الشارقة ودبي</span><b>0507964082</b></a>
+    <a class="num" href="tel:0566295396"><span><span>فادي لسحب السيارات</span><small>اليرموك وحلوان</small></span><b>0566295396</b></a>
+    <a class="num" href="tel:0502744907"><span>المناطق الصناعية الرابعة والخامسة</span><b>0502744907</b></a>
+    <a class="num" href="tel:0522450678"><span><span>خدمة الشحن السريع</span><small>ونش هيدروليك</small></span><b>0522450678</b></a>
+    <a class="num" href="tel:0552528522"><span>الذيد / خورفكان</span><b>0552528522</b></a>
+    <a class="num" href="tel:0552728860"><span>الشرق والقرائن / الجرينة / اللية</span><b>0552728860</b></a>
+    <a class="num" href="tel:0559227724"><span>المجاز</span><b>0559227724</b></a>
+  </div>
+
+  <h3>🌊 إمارة عجمان</h3>
+  <div class="nums">
+    <a class="num" href="tel:0554432164"><span>استجابة فورية داخل عجمان</span><b>0554432164</b></a>
+    <a class="num" href="tel:0509983960"><span><span>ونش عجمان الشامل</span><small>الأحياء والصناعية</small></span><b>0509983960</b></a>
+    <a class="num" href="tel:0582020865"><span><span>ريكفري أسامة</span><small>نقل إلى الشارقة ودبي</small></span><b>0582020865</b></a>
+    <a class="num" href="tel:0557452223"><span><span>سطحة عجمان</span><small>للمركبات المتعطلة والمصدومة</small></span><b>0557452223</b></a>
+    <a class="num" href="tel:0566295396"><span><span>خدمة فورية</span><small>قريب من الجرف والراشدية</small></span><b>0566295396</b></a>
+    <a class="num" href="tel:0555231405"><span><span>ريكفري الإمارات المركزي</span><small>طوارئ وسحب رمل</small></span><b>0555231405</b></a>
+    <a class="num" href="tel:0509983960"><span>النعيمية / الجرف / الراشدية / المنطقة الصناعية</span><b>0509983960</b></a>
+    <a class="num" href="tel:0552528522"><span>المويهات</span><b>0552528522</b></a>
+  </div>
+
+  <h3>🌊 إمارة أم القيوين</h3>
+  <div class="nums">
+    <a class="num" href="tel:0509048982"><span><span>ريكفري بن يوسف</span><small>شارع الشيخ محمد بن زايد والراس والصناعية</small></span><b>0509048982</b></a>
+    <a class="num" href="tel:0555771623"><span>السلمة وفلج المعلا</span><b>0555771623</b></a>
+    <a class="num" href="tel:0507766861"><span><span>سطحة ونش الإمارات</span><small>طرق داخلية وخارجية</small></span><b>0507766861</b></a>
+    <a class="num" href="tel:0522450678"><span>الشحن السريع والإنقاذ من الرمال</span><b>0522450678</b></a>
+    <a class="num" href="tel:0545457589"><span>أم القيوين (المدينة)</span><b>0545457589</b></a>
+  </div>
+
+  <h3>🏔️ إمارة رأس الخيمة</h3>
+  <div class="nums">
+    <a class="num" href="tel:0525239993"><span><span>المركز الرئيسي والطرق الجبلية</span><small>جبل جيس - الرقم الأول</small></span><b>0525239993</b></a>
+    <a class="num" href="tel:0508007773"><span><span>المركز الرئيسي والطرق الجبلية</span><small>جبل جيس - الرقم الثاني</small></span><b>0508007773</b></a>
+    <a class="num" href="tel:0502700286"><span><span>الجزيرة الحمراء / ميناء العرب / جزيرة المرجان</span><small>الرقم الأول</small></span><b>0502700286</b></a>
+    <a class="num" href="tel:0508007773"><span><span>الجزيرة الحمراء / ميناء العرب / جزيرة المرجان</span><small>الرقم الثاني</small></span><b>0508007773</b></a>
+    <a class="num" href="tel:0508466263"><span>ونش عمار (داخل الإمارة)</span><b>0508466263</b></a>
+  </div>
+
+  <h3>⛰️ إمارة الفجيرة والمنطقة الشرقية</h3>
+  <div class="nums">
+    <a class="num" href="tel:0504173141"><span><span>الفجيرة والساحل</span><small>العقة والبدية</small></span><b>0504173141</b></a>
+    <a class="num" href="tel:0561648889"><span><span>ونش الفجيرة السريع</span><small>24/7</small></span><b>0561648889</b></a>
+    <a class="num" href="tel:0559227724"><span>الطرق الجبلية الوعرة والأنفاق</span><b>0559227724</b></a>
+    <a class="num" href="tel:0561101863"><span>مدينة الفجيرة ودبا الفجيرة</span><b>0561101863</b></a>
+  </div>
+
+  <form method="dialog"><button class="chip cls" data-i="close"></button></form>
+</dialog>
+
 <script>
 const $ = s => document.querySelector(s);
 const app = $('#app'), chat = $('#chat'), inp = $('#inp'), locEl = $('#loc');
@@ -236,7 +350,8 @@ const T = {
   ar: {
     name:'سند', loc:'موقعي', sos:'طوارئ', ph:'اكتب أو اضغط الميكروفون وتحدث', listening:'أنا أسمعك… اضغط للإيقاف', trans:'جارٍ تحويل الصوت إلى نص…',
     greet:['أهلًا بك، بماذا أساعدك؟','سند معك. ما الذي تحتاجه؟','أخبرني ما الذي يحدث.','أنا هنا. من أين نبدأ؟','ما الأمر؟ أنا أسمعك.','في أي شيء تحتاج سندًا؟','قل لي ما تحتاجه الآن.','خذ نفسًا، ثم أخبرني.'],
-    chips:[['طوارئ طبية','أحتاج مساعدة طبية عاجلة'],['عطل في السيارة','سيارتي معطلة على الطريق، أحتاج ميكانيكي أو سحب'],['أقرب ريكفري','أبحث عن أقرب ريكفري أو ونش من موقعي'],['أقرب مستشفى','أبحث عن أقرب مستشفى'],['حريق','كيف أتصرف عند حدوث حريق؟'],['حروق','ما خطوات الإسعاف الأولي للحروق؟']],
+    chips:[['طوارئ طبية','أحتاج مساعدة طبية عاجلة'],['عطل في السيارة','سيارتي معطلة على الطريق، أحتاج ميكانيكي أو سحب'],['أقرب مستشفى','أبحث عن أقرب مستشفى'],['اكتشاف الأماكن القريبة','أرقام ريكفري سحب سيارات وإنقاذ قريبة مني'],['حريق','كيف أتصرف عند حدوث حريق؟'],['حروق','ما خطوات الإسعاف الأولي للحروق؟']],
+    nearT:'اكتشاف الأماكن القريبة · أرقام الريكفري والإنقاذ', emergencyS:'🚨 أرقام الطوارئ والإنقاذ الخاص (كافة الإمارات)', rescueAll:'للحالات والأماكن الصعبة والإنقاذ البري', rescueAllN:'سحب رمال / بر', liveLocTip:'💡 نصيحة سريعة: إذا كنت عالقاً في مكان غير معروف، يُفضل دائماً إرسال الموقع المباشر (Live Location) عبر الواتساب للسائق لتسهيل وصوله إليك بسرعة.',
     sosT:'أرقام الطوارئ في الإمارات', police:'الشرطة', amb:'الإسعاف', civil:'الدفاع المدني', musanad:'مساندة الطرق', musanadN:'أبوظبي · تأمين الطريق وسحب المركبة المتعطلة', saaed:'ساعد', saaedN:'أبوظبي · الحوادث البسيطة بدون إصابات وتخطيط الحادث', sosN:'في الحالات الخطرة اتصل مباشرة. سند مساعد إرشادي ولا يتصل بالجهات نيابة عنك.', close:'إغلاق',
     locT:'موقعك', auto:'تحديد تلقائي', manual:'أو اكتب منطقتك يدويًا', geoPh:'مثال: مدينة خليفة، أبوظبي', search:'بحث', verify:'تحقق من موقعك على الخريطة',
     locNote:'قد يخطئ تحديد الموقع أحيانًا، خصوصًا بالمناطق الجديدة أو ضعيفة التغطية. تحقق من موقعك على الخريطة قبل الاعتماد عليه بالكامل.',
@@ -247,13 +362,13 @@ const T = {
     nomic:'المتصفح لا يدعم تسجيل الصوت.', micDenied:'اسمح للمتصفح باستخدام الميكروفون.', nospeech:'لم أسمع كلامًا واضحًا. حاول مرة أخرى.', micFail:'تعذّر تحويل الصوت. تحقق من الاتصال وحاول مرة أخرى.',
     nots:'المتصفح لا يدعم قراءة النص.', call:'اتصال', dir:'الاتجاهات', down:'تعذّر الاتصال بالخادم. في الطوارئ اتصل بـ 999.', speak:'قراءة الرد',
     copy:'نسخ', copied:'تم النسخ', step:'الخطوة', of:'من', nextStep:'الخطوة التالية', prevStep:'الخطوة السابقة', doneStep:'انتهت الخطوات', quickT:'دليل سريع', nearest:'الأقرب', web:'الموقع', sp_electrical:'كهرباء السيارات', sp_ac:'تكييف ومكيفات', sp_body:'سمكرة ودهان', sp_mechanic:'ميكانيك وصيانة', sp_glass:'زجاج', sp_battery:'بطاريات', sp_accessories:'زينة وإكسسوارات', sp_tow:'سحب ونقل', sp_general:'صيانة عامة', notRepair:'ليست ورشة تصليح', sv_tires:'بنشر وإطارات', sv_oil:'تبديل زيت', sv_wash:'غسيل وتنظيف', otherSvc:'خدمات أخرى قريبة (ليست ورش تصليح)',
-    discNote:'قد يخطئ الموقع أحيانًا في تفاصيل الحالة. هذه إرشادات عامة ولا تغني عن فريق طبي مختص في الحالات الجدّية.',
-    recovSep:'أقرب ريكفري من موقعك', recovBadge:'ريكفري', recovHard:'إنقاذ بري', recovWa:'واتساب', recovTip:'إذا كنت عالقًا في مكان غير معروف، أرسل الموقع المباشر (Live Location) عبر واتساب للسائق حتى يصل إليك أسرع. المسافة تقريبية حسب المنطقة.'
+    discNote:'قد يخطئ الموقع أحيانًا في تفاصيل الحالة. هذه إرشادات عامة ولا تغني عن فريق طبي مختص في الحالات الجدّية.'
   },
   en: {
     name:'Sanad', loc:'My location', sos:'Emergency', ph:'Type, or tap the mic and speak', listening:'Listening… tap to stop', trans:'Converting speech to text…',
     greet:['Hello, how can I help?','Sanad is with you. What do you need?','Tell me what is happening.','I am here. Where do we start?','What is going on? I am listening.','What do you need help with?','Tell me what you need now.','Take a breath, then tell me.'],
-    chips:[['Medical emergency','I need urgent medical help'],['Car breakdown','My car broke down on the road, I need a mechanic or towing'],['Nearest recovery','Find the nearest recovery/winch from my location'],['Nearest hospital','Find the nearest hospital'],['Fire','What should I do in a fire?'],['Burns','What is the first aid for burns?']],
+    chips:[['Medical emergency','I need urgent medical help'],['Car breakdown','My car broke down on the road, I need a mechanic or towing'],['Nearest hospital','Find the nearest hospital'],['Near Discovery','Nearby car recovery and rescue numbers'],['Fire','What should I do in a fire?'],['Burns','What is the first aid for burns?']],
+    nearT:'Near Discovery · Recovery & Rescue Numbers', emergencyS:'🚨 Special Emergency & Rescue Numbers (All Emirates)', rescueAll:'For difficult cases, off-road & land rescue', rescueAllN:'Sand dunes / off-road recovery', liveLocTip:'💡 Quick tip: If you are stuck in an unknown location, it is always best to send the Live Location via WhatsApp to the driver to help them reach you faster.',
     sosT:'UAE emergency numbers', police:'Police', amb:'Ambulance', civil:'Civil Defense', musanad:'Road assistance (Musanada)', musanadN:'Abu Dhabi · road securing & towing a stalled vehicle', saaed:'Saaed', saaedN:'Abu Dhabi · minor accidents with no injuries, accident reporting', sosN:'In danger, call directly. Sanad is a guide and does not call anyone for you.', close:'Close',
     locT:'Your location', auto:'Detect automatically', manual:'Or enter your area manually', geoPh:'e.g. Khalifa City, Abu Dhabi', search:'Search', verify:'Check your location on the map',
     locNote:'Location detection can sometimes be off, especially in newer or poorly-mapped areas. Check the map before fully relying on it.',
@@ -264,8 +379,7 @@ const T = {
     nomic:'This browser cannot record audio.', micDenied:'Allow the browser to use the microphone.', nospeech:'I did not hear clear speech. Try again.', micFail:'Could not convert the audio. Check your connection and try again.',
     nots:'This browser does not support reading text aloud.', call:'Call', dir:'Directions', down:'Cannot reach the server. In an emergency call 999.', speak:'Read reply',
     copy:'Copy', copied:'Copied', step:'Step', of:'of', nextStep:'Next step', prevStep:'Previous step', doneStep:'All steps done', quickT:'Quick guide', nearest:'Nearest', web:'Website', sp_electrical:'Auto electrical', sp_ac:'A/C & cooling', sp_body:'Body & paint', sp_mechanic:'Mechanic & service', sp_glass:'Glass', sp_battery:'Batteries', sp_accessories:'Accessories', sp_tow:'Towing', sp_general:'General service', notRepair:'Not a repair garage', sv_tires:'Tyres & puncture', sv_oil:'Oil change', sv_wash:'Car wash', otherSvc:'Other nearby services (not repair garages)',
-    discNote:'Sanad can sometimes get details wrong. This is general guidance, not a substitute for a qualified medical team in serious cases.',
-    recovSep:'Nearest recovery from your location', recovBadge:'Recovery', recovHard:'Off-road rescue', recovWa:'WhatsApp', recovTip:'If you are stuck in an unknown place, send your WhatsApp Live Location to the driver so they can reach you faster. Distance is approximate to the coverage area.'
+    discNote:'Sanad can sometimes get details wrong. This is general guidance, not a substitute for a qualified medical team in serious cases.'
   }
 };
 let cfg = { lang: 'ar', color: COLORS[0], read: false, theme: 'dark' }, gi = Math.floor(Math.random() * 8), coords = null, history = [];
@@ -295,6 +409,7 @@ $('#readOpt').onclick = () => { playClick(); cfg.read = !cfg.read; if (!cfg.read
 $('#setBtn').onclick = () => { playClick(); $('#setDlg').showModal(); };
 $('#sosBtn').onclick = () => { playClick(); $('#dlg').showModal(); };
 $('#locBtn').onclick = () => { playClick(); $('#locDlg').showModal(); };
+$('#nearBtn').onclick = () => { playClick(); $('#nearDlg').showModal(); };
 
 // ---- دليل الحالات السريع (فيديو + خطوات جاهزة بدون انتظار الذكاء الاصطناعي) ----
 const SCENARIOS = [
@@ -421,7 +536,6 @@ function quickScenario(sc) {
     await typeText(el, intro);
     if (steps.length) el.appendChild(buildStepCard(steps));
     attachVideo(el, sc);
-    if (sc.id === 'road_accident') renderRecovery(el, await fetchRecovery(sc.title[cfg.lang]));
     addActions(el, full);
     pushHistory('model', full);
     chat.scrollTop = chat.scrollHeight; playReceive();
@@ -967,44 +1081,6 @@ const DIR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
 const CALL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>';
 const STAR_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01z"/></svg>';
 const WEB_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>';
-const WA_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.05 4.91A9.82 9.82 0 0 0 12.04 2C6.55 2 2.1 6.45 2.1 11.94c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.49 0 9.94-4.45 9.94-9.94 0-2.65-1.03-5.14-2.94-7zM12.05 20.15h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.37c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.22-8.24 8.22zm4.52-6.16c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.97-.15.17-.29.19-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.15.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.35-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74 1.48.64 2.07.7 2.81.59.43-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29z"/></svg>';
-function waHref(phone) {
-  const p = String(phone || '').replace(/\D/g, '');
-  if (!p) return '';
-  const intl = p.startsWith('971') ? p : (p.startsWith('0') ? '971' + p.slice(1) : '971' + p);
-  return 'https://wa.me/' + intl;
-}
-function renderRecovery(el, recovery) {
-  if (!el || !Array.isArray(recovery) || !recovery.length) return;
-  const sep = document.createElement('div'); sep.className = 'svc-sep'; sep.innerHTML = '<span>' + t('recovSep') + '</span>'; el.appendChild(sep);
-  recovery.forEach((s, idx) => {
-    const hard = s.kind === 'hard';
-    const d = document.createElement('div'); d.className = 'svc tow' + (s.recommended ? ' rec' : '') + (hard ? ' hard' : ''); d.style.setProperty('--i', idx);
-    const top = document.createElement('div'); top.className = 'svc-top';
-    const info = document.createElement('div'); info.textContent = s.name;
-    const b = document.createElement('span'); b.className = 'svc-badge'; b.textContent = hard ? t('recovHard') : t('recovBadge'); info.appendChild(b);
-    if (s.area) { const sm = document.createElement('small'); sm.textContent = s.area; info.appendChild(sm); }
-    if (s.distance) { const sm = document.createElement('small'); sm.textContent = s.distance; info.appendChild(sm); }
-    if (s.note) { const sm = document.createElement('small'); sm.textContent = s.note; info.appendChild(sm); }
-    top.appendChild(info);
-    const acts = document.createElement('div'); acts.className = 'svc-actions';
-    (s.phones || []).forEach(ph => {
-      const a = document.createElement('a'); a.className = 'svc-btn call'; a.href = 'tel:' + String(ph).replace(/[^\d+]/g, ''); a.innerHTML = CALL_ICON + '<span>' + ph + '</span>'; acts.appendChild(a);
-      const w = document.createElement('a'); w.className = 'svc-btn wa'; w.target = '_blank'; w.rel = 'noopener noreferrer'; w.href = waHref(ph); w.innerHTML = WA_ICON + '<span>' + t('recovWa') + '</span>'; acts.appendChild(w);
-    });
-    d.append(top, acts); el.appendChild(d);
-  });
-  const tip = document.createElement('p'); tip.className = 'recov-tip'; tip.textContent = t('recovTip'); el.appendChild(tip);
-}
-async function fetchRecovery(message) {
-  if (!coords) await locate();
-  if (!coords) return [];
-  try {
-    const r = await fetch('/api/recovery', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: message || '', latitude: coords.lat, longitude: coords.lon, lang: cfg.lang }) });
-    const d = await r.json();
-    return Array.isArray(d.recovery) ? d.recovery : [];
-  } catch { return []; }
-}
 const INFO_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
 const SP_ICONS = {
   electrical: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
@@ -1018,7 +1094,7 @@ const SP_ICONS = {
   general: '<path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"/><rect x="3" y="11" width="18" height="6" rx="2"/><path d="M6 17v2"/><path d="M18 17v2"/><path d="M7 14h.01"/><path d="M17 14h.01"/>',
 };
 const spIcon = k => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (SP_ICONS[k] || SP_ICONS.general) + '</svg>';
-async function fillBot(el, reply, services = [], question = '', recovery = []) {
+async function fillBot(el, reply, services = [], question = '') {
   const { intro, steps } = parseSteps(reply);
   el.textContent = '';
   await typeText(el, steps.length >= 2 ? intro : reply);
@@ -1063,7 +1139,6 @@ async function fillBot(el, reply, services = [], question = '', recovery = []) {
   });
   const sc = detectScenario(question);
   if (sc) attachVideo(el, sc);
-  renderRecovery(el, recovery);
   addActions(el, reply);
   chat.scrollTop = chat.scrollHeight;
 }
@@ -1072,8 +1147,7 @@ async function send(text) {
   inp.value = ''; app.classList.add('started'); insertDisclaimer(); add(text, 'user'); playSend();
   pushHistory('user', text);
   const namesPlace = /(?:بالقرب من|بجوار|بجانب|(?<![أاإ])قرب|(?<![أاإ])جنب|قريب من|مقابل|بمحاذاة|near|close to|beside|next to)\s+\S/i.test(text);
-  const needsPlace = /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|بنشر|تواير|إطار|اطار|غسيل|زيت|سحب|ونش|ريكفري|سطحة|nearest|nearby|hospital|clinic|mechanic|garage|tow|recovery|winch/i.test(text);
-  const needsRecovery = /ريكفري|ونش|سطحة|سحب|ورشة|ميكانيك|حادث|صدمت|معطل|garage|mechanic|recovery|tow|accident|crash|breakdown/i.test(text);
+  const needsPlace = /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|بنشر|تواير|إطار|اطار|غسيل|زيت|سحب|ونش|nearest|nearby|hospital|clinic|mechanic|garage|tow/i.test(text);
   // إذا كانت الرسالة تطابق سيناريو إسعافي معروف (وليست طلب بحث عن مكان)، نعرض الخطوات والفيديو
   // فورًا من الدليل الجاهز بدل انتظار رد الذكاء الاصطناعي — أسرع وأدق في حالات الطوارئ
   const sc = !needsPlace ? detectScenario(text) : null;
@@ -1087,7 +1161,6 @@ async function send(text) {
       await typeText(el, intro);
       if (steps.length) el.appendChild(buildStepCard(steps));
       attachVideo(el, sc);
-      if (needsRecovery || sc.id === 'road_accident') renderRecovery(el, await fetchRecovery(text));
       addActions(el, full);
       pushHistory('model', full);
       chat.scrollTop = chat.scrollHeight; playReceive();
@@ -1100,7 +1173,7 @@ async function send(text) {
   try {
     const r = await fetch('/api/assist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, latitude: coords?.lat, longitude: coords?.lon, lang: cfg.lang, history: history.slice(0, -1) }) });
     const d = await r.json();
-    playReceive(); await fillBot(el, d.reply || '…', d.services, text, d.recovery);
+    playReceive(); await fillBot(el, d.reply || '…', d.services, text);
     pushHistory('model', d.reply || '');
   } catch { await fillBot(el, t('down')); }
 }
