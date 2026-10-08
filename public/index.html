@@ -99,6 +99,11 @@ html[dir="rtl"] .stepbtn.next svg{transform:scaleX(-1)}
 .svc-btn.web:hover{border-color:var(--g);color:var(--g)}
 .svc.other{border-style:dashed}
 .svc.other .svc-btn.call{background:var(--s2);color:var(--tx);border-color:var(--line)}
+.svc.tow{background:linear-gradient(180deg,color-mix(in srgb,#ff7b2f 10%,var(--s)) 0%,var(--s) 60%);border:1px solid color-mix(in srgb,#ff7b2f 40%,var(--line))}
+.svc.tow::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;border-radius:18px 18px 0 0;background:linear-gradient(90deg,#ff7b2f,#ff3e3e)}
+.svc.tow .svc-btn.call{background:linear-gradient(135deg,#ff6a00,#ff3b3b);color:#fff;border-color:#ff6a00;box-shadow:0 4px 18px color-mix(in srgb,#ff5a1f 38%,transparent);font-weight:800}
+.svc.tow .svc-tag{color:#ff7b2f;background:color-mix(in srgb,#ff7b2f 10%,transparent);border-color:color-mix(in srgb,#ff7b2f 35%,transparent)}
+.svc.tow .svc-chip{color:#ff7b2f;background:color-mix(in srgb,#ff7b2f 10%,transparent);border-color:color-mix(in srgb,#ff7b2f 32%,transparent)}
 .svc-tag{display:flex;align-items:center;gap:5px;width:fit-content;max-width:100%;margin-top:7px;padding:3px 10px 3px 9px;border-radius:99px;font-size:11.5px;font-weight:700;color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);border:1px solid color-mix(in srgb,var(--warn) 32%,transparent)}
 .svc-tag svg{width:12px;height:12px;flex:none}
 .svc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
@@ -361,7 +366,7 @@ const T = {
     denied:'تم رفض إذن الموقع. اضغط أيقونة القفل بجانب العنوان واسمح بالموقع، أو اكتب منطقتك يدويًا.', failed:'تعذّر تحديد الموقع. اكتب منطقتك يدويًا من زر «موقعي».', notfound:'لم أجد هذا المكان. جرّب اسمًا آخر.', manualOk:'الموقع: ',
     nomic:'المتصفح لا يدعم تسجيل الصوت.', micDenied:'اسمح للمتصفح باستخدام الميكروفون.', nospeech:'لم أسمع كلامًا واضحًا. حاول مرة أخرى.', micFail:'تعذّر تحويل الصوت. تحقق من الاتصال وحاول مرة أخرى.',
     nots:'المتصفح لا يدعم قراءة النص.', call:'اتصال', dir:'الاتجاهات', down:'تعذّر الاتصال بالخادم. في الطوارئ اتصل بـ 999.', speak:'قراءة الرد',
-    copy:'نسخ', copied:'تم النسخ', step:'الخطوة', of:'من', nextStep:'الخطوة التالية', prevStep:'الخطوة السابقة', doneStep:'انتهت الخطوات', quickT:'دليل سريع', nearest:'الأقرب', web:'الموقع', sp_electrical:'كهرباء السيارات', sp_ac:'تكييف ومكيفات', sp_body:'سمكرة ودهان', sp_mechanic:'ميكانيك وصيانة', sp_glass:'زجاج', sp_battery:'بطاريات', sp_accessories:'زينة وإكسسوارات', sp_tow:'سحب ونقل', sp_general:'صيانة عامة', notRepair:'ليست ورشة تصليح', sv_tires:'بنشر وإطارات', sv_oil:'تبديل زيت', sv_wash:'غسيل وتنظيف', otherSvc:'خدمات أخرى قريبة (ليست ورش تصليح)',
+    copy:'نسخ', copied:'تم النسخ', step:'الخطوة', of:'من', nextStep:'الخطوة التالية', prevStep:'الخطوة السابقة', doneStep:'انتهت الخطوات', quickT:'دليل سريع', nearest:'الأقرب', web:'الموقع', sp_electrical:'كهرباء السيارات', sp_ac:'تكييف ومكيفات', sp_body:'سمكرة ودهان', sp_mechanic:'ميكانيك وصيانة', sp_glass:'زجاج', sp_battery:'بطاريات', sp_accessories:'زينة وإكسسوارات', sp_tow:'سحب ونقل', sp_general:'صيانة عامة', notRepair:'ليست ورشة تصليح', sv_tires:'بنشر وإطارات', sv_oil:'تبديل زيت', sv_wash:'غسيل وتنظيف', sv_tow:'ريكفري وونش وسطحة', otherSvc:'خدمات أخرى قريبة (ليست ورش تصليح)',
     discNote:'قد يخطئ الموقع أحيانًا في تفاصيل الحالة. هذه إرشادات عامة ولا تغني عن فريق طبي مختص في الحالات الجدّية.'
   },
   en: {
@@ -378,7 +383,7 @@ const T = {
     denied:'Location permission was denied. Click the lock icon next to the address, allow location, or enter your area manually.', failed:'Could not find your location. Enter your area manually from "My location".', notfound:'Place not found. Try another name.', manualOk:'Location: ',
     nomic:'This browser cannot record audio.', micDenied:'Allow the browser to use the microphone.', nospeech:'I did not hear clear speech. Try again.', micFail:'Could not convert the audio. Check your connection and try again.',
     nots:'This browser does not support reading text aloud.', call:'Call', dir:'Directions', down:'Cannot reach the server. In an emergency call 999.', speak:'Read reply',
-    copy:'Copy', copied:'Copied', step:'Step', of:'of', nextStep:'Next step', prevStep:'Previous step', doneStep:'All steps done', quickT:'Quick guide', nearest:'Nearest', web:'Website', sp_electrical:'Auto electrical', sp_ac:'A/C & cooling', sp_body:'Body & paint', sp_mechanic:'Mechanic & service', sp_glass:'Glass', sp_battery:'Batteries', sp_accessories:'Accessories', sp_tow:'Towing', sp_general:'General service', notRepair:'Not a repair garage', sv_tires:'Tyres & puncture', sv_oil:'Oil change', sv_wash:'Car wash', otherSvc:'Other nearby services (not repair garages)',
+    copy:'Copy', copied:'Copied', step:'Step', of:'of', nextStep:'Next step', prevStep:'Previous step', doneStep:'All steps done', quickT:'Quick guide', nearest:'Nearest', web:'Website', sp_electrical:'Auto electrical', sp_ac:'A/C & cooling', sp_body:'Body & paint', sp_mechanic:'Mechanic & service', sp_glass:'Glass', sp_battery:'Batteries', sp_accessories:'Accessories', sp_tow:'Towing', sp_general:'General service', notRepair:'Not a repair garage', sv_tires:'Tyres & puncture', sv_oil:'Oil change', sv_wash:'Car wash', sv_tow:'Recovery · Winch · Flatbed', otherSvc:'Other nearby services (not repair garages)',
     discNote:'Sanad can sometimes get details wrong. This is general guidance, not a substitute for a qualified medical team in serious cases.'
   }
 };
@@ -1101,13 +1106,14 @@ async function fillBot(el, reply, services = [], question = '') {
   if (steps.length >= 2) el.appendChild(buildStepCard(steps));
   let sepShown = false;
   services.forEach((s, idx) => {
-    const nonRepair = !!s.service && s.service !== 'repair';
-    // فاصل أنيق قبل أول محل بنشر/زيت/غسيل (يجي بعد ورش التصليح الحقيقية)
+    const isTow = s.service === 'tow';
+    const nonRepair = !!s.service && s.service !== 'repair' && !isTow;
+    // فاصل أنيق قبل أول محل بنشر/زيت/غسيل (يجي بعد ورش التصليح الحقيقية والريكفري)
     if (nonRepair && idx > 0 && !sepShown) {
       sepShown = true;
       const sp = document.createElement('div'); sp.className = 'svc-sep'; sp.innerHTML = '<span>' + t('otherSvc') + '</span>'; el.appendChild(sp);
     }
-    const d = document.createElement('div'); d.className = 'svc' + (s.recommended ? ' rec' : '') + (nonRepair ? ' other' : ''); d.style.setProperty('--i', idx);
+    const d = document.createElement('div'); d.className = 'svc' + (s.recommended ? ' rec' : '') + (isTow ? ' tow' : '') + (nonRepair ? ' other' : ''); d.style.setProperty('--i', idx);
     const top = document.createElement('div'); top.className = 'svc-top';
     const info = document.createElement('div'); info.textContent = s.name;
     if (s.recommended) { const b = document.createElement('span'); b.className = 'svc-badge'; b.textContent = t('nearest'); info.appendChild(b); }
@@ -1117,7 +1123,8 @@ async function fillBot(el, reply, services = [], question = '') {
       s.specialties.slice(0, 3).forEach(k => { const c = document.createElement('span'); c.className = 'svc-chip'; c.innerHTML = spIcon(k) + '<span>' + (t('sp_' + k) || '') + '</span>'; chips.appendChild(c); });
       info.appendChild(chips);
     }
-    if (nonRepair) { const tg = document.createElement('span'); tg.className = 'svc-tag'; tg.innerHTML = INFO_ICON + '<span>' + (t('sv_' + s.service) || '') + ' · ' + t('notRepair') + '</span>'; info.appendChild(tg); }
+    if (isTow) { const tg = document.createElement('span'); tg.className = 'svc-tag'; tg.innerHTML = CALL_ICON + '<span>' + (t('sv_' + s.service) || '') + '</span>'; info.appendChild(tg); }
+    else if (nonRepair) { const tg = document.createElement('span'); tg.className = 'svc-tag'; tg.innerHTML = INFO_ICON + '<span>' + (t('sv_' + s.service) || '') + ' · ' + t('notRepair') + '</span>'; info.appendChild(tg); }
     top.appendChild(info);
     if (s.rating || s.hours) {
       const meta = document.createElement('div'); meta.className = 'svc-meta';
@@ -1147,7 +1154,7 @@ async function send(text) {
   inp.value = ''; app.classList.add('started'); insertDisclaimer(); add(text, 'user'); playSend();
   pushHistory('user', text);
   const namesPlace = /(?:بالقرب من|بجوار|بجانب|(?<![أاإ])قرب|(?<![أاإ])جنب|قريب من|مقابل|بمحاذاة|near|close to|beside|next to)\s+\S/i.test(text);
-  const needsPlace = /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|بنشر|تواير|إطار|اطار|غسيل|زيت|سحب|ونش|nearest|nearby|hospital|clinic|mechanic|garage|tow/i.test(text);
+  const needsPlace = /قريب|أقرب|مستشفى|عيادة|ميكانيك|ورشة|بنشر|تواير|إطار|اطار|غسيل|زيت|سحب|ونش|وينش|وانش|ريكفر|ريكفري|ديسكفر|ديسكفري|سطحة|إنقاذ|nearest|nearby|hospital|clinic|mechanic|garage|\btow\b|towing|recover|recovery|winch|discovery|flatbed/i.test(text);
   // إذا كانت الرسالة تطابق سيناريو إسعافي معروف (وليست طلب بحث عن مكان)، نعرض الخطوات والفيديو
   // فورًا من الدليل الجاهز بدل انتظار رد الذكاء الاصطناعي — أسرع وأدق في حالات الطوارئ
   const sc = !needsPlace ? detectScenario(text) : null;
