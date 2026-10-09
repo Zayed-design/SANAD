@@ -74,7 +74,7 @@ function loadRecovery() {
 const RECOVERY = loadRecovery();
 console.log(`[recovery] تم تحميل ${RECOVERY.providers.length} مزوّد ريكفري من recovery.json`);
 // كلمات الريكفري المحددة فقط (ريكفري/ونش/سطحة/winch...) — "سحب" و"tow" العامة تبقى للورش كما كانت
-const RECOVERY_RE = /(?<![؀-ۿ])(?:ال|لل|ب|ل)?(?:ريكفر[يى]|ريكوفري|ونش|وينش|سطح[ةه])(?![؀-ۿ])|\bwinch\b|flat ?bed|tow ?truck|recovery\s+(?:truck|vehicle|service)|(?:nearest|closest)\s+recovery(?!\s+position)/i;
+const RECOVERY_RE = /(?<![؀-ۿ])(?:ال|لل|ب|ل)?(?:[ريد]ي?كس?فر[يى]|ريكوفري|ونش|وينش|سطح[ةه])(?![؀-ۿ])|\bwinch\b|flat ?bed|tow ?truck|recovery\s+(?:truck|vehicle|service)|(?:nearest|closest)\s+recovery(?!\s+position)/i;
 
 const KINDS = [
   { test: RECOVERY_RE, recovery: true, fallback: "ريكفري" },
