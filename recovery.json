@@ -1,0 +1,39 @@
+{
+  "allUAE": {
+    "name": "الإنقاذ البري وسحب الرمال – كافة الإمارات",
+    "nameEn": "Off-road & desert rescue – all UAE",
+    "phone": "0565542225"
+  },
+  "providers": [
+    { "name": "ريكفري بني ياس", "nameEn": "Recovery – Bani Yas", "phone": "0501216458",
+      "zones": [{ "ar": "بني ياس", "en": "Bani Yas", "lat": 24.300, "lon": 54.625 }] },
+    { "name": "ريكفري الشامخة", "nameEn": "Recovery – Al Shamkha", "phone": "0559227724",
+      "zones": [{ "ar": "الشامخة", "en": "Al Shamkha", "lat": 24.382, "lon": 54.702 }] },
+    { "name": "ريكفري الفلاح", "nameEn": "Recovery – Al Falah", "phone": "0509983960",
+      "zones": [{ "ar": "الفلاح", "en": "Al Falah", "lat": 24.330, "lon": 54.720 }] },
+    { "name": "ريكفري المصفح", "nameEn": "Recovery – Mussafah", "phone": "0509210785",
+      "zones": [{ "ar": "المصفح", "en": "Mussafah", "lat": 24.360, "lon": 54.500 }] },
+    { "name": "ريكفري مدينة محمد بن زايد · شخبوط · الشوامخ", "nameEn": "Recovery – MBZ City · Shakhbout · Al Shawamekh", "phone": "0545457589",
+      "zones": [
+        { "ar": "مدينة محمد بن زايد", "en": "Mohammed Bin Zayed City", "lat": 24.345, "lon": 54.540 },
+        { "ar": "مدينة شخبوط", "en": "Shakhbout City", "lat": 24.3515, "lon": 54.622 },
+        { "ar": "الشوامخ", "en": "Al Shawamekh", "lat": 24.360, "lon": 54.580 }
+      ] },
+    { "name": "ريكفري الشهامة · الرحبة", "nameEn": "Recovery – Al Shahama · Al Rahba", "phone": "0569078756",
+      "zones": [
+        { "ar": "الشهامة", "en": "Al Shahama", "lat": 24.520, "lon": 54.660 },
+        { "ar": "الرحبة", "en": "Al Rahba", "lat": 24.525, "lon": 54.715 }
+      ] },
+    { "name": "ريكفري جزيرة ياس · جزيرة الريم", "nameEn": "Recovery – Yas Island · Al Reem Island", "phone": "0552528522",
+      "zones": [
+        { "ar": "جزيرة ياس", "en": "Yas Island", "lat": 24.467, "lon": 54.603 },
+        { "ar": "جزيرة الريم", "en": "Al Reem Island", "lat": 24.4985, "lon": 54.402 }
+      ] },
+    { "name": "ريكفري الخالدية · البطين · الكورنيش", "nameEn": "Recovery – Al Khalidiya · Al Bateen · Corniche", "phone": "0509725785",
+      "zones": [
+        { "ar": "الخالدية", "en": "Al Khalidiya", "lat": 24.4695, "lon": 54.349 },
+        { "ar": "البطين", "en": "Al Bateen", "lat": 24.454, "lon": 54.346 },
+        { "ar": "شارع الكورنيش", "en": "Corniche Road", "lat": 24.478, "lon": 54.340 }
+      ] }
+  ]
+}

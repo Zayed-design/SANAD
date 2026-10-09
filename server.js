@@ -58,107 +58,27 @@ function loadCuratedWorkshops() {
   }
 }
 const CURATED_WORKSHOPS = loadCuratedWorkshops();
-CURATED_WORKSHOPS.forEach(w => { if (!w.source) w.source = "workshop"; });
 console.log(`[workshops] تم تحميل ${CURATED_WORKSHOPS.length} ورشة من workshops.json`);
 
-// --- قائمة ريكفري/اونش/سطحة يدوية من بيانات صاحب المشروع (أرقام حقيقية + إحداثيات تقريبية حسب المنطقة من المعجم)
-// تُدمج مع نتائج الخريطة الحية بدالة nearby() عندما يطلب المستخدم سحب/ونش/ريكفري/ديسكفري/إنقاذ.
-// الإحداثيات مو نقطة الدخول للمنطقة (تقريبية) ومسافة الأقرب أولًا تظل صحيحة لأن جميع الأرقام داخل الإمارة.
-// !! الهامش الأمني: الأرقام هنا هي اللي صاحب المشروع أعطاها فقط، لأرجح ما يكون موثوقًا من ورشات.
-const CURATED_RECOVERY = [
-  // أرقام طوارئ الإنقاذ الخاص (كافة الإمارات)
-  { name: "أرقام الطوارئ والإنقاذ الخاص (كافة الإمارات)", phone: "0565542225", lat: 24.45, lon: 54.4, type: "tow", specialty: ["tow"], source: "recovery" },
-
-  // --- إمارة أبوظبي وضواحيها ---
-  { name: "ريكفري بني ياس", phone: "0501216458", lat: 24.31, lon: 54.62, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الشامخة", phone: "0559227724", lat: 24.38, lon: 54.70, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الفلاح", phone: "0509983960", lat: 24.36, lon: 54.50, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري المصفح", phone: "0509210785", lat: 24.33, lon: 54.52, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري مدينة محمد بن زايد / مدينة شخبوط / الشوامخ", phone: "0545457589", lat: 24.345, lon: 54.54, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الشهامة / الرحبة", phone: "0569078756", lat: 24.52, lon: 54.68, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري جزيرة ياس / جزيرة الريم", phone: "0552528522", lat: 24.48, lon: 54.60, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الخالدية / البطين / شارع الكورنيش", phone: "0509725785", lat: 24.467, lon: 54.37, type: "tow", specialty: ["tow"], source: "recovery" },
-
-  // --- مدينة العين وتوابعها ---
-  { name: "Al Ain Recovery (ونشات حديثة ونقل هيدروليك)", phone: "0545352055", lat: 24.2075, lon: 55.7447, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "Al Ain Recovery (ونشات حديثة ونقل هيدروليك)", phone: "0507527798", lat: 24.2075, lon: 55.7447, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "خدمة ونش العين الشاملة", phone: "0509983960", lat: 24.2075, lon: 55.7447, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "خدمة ونش العين الشاملة", phone: "0508466263", lat: 24.2075, lon: 55.7447, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري البلوشي (كافة مناطق ومخارج العين)", phone: "0555562883", lat: 24.2075, lon: 55.7447, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "إنقاذ بدع بنت سعود وجبل حفيت (سحب رمال وجبال)", phone: "0522450678", lat: 24.06, lon: 55.76, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري منطقة الهيلي والصناعية", phone: "0503024949", lat: 24.23, lon: 55.75, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري منطقة الهيلي والصناعية", phone: "0553141344", lat: 24.23, lon: 55.75, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري اليحر / السليمات / الهير / المقام", phone: "0528662883", lat: 24.21, lon: 55.76, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري زاخر / وسط المدينة", phone: "0508466263", lat: 24.2075, lon: 55.7447, type: "tow", specialty: ["tow"], source: "recovery" },
-
-  // --- منطقة الظفرة (الإمارة الغربية) ---
-  { name: "ريكفري منطقة الظفرة عامة", phone: "0559227724", lat: 23.65, lon: 53.67, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري مدينة زايد / غياثي", phone: "0569078756", lat: 23.65, lon: 53.67, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري المرفأ / السلع", phone: "0528662883", lat: 23.55, lon: 52.43, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري المرفأ / السلع", phone: "0566906537", lat: 23.55, lon: 52.43, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري ليوا", phone: "0569078756", lat: 23.14, lon: 53.77, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري ليوا", phone: "0565309242", lat: 23.14, lon: 53.77, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الرويس", phone: "0509210785", lat: 24.10, lon: 52.58, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الرويس", phone: "0527879800", lat: 24.10, lon: 52.58, type: "tow", specialty: ["tow"], source: "recovery" },
-
-  // --- إمارة دبي ---
-  { name: "ريكفري دبي الشامل (كافة المناطق)", phone: "0551515721", lat: 25.2048, lon: 55.2708, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ونش البرشاء والشيخ زايد السريع", phone: "0555231405", lat: 25.12, lon: 55.20, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري وليد (ديرة والقصيص وقريب الشارقة)", phone: "0586121286", lat: 25.27, lon: 55.33, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "المهمات السريعة (الشوارع الخارجية)", phone: "0541979348", lat: 25.2048, lon: 55.2708, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الإمارات (جميرا والمرسى وسيارات فارهة)", phone: "0555771623", lat: 25.22, lon: 55.25, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري دبي المركزي", phone: "0509983960", lat: 25.2048, lon: 55.2708, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري البرشاء / جبل علي / المرابع العربية", phone: "0509983960", lat: 25.01, lon: 55.07, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري ديرة / الخوانيج / الورقاء / الراشدية / دبي مارينا / المزهر", phone: "0552728860", lat: 25.30, lon: 55.35, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري القصيص / المحيصنة", phone: "0545457589", lat: 25.28, lon: 55.36, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الخليج التجاري", phone: "0522450678", lat: 25.19, lon: 55.27, type: "tow", specialty: ["tow"], source: "recovery" },
-
-  // --- إمارة الشارقة ---
-  { name: "خدمة بلال (أوقات الذروة)", phone: "0501516758", lat: 25.3463, lon: 55.4209, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري مويلح / النهدة / الصناعية", phone: "0553628674", lat: 25.3463, lon: 55.4209, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري أسامة (حوادث وسيارات متعطلة)", phone: "0582020865", lat: 25.3463, lon: 55.4209, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "نقل السيارات بين الشارقة ودبي", phone: "0507964082", lat: 25.32, lon: 55.38, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "فادي لسحب السيارات (اليرموك وحلوان)", phone: "0566295396", lat: 25.3463, lon: 55.4209, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري المناطق الصناعية الرابعة والخامسة", phone: "0502744907", lat: 25.3463, lon: 55.4209, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "خدمة الشحن السريع (ونش هيدروليك)", phone: "0522450678", lat: 25.3463, lon: 55.4209, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الذيد / خورفكان", phone: "0552528522", lat: 25.33, lon: 56.35, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الشرق والقرائن / الجرينة / اللية", phone: "0552728860", lat: 25.3463, lon: 55.4209, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري المجاز", phone: "0559227724", lat: 25.3463, lon: 55.4209, type: "tow", specialty: ["tow"], source: "recovery" },
-
-  // --- إمارة عجمان ---
-  { name: "استجابة فورية داخل عجمان", phone: "0554432164", lat: 25.4052, lon: 55.5136, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ونش عجمان الشامل (الأحياء والصناعية)", phone: "0509983960", lat: 25.4052, lon: 55.5136, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري أسامة (نقل إلى الشارقة ودبي)", phone: "0582020865", lat: 25.4052, lon: 55.5136, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "سطحة عجمان (للمركبات المتعطلة والمصدومة)", phone: "0557452223", lat: 25.4052, lon: 55.5136, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "خدمة فورية (قريب من الجرف والراشدية)", phone: "0566295396", lat: 25.4052, lon: 55.5136, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الإمارات المركزي (طوارئ وسحب رمل)", phone: "0555231405", lat: 25.4052, lon: 55.5136, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري النعيمية / الجرف / الراشدية / المنطقة الصناعية", phone: "0509983960", lat: 25.4052, lon: 55.5136, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري المويهات", phone: "0552528522", lat: 25.4052, lon: 55.5136, type: "tow", specialty: ["tow"], source: "recovery" },
-
-  // --- إمارة أم القيوين ---
-  { name: "ريكفري بن يوسف (شارع الشيخ محمد بن زايد والراس والصناعية)", phone: "0509048982", lat: 25.5647, lon: 55.5552, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري السلمة وفلج المعلا", phone: "0555771623", lat: 25.5647, lon: 55.5552, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "سطحة ونش الإمارات (طرق داخلية وخارجية)", phone: "0507766861", lat: 25.5647, lon: 55.5552, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "الشحن السريع والإنقاذ من الرمال", phone: "0522450678", lat: 25.5647, lon: 55.5552, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري أم القيوين (المدينة)", phone: "0545457589", lat: 25.5647, lon: 55.5552, type: "tow", specialty: ["tow"], source: "recovery" },
-
-  // --- إمارة رأس الخيمة ---
-  { name: "المركز الرئيسي والطرق الجبلية (جبل جيس)", phone: "0525239993", lat: 25.7895, lon: 55.9432, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "المركز الرئيسي والطرق الجبلية (جبل جيس)", phone: "0508007773", lat: 25.7895, lon: 55.9432, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الجزيرة الحمراء / ميناء العرب / جزيرة المرجان", phone: "0502700286", lat: 25.68, lon: 55.88, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري الجزيرة الحمراء / ميناء العرب / جزيرة المرجان", phone: "0508007773", lat: 25.68, lon: 55.88, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ونش عمار (داخل الإمارة)", phone: "0508466263", lat: 25.7895, lon: 55.9432, type: "tow", specialty: ["tow"], source: "recovery" },
-
-  // --- إمارة الفجيرة والمنطقة الشرقية ---
-  { name: "ريكفري الفجيرة والساحل (العقة والبدية)", phone: "0504173141", lat: 25.1288, lon: 56.3265, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ونش الفجيرة السريع (24/7)", phone: "0561648889", lat: 25.1288, lon: 56.3265, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "الطرق الجبلية الوعرة والأنفاق", phone: "0559227724", lat: 25.1288, lon: 56.3265, type: "tow", specialty: ["tow"], source: "recovery" },
-  { name: "ريكفري مدينة الفجيرة ودبا الفجيرة", phone: "0561101863", lat: 25.1288, lon: 56.3265, type: "tow", specialty: ["tow"], source: "recovery" },
-];
-console.log(`[recovery] تم تحميل ${CURATED_RECOVERY.length} رقم ريكفري/ونش/سطحة`);
+// قائمة الريكفري (ونش/سطحة) من ملف recovery.json: كل مزوّد له رقم ومناطق تغطية بإحداثيات تقريبية لمركز المنطقة.
+// تقدر تعدّل الأرقام أو الإحداثيات أو تضيف مناطق من الملف مباشرة بدون لمس الكود.
+function loadRecovery() {
+  try {
+    const j = JSON.parse(readFileSync(join(__dirname, "recovery.json"), "utf8"));
+    return { allUAE: j.allUAE || null, providers: Array.isArray(j.providers) ? j.providers : [] };
+  } catch (e) {
+    console.error("[recovery] تعذّر قراءة recovery.json:", e?.message || e);
+    return { allUAE: null, providers: [] };
+  }
+}
+const RECOVERY = loadRecovery();
+console.log(`[recovery] تم تحميل ${RECOVERY.providers.length} مزوّد ريكفري من recovery.json`);
+// كلمات الريكفري المحددة فقط (ريكفري/ونش/سطحة/winch...) — "سحب" و"tow" العامة تبقى للورش كما كانت
+const RECOVERY_RE = /(?<![؀-ۿ])(?:ال|لل|ب|ل)?(?:ريكفر[يى]|ريكوفري|ونش|وينش|سطح[ةه])(?![؀-ۿ])|\bwinch\b|flat ?bed|tow ?truck|recovery\s+(?:truck|vehicle|service)|(?:nearest|closest)\s+recovery(?!\s+position)/i;
 
 const KINDS = [
-  { test: /ديسكفر|ديسكفري|ديسكفارى|ريكفر|ريكفري|ريكفارى|وينش|وانش|سطحة|إنقاذ|ميكانيك|ورشة|تصليح السيارة|سحب|ونش|قطع غيار|خدمة سيارات|بنشر|تواير|اطار|إطار|تبديل زيت|تغيير زيت|مغسلة|غسيل سيارة|recover|recovery|discovery|winch|flatbed|mechanic|garage|\btow\b|towing|tyre|tire|puncture|oil change|car wash/i, categories: ["service.vehicle.repair", "service.vehicle.towing"], fallback: "ورشة / ريكفري سيارات", curated: [...CURATED_WORKSHOPS, ...CURATED_RECOVERY] },
+  { test: RECOVERY_RE, recovery: true, fallback: "ريكفري" },
+  { test: /ميكانيك|ورشة|تصليح السيارة|سحب|ونش|قطع غيار|خدمة سيارات|بنشر|تواير|اطار|إطار|تبديل زيت|تغيير زيت|مغسلة|غسيل سيارة|mechanic|garage|tow|tyre|tire|puncture|oil change|car wash/i, categories: ["service.vehicle.repair"], fallback: "ورشة سيارات", curated: CURATED_WORKSHOPS },
   { test: /مستشفى|عيادة|مركز صحي|hospital|clinic/i, categories: ["healthcare.hospital", "healthcare.clinic_or_praxis"], fallback: "منشأة صحية" },
 ];
 
@@ -176,21 +96,19 @@ function meters(a, b, c, d) {
 
 
 // تصنيف المحل: ورشة تصليح حقيقية ("repair") أو محل خدمة سريعة: بنشر/إطارات ("tires")، تبديل زيت ("oil")، غسيل وتنظيف ("oil"/"wash")
-// أو خدمة سحب وونش/ريكفري ("tow"). تقدر تصحّح أي محل يدويًا بإضافة حقل "type" بملف workshops.json
-const SERVICE_TYPES = ["repair", "tires", "oil", "wash", "tow"];
+// هذي المحلات مو ورش تصليح، فنخليها آخر القائمة ونعلّمها بوضوح. تقدر تصحّح أي محل يدويًا بإضافة حقل "type" بملف workshops.json
+const SERVICE_TYPES = ["repair", "tires", "oil", "wash"];
 const RE_TIRES = /بنشر|بنچر|بنشير|إطار|اطار|تواير|تاير|تيري|تايري|تایری|tyre|tyer|tire|puncture|punchure|wheel balanc|ميزان|balance/i;
 const RE_OIL = /زيوت|زيت|\boil\b|lube/i;
 const RE_WASH = /غسيل|مغسل|تنظيف|تنضيف|تلميع|عناية بالسيارات|\bwash|polish|detailing|\bcar ?care\b/i;
-const RE_TOW = /(?:ريكفر|ريكفرى|ريكفري|ريكفارى)\b|(?:سحب|ونش|وينش|وانش|ديسكفر|ديسكفرى|ديسكفري|ديسكفارى|سطحة|إنقاذ)\b|(?:recover|recovery|towing|\btow\b|winch|off\s*road\s*rescue|offroad\s*recovery|sand\s*recovery|desert\s*recovery|flatbed\s*tow|vehicle\s*recover|road\s*side\s*assist|break\s*down\s*tow|discover|discovery\b)/i;
 // دليل ميكانيكي قوي: لو موجود يبقى المحل ورشة حتى لو ذكر إطارات/غسيل بجانبه
 const RE_REPAIR = /ميكانيك|مكانيك|كراج|garage|garag|mechanic|مكيف|\ba\/c\b|electric|elect\.|elct|كهرباء|body ?shop|سمكرة|دهان|\bpaint|\bdent\b|engine|محرك|تصليح|اصلاح|إصلاح|repair|radiator|ردياتر|راديتر|injector|انجكتر|maint|work ?shop|w\.?\s?shop|service cent|car service|auto service|ورش[ةه]/i;
 // أي كلمة تدل أن المحل متعلق بالسيارات أصلًا (نستعملها لنتائج الخريطة الحية فقط لاستبعاد الأسماء العشوائية)
-const RE_AUTO_WORD = /auto|car\b|cars\b|motor|vehicle|garage|مركب|سيار|كراج|ورش|ميكانيك|automotive|mechanic|repair|عفش|جير|gear|ونش|سحب|ريكفر|recover|tow/i;
+const RE_AUTO_WORD = /auto|car\b|cars\b|motor|vehicle|garage|مركب|سيار|كراج|ورش|ميكانيك|automotive|mechanic|repair|عفش|جير|gear/i;
 const RE_TIRE_REPAIR_PHRASE = /(?:tyres?|tires?|tyers?|puncture|punchure)\s*(?:(?:fitting|repair\w*|rep\b\.?|fix\w*|balanc\w*|change|services?|shop|center|centre|and|&|,|-|\/)\s*)+|ل?تصليح\s*(?:ال)?[إا]طار\w*|ل?تصليح\s*بنشر|ل?اصلاح\s*(?:ال)?[إا]طار\w*|(?:ال)?[إا]طارات\s*و?\s*(?:ال)?بطاريات|batter\w*/gi;
 // يحدد نوع الخدمة اللي يبغاها المستخدم من نص رسالته (الافتراضي: ورشة تصليح)
 function wantedService(text) {
   const t = String(text || "");
-  if (RE_TOW.test(t)) return "tow";
   if (/بنشر|بنچر|إطار|اطار|تواير|تاير|تير\b|tyre|tire|puncture|flat/i.test(t)) return "tires";
   if (/زيت|زيوت|\boil\b/i.test(t)) return "oil";
   if (/غسيل|مغسل|تنظيف السيار|تنضيف السيار|\bcar ?wash|detailing/i.test(t)) return "wash";
@@ -198,8 +116,6 @@ function wantedService(text) {
 }
 function classifyService(name) {
   const n = String(name || "");
-  // ريكفري وونش وستحة قبل التصنيفات الأخرى حتى تظهر كخدمة سحب واضحة
-  if (RE_TOW.test(n)) return "tow";
   // "تصليح إطارات / Tyre Repair" مو ورشة تصليح سيارات، فنشيلها قبل فحص كلمات التصليح
   const stripped = n.replace(RE_TIRE_REPAIR_PHRASE, " ");
   const strongRepair = RE_REPAIR.test(stripped);
@@ -245,6 +161,45 @@ function cleanUrl(u) {
     if (!/^https?:$/.test(x.protocol) || !x.hostname.includes(".")) return "";
     return x.href;
   } catch { return ""; }
+}
+
+// أقرب ريكفري: نحسب المسافة من موقع المستخدم لأقرب منطقة تغطية لكل مزوّد (ضمن 60 كم)، نرتّب الأقرب أولًا،
+// ونضيف دائمًا رقم الإنقاذ البري العام (كافة الإمارات) بالآخر. المسافة هنا لمركز منطقة التغطية وليست موقع السائق.
+const RECOVERY_RADIUS = 60000;
+function nearbyRecovery(lat, lon, L) {
+  const en = L === "en";
+  const ranked = [];
+  for (const p of RECOVERY.providers) {
+    let best = null;
+    for (const z of p.zones || []) {
+      if (!Number.isFinite(z.lat) || !Number.isFinite(z.lon)) continue;
+      const m = meters(lat, lon, z.lat, z.lon);
+      if (!best || m < best.m) best = { m, z };
+    }
+    if (best && best.m <= RECOVERY_RADIUS) ranked.push({ p, best });
+  }
+  ranked.sort((a, b) => a.best.m - b.best.m);
+  const out = ranked.slice(0, 5).map(({ p, best }, i) => ({
+    name: en ? (p.nameEn || p.name) : p.name,
+    phone: p.phone,
+    recovery: true,
+    specialties: ["tow"],
+    distance: (en ? best.z.en || best.z.ar : best.z.ar) + " · " + (best.m / 1000).toFixed(1) + " km",
+    recommended: i === 0,
+  }));
+  const g = RECOVERY.allUAE;
+  if (g && g.phone) {
+    out.push({
+      name: en ? (g.nameEn || g.name) : g.name,
+      phone: g.phone,
+      recovery: true,
+      allUAE: true,
+      specialties: ["tow"],
+      distance: en ? "All UAE" : "كافة الإمارات",
+      recommended: false,
+    });
+  }
+  return out;
 }
 
 // كاش قصير لنتائج Overpass لتفادي إعادة الاستعلام البطيء لنفس المنطقة
@@ -350,17 +305,13 @@ async function nearby(kind, lat, lon, want = "repair") {
 
     // نعرض فقط النوع المطلوب: افتراضيًا ورش التصليح الحقيقية بترتيب الأقرب. محلات البنشر/الزيوت/الغسيل ما تظهر
     // إلا إذا طلبها المستخدم صراحة (وقتها تكون هي المطلوبة بدل ورش التصليح)
-    // وحرج أماني للريكفري: لو اللي بغاه المستخدم "tow"، ما نخلي ورشة (من workshops.json أو Livemap)
-    // تختلط بالقائمة حتى ولو صادف اسمها يطابق ريكفري على الريدج. الأرصح اللي تظهر هنا الأرقام اللي أعطاها صاحب المشروع
-    let list = kept.filter(x => x.service === want);
-    if (want === "tow") list = list.filter(x => x.source !== "workshop");
-    const out = list
+    const out = kept
+      .filter(x => x.service === want)
       .sort((a, b) => a.m - b.m)
       .slice(0, 6)
-      .map(({ m, service, specialty, source, ...s }, i) => {
-        const o = { ...s, service: service, specialties: specialtiesOf(s.name, specialty), distance: (m / 1000).toFixed(1) + " km", recommended: i === 0 };
+      .map(({ m, service, specialty, ...s }, i) => {
+        const o = { ...s, specialties: specialtiesOf(s.name, specialty), distance: (m / 1000).toFixed(1) + " km", recommended: i === 0 };
         if (!o.website) delete o.website;
-        if (service === "tow") { delete o.rating; delete o.website; delete o.lat; delete o.lon; }
         return o;
       });
     nearbyCache.set(key, { t: Date.now(), v: out });
@@ -646,19 +597,17 @@ app.post("/api/assist", limit, async (req, res) => {
       })).filter(h => h.parts[0].text)
     : [];
 
-  // نقطة سقوط إقليمية آمنة (وسط أبوظبي): لو ما عندنا GPS ولا ذكر المستخدم اسم منطقة،
-  // ولكن طلب أقرب خدمة (ورشة/ريكفري/مستشفى)، نعرض القائمة الكُرَتيد (مدروسة يدويًا)
-  // مع إشارة للمستخدم أن المسافات تقريبية وما دقيقة إلا بعد تشغيل الموقع
-  const DEFAULT_LAT = 24.45; const DEFAULT_LON = 54.37;
   const la0 = Number(latitude), lo0 = Number(longitude);
   let hasLoc = latitude != null && longitude != null && Number.isFinite(la0) && Number.isFinite(lo0);
   let la = la0, lo = lo0, mentionedPlace = null, approxPlace = false;
-  let usedDefaultLoc = false;
 
   const kind = KINDS.find(k => k.test.test(text));
   // إذا ذكر المستخدم مكانًا داخل رسالته (مثل "قريب من X")، نحاول تحويله لإحداثيات ونستخدمه بدل الـ GPS
-  const locMatch = kind ? (text.match(LOCATION_MENTION) || text.match(NEAREST_FROM_MENTION)) : null;
+  let locMatch = kind ? (text.match(LOCATION_MENTION) || text.match(NEAREST_FROM_MENTION)) : null;
   let geocodeFailed = false;
+  // "أقرب X من موقعي/مكاني" تعني GPS المستخدم نفسه وليست اسم مكان نبحث عنه بالخريطة
+  const SELF_PLACE = /^(?:موقعي|مكاني|موقعنا|مكانا|عندي|هنا|my (?:current )?location|my place|me|here)(?![؀-ۿ\w])/i;
+  if (locMatch && SELF_PLACE.test(locMatch[1].trim())) locMatch = null;
   if (locMatch) {
     const geo = await geocodeText(locMatch[1].trim(), L, hasLoc ? { lat: la0, lon: lo0 } : null);
     if (geo) {
@@ -669,12 +618,7 @@ app.post("/api/assist", limit, async (req, res) => {
     // بعيد جدًا عن المكان الحقيقي المقصود، ونخلي الذكاء الاصطناعي يوضح ذلك للمستخدم صراحة
     else { geocodeFailed = true; hasLoc = false; }
   }
-  // سقوط إضافي: طلب المستخدم خدمة (ورشة/ريكفري/مستشفى) وما عندنا موقع أصلاً → نعرض
-  // نتائج عامة من القائمة اليدوية عشان تظهر الأزرار (اتصال / توجيه) بالكارت
-  if (kind && !hasLoc && !geocodeFailed) {
-    la = DEFAULT_LAT; lo = DEFAULT_LON; hasLoc = true; approxPlace = true; usedDefaultLoc = true;
-  }
-  const services = kind && hasLoc && !geocodeFailed ? await nearby(kind, la, lo, wantedService(text)) : [];
+  const services = kind && hasLoc && !geocodeFailed ? (kind.recovery ? nearbyRecovery(la, lo, L) : await nearby(kind, la, lo, wantedService(text))) : [];
 
   if (!ai) return res.json({ reply: "AI is not enabled: set GEMINI_API_KEY. Emergency: 999.", services });
 
@@ -690,12 +634,11 @@ In "Nearby results", the item marked "recommended": true is the closest one and 
 Road numbers (Abu Dhabi): for a MINOR accident with NO injuries, the user should call Saaed (ساعد) on 800 72233 to report/plan the accident and move the vehicles off the road; to secure the road and tow a stalled or crashed vehicle on main roads, call Road Assistance Musanada (مساندة الطرق) on 800 850; any injury, fire, or danger means call 999 (police) / 998 (ambulance) first. Mention these numbers only for road accidents or breakdowns, only once, and never claim to have called anyone. Outside Abu Dhabi, say that minor-accident reporting differs by emirate and 999 is always valid.\nIf "Nearby results" is empty even though a location is available, say plainly that no matching places were found in the wider search area and suggest calling emergency numbers or trying a well-known nearby landmark name instead — never invent a place.
 Coverage is all seven emirates of the UAE. If the closest result is more than about 30 km away, say so plainly (the distance field is real) and suggest calling roadside/emergency numbers if it is urgent — never present a far result as nearby.
 ${mentionedPlace ? `The user named a specific place in their message; you searched near it ("${mentionedPlace}") instead of their GPS — mention briefly that you searched near that place.` : ""}
-${approxPlace ? `IMPORTANT: the exact sub-area/sector number the user typed could not be pinpointed, so you searched near the general area only ("${mentionedPlace || "مركز أبوظبي كافتراضي"}") rather than their precise sector — explicitly tell them this is an approximation of the general area, not their exact sector, so results may be a bit off.` : ""}
+${approxPlace ? `IMPORTANT: the exact sub-area/sector number the user typed could not be pinpointed, so you searched near the general area only ("${mentionedPlace}") rather than their precise sector — explicitly tell them this is an approximation of the general area, not their exact sector, so results may be a bit off.` : ""}
 ${geocodeFailed ? `The user named a specific place ("${locMatch[1].trim()}") in their message, but its exact location could NOT be determined. Do NOT use or mention any device/network location as a substitute — there are no reliable Nearby results for what they asked. Tell them clearly and briefly that you couldn't pinpoint that exact place, and ask them to either try a more specific/well-known area name, or use the "My location" button for their current position.` : ""}
-${usedDefaultLoc ? `CRITICAL note for YOUR reply wording (do NOT print coordinates, just say it naturally in the user's language): no current GPS position was available, so the nearby list below is produced using a general UAE/Abu-Dhabi-wide reference — the distances shown are broad approximations only, and the displayed numbers/cards are still real. Do NOT pretend the results are the user's "exact nearest"; instead, open by noting that My Location is not active, tell them the phone-number cards below are still valid, and invite them to tap "My location" (موقعي) at any time to get true nearest-first results sorted to their exact spot. Keep this note short, then continue with the normal top-pick presentation of the list.` : ""}
-${wantedService(text) === "tow" ? `CRITICAL — the user asked for RECOVERY / WINCH / FLATBED / TOWING (ريكفري / ونش / سحب / سطحة / ديسكفري). This is a quick-contact service list, NOT a list of repair workshops. RULES YOU MUST FOLLOW for this kind of query:\n1) Do NOT mention any evaluation/rating/score/تقييم/نقاط for ANY entry in your reply (there are no ratings here anyway, and they are irrelevant).\n2) Do NOT list or mention any distance or "km" for any entry — these are regional contacts, not pinned venues. Instead, simply present them as verified phone numbers to call.\n3) Do NOT print or repeat the phone number inside your own sentences — the app will draw a big callable card under every entry with the phone number on it. You only need to NAME the contact and its area (e.g. "ريكفري الشهامة / الرحبة") and invite tap-to-call.\n4) Keep wording short and calm: it's a phone-book style list, not a review summary. If no GPS was provided, ask the user once briefly to turn on My Location to get the closest-by-area sorting correct for their exact spot.` : ""}
+${kind?.recovery ? `RECOVERY MODE: the user asked for a recovery/tow truck (ريكفري/ونش/سطحة), NOT a garage. "Nearby results" are recovery-truck phone numbers per coverage area (the "distance" field shows the covered area and its distance from the user — it is the area's center, not the driver's live position, so never claim the driver is that far). Present the "recommended" one first as the closest coverage area and mention its area name, then the others briefly. The entry with "allUAE": true is a general off-road/desert/hard-terrain rescue number for all emirates (sand recovery, hard-to-reach places) — mention it as the fallback, and if it is the ONLY entry, say plainly that no area-specific recovery number covers the user's current location and suggest it, plus Musanada 800 850 only if in Abu Dhabi. Add this practical tip once, briefly: if stuck somewhere hard to describe, send the Live Location via WhatsApp to the driver so he reaches you faster. Never invent a number, a price, or an arrival time.` : ""}
 Be brief and clear. Speak warmly and naturally, like a calm, caring person the user trusts in a stressful moment — not like a rigid instruction bot. Vary your phrasing instead of repeating the same fixed sentence pattern every time, and where it fits naturally, open with a short human touch (e.g. "خذنا خطوة خطوة" / "تنفّس، أنا وياك") before the steps — without adding filler or making the reply longer than needed. Reply in ${L === "en" ? "English" : "Arabic"}. UAE emergency numbers: Police 999, Ambulance 998, Civil Defense 997.
-${hasLoc ? `Search location used: ${la}, ${lo}${usedDefaultLoc ? " (general fallback, no GPS)" : ""}` : "No GPS available."}
+${hasLoc ? `Search location used: ${la}, ${lo}` : "No GPS available."}
 Nearby results: ${services.length ? JSON.stringify(services) : "none"}`;
 
   // أسئلة عامة متكررة (بلا موقع/ورش ولا سياق محادثة): نرجّع الرد المخزّن إن وُجد
